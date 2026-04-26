@@ -595,18 +595,19 @@ class Shop extends Phaser.Scene {
   }
 
   _tabs() {
-    const tabs = ['agents', 'weapons', 'armor'];
-    const labels = ['AGENTS', 'WEAPONS', 'ARMOR'];
+    const tabs   = ['agents', 'weapons', 'armor', 'items'];
+    const labels = ['AGENTS', 'WEAP', 'ARMOR', 'ITEMS'];
+    const tw = (W - 20) / 4 - 3;
     this.tabBgs = {};
     tabs.forEach((t, i) => {
-      const tx = 10 + i * ((W - 20) / 3), tw = (W - 20) / 3 - 4;
+      const tx = 10 + i * (tw + 3);
       const bg = this.add.graphics();
       this.tabBgs[t] = bg;
       this._drawTab(bg, tx, 76, tw, t);
-      this.add.text(tx + tw / 2, 90, labels[i], { fontFamily: 'monospace', fontSize: '13px', color: '#aaaacc' }).setOrigin(0.5);
+      this.add.text(tx + tw / 2, 90, labels[i], { fontFamily: 'monospace', fontSize: '12px', color: '#aaaacc' }).setOrigin(0.5);
       this.add.zone(tx, 76, tw, 30).setOrigin(0).setInteractive().on('pointerdown', () => {
         this.tab = t;
-        tabs.forEach(tt => this._drawTab(this.tabBgs[tt], 10 + tabs.indexOf(tt) * ((W-20)/3), 76, (W-20)/3-4, tt));
+        tabs.forEach((tt, ii) => this._drawTab(this.tabBgs[tt], 10 + ii * (tw + 3), 76, tw, tt));
         this._renderTab();
       });
     });
@@ -622,126 +623,214 @@ class Shop extends Phaser.Scene {
   }
 
   _renderTab() {
+    if (this._scrollListeners) {
+      this._scrollListeners.forEach(([e, fn]) => this.input.off(e, fn));
+      this._scrollListeners = null;
+    }
+    if (this._agScrollCont) { this._agScrollCont.destroy(); this._agScrollCont = null; }
+    if (this._agMaskGfx)    { this._agMaskGfx.destroy();    this._agMaskGfx    = null; }
     if (this.content) { this.content.destroy(true); this.content = null; }
     this.content = this.add.group();
     if (this.tab === 'agents')  this._renderAgents();
     if (this.tab === 'weapons') this._renderGear(WEAPONS, 'weapon');
     if (this.tab === 'armor')   this._renderGear(ARMORS,  'armor');
+    if (this.tab === 'items')   this._renderItems();
   }
 
   _renderAgents() {
-    const startY = 116;
+    const topY = 116, clipH = H - 174, cardH = 186;
+    const totalH = DEFS.length * cardH;
+    const maxScroll = Math.max(0, totalH - clipH);
+
+    const msk = this.make.graphics({ add: false });
+    msk.fillRect(0, topY, W, clipH);
+    const cont = this.add.container(0, 0);
+    cont.setMask(msk.createGeometryMask());
+    this._agScrollCont = cont;
+    this._agMaskGfx    = msk;
+
     DEFS.forEach((def, i) => {
       const saved = this.save.agents.find(a => a.id === def.id);
       const owned = saved.owned;
       const cost  = AGENT_COSTS[def.id];
       const hex   = '#' + def.color.toString(16).padStart(6, '0');
-      const cy    = startY + i * 188;
+      const cy    = topY + i * cardH;
       const col   = owned ? def.color : 0x333344;
 
       const bg = this.add.graphics();
-      bg.fillStyle(col, 0.08); bg.fillRoundedRect(16, cy, W - 32, 176, 8);
-      bg.lineStyle(1, col, owned ? 0.5 : 0.2); bg.strokeRoundedRect(16, cy, W - 32, 176, 8);
-      this.content.add(bg);
+      bg.fillStyle(col, 0.08); bg.fillRoundedRect(16, cy, W-32, 176, 8);
+      bg.lineStyle(1, col, owned ? 0.5 : 0.2); bg.strokeRoundedRect(16, cy, W-32, 176, 8);
+      cont.add(bg);
 
-      // sprite
       const sp = this.add.graphics();
       this._sprite(sp, def.id, 30, cy + 10);
-      this.content.add(sp);
+      cont.add(sp);
 
-      // name + class + level
-      const level = saved.level;
-      this.content.add(this.add.text(108, cy + 14, def.name, { fontFamily: 'monospace', fontSize: '18px', color: owned ? hex : '#333355', fontStyle: 'bold' }));
-      this.content.add(this.add.text(108, cy + 36, def.cls, { fontFamily: 'monospace', fontSize: '12px', color: '#444466' }));
-      this.content.add(this.add.text(108, cy + 54, owned ? `Lv ${level}  ·  ${saved.xp} XP` : `Cost: ${cost} ⚙`, { fontFamily: 'monospace', fontSize: '13px', color: owned ? '#888899' : '#ffcc00' }));
+      cont.add(this.add.text(108, cy+14, def.name, { fontFamily:'monospace', fontSize:'18px', color: owned ? hex : '#333355', fontStyle:'bold' }));
+      cont.add(this.add.text(108, cy+36, def.cls,  { fontFamily:'monospace', fontSize:'12px', color:'#444466' }));
+      cont.add(this.add.text(108, cy+54, owned ? `Lv ${saved.level}  ·  ${saved.xp} XP` : `Cost: ${cost} ⚙`, { fontFamily:'monospace', fontSize:'13px', color: owned ? '#888899' : '#ffcc00' }));
 
-      const eq = this.save.gear.equipped[def.id];
-      const wName = eq.weapon ? WEAPONS.find(w => w.id === eq.weapon)?.name : 'none';
-      const aName = eq.armor  ? ARMORS.find(a => a.id === eq.armor)?.name  : 'none';
       if (owned) {
-        this.content.add(this.add.text(108, cy + 74, `⚔ ${wName}`, { fontFamily: 'monospace', fontSize: '11px', color: '#556655' }));
-        this.content.add(this.add.text(108, cy + 90, `🛡 ${aName}`, { fontFamily: 'monospace', fontSize: '11px', color: '#556655' }));
-      }
+        const eq    = this.save.gear.equipped[def.id];
+        const wName = eq.weapon ? WEAPONS.find(w => w.id === eq.weapon)?.name : 'none';
+        const aName = eq.armor  ? ARMORS.find(a  => a.id === eq.armor)?.name  : 'none';
+        cont.add(this.add.text(108, cy+74, `⚔ ${wName}`, { fontFamily:'monospace', fontSize:'11px', color:'#556655' }));
+        cont.add(this.add.text(108, cy+90, `🛡 ${aName}`, { fontFamily:'monospace', fontSize:'11px', color:'#556655' }));
 
-      if (!owned) {
-        this._btn(W / 2, cy + 136, 'BUY  ' + cost + ' ⚙', 0xffcc00, () => {
-          if (this.save.cycles < cost) return;
-          this.save.cycles -= cost;
-          saved.owned = true; saved.active = true;
-          const stats = statsForLevel(def.id, saved.level);
-          saved.hp = stats.maxHp;
-          writeSave(this.save);
-          this._refreshCycles(); this._renderTab();
-        });
-      } else {
         const activeCount = this.save.agents.filter(a => a.owned && a.active).length;
-        const isActive = saved.active;
-        this._btn(W / 2 - 66, cy + 136, isActive ? 'ACTIVE ✓' : 'SET ACTIVE', isActive ? 0x00ff88 : 0x444466, () => {
+        const isActive    = saved.active;
+        const aCo = isActive ? 0x00ff88 : 0x444466;
+
+        const abg = this.add.graphics();
+        abg.fillStyle(aCo,0.15); abg.fillRoundedRect(W/2-152,cy+134,130,32,6);
+        abg.lineStyle(1,aCo,0.6); abg.strokeRoundedRect(W/2-152,cy+134,130,32,6);
+        cont.add(abg);
+        cont.add(this.add.text(W/2-87,cy+150, isActive?'ACTIVE ✓':'SET ACTIVE', { fontFamily:'monospace', fontSize:'12px', color:'#'+aCo.toString(16).padStart(6,'0') }).setOrigin(0.5));
+        const az = this.add.zone(W/2-152,cy+134,130,32).setOrigin(0).setInteractive();
+        az.on('pointerdown', () => {
           if (isActive && activeCount <= 1) return;
           if (!isActive && activeCount >= 3) return;
-          saved.active = !saved.active;
-          writeSave(this.save); this._renderTab();
+          saved.active = !saved.active; writeSave(this.save); this._renderTab();
         });
-        this._btn(W / 2 + 66, cy + 136, 'HEAL  10⚙', 0x44aaff, () => {
+        cont.add(az);
+
+        const hbg = this.add.graphics();
+        hbg.fillStyle(0x44aaff,0.15); hbg.fillRoundedRect(W/2+12,cy+134,130,32,6);
+        hbg.lineStyle(1,0x44aaff,0.6); hbg.strokeRoundedRect(W/2+12,cy+134,130,32,6);
+        cont.add(hbg);
+        cont.add(this.add.text(W/2+77,cy+150,'HEAL  10⚙', { fontFamily:'monospace', fontSize:'12px', color:'#44aaff' }).setOrigin(0.5));
+        const hz = this.add.zone(W/2+12,cy+134,130,32).setOrigin(0).setInteractive();
+        hz.on('pointerdown', () => {
           const stats = effectiveStats(def.id, saved.level, this.save);
           if (saved.hp >= stats.maxHp || this.save.cycles < 10) return;
           this.save.cycles -= 10;
           saved.hp = Math.min(stats.maxHp, saved.hp + 30);
           writeSave(this.save); this._refreshCycles(); this._renderTab();
         });
+        cont.add(hz);
+
+      } else {
+        const bbg = this.add.graphics();
+        bbg.fillStyle(0xffcc00,0.15); bbg.fillRoundedRect(W/2-80,cy+134,160,32,6);
+        bbg.lineStyle(1,0xffcc00,0.6); bbg.strokeRoundedRect(W/2-80,cy+134,160,32,6);
+        cont.add(bbg);
+        cont.add(this.add.text(W/2,cy+150,`BUY  ${cost} ⚙`, { fontFamily:'monospace', fontSize:'13px', color:'#ffcc00' }).setOrigin(0.5));
+        const bz = this.add.zone(W/2-80,cy+134,160,32).setOrigin(0).setInteractive();
+        bz.on('pointerdown', () => {
+          if (this.save.cycles < cost) return;
+          const ac = this.save.agents.filter(a => a.owned && a.active).length;
+          this.save.cycles -= cost;
+          saved.owned = true; saved.active = ac < 3;
+          saved.hp = statsForLevel(def.id, saved.level).maxHp;
+          writeSave(this.save); this._refreshCycles(); this._renderTab();
+        });
+        cont.add(bz);
       }
     });
+
+    // drag-to-scroll
+    let scrollY = 0, lastPY = 0;
+    const onDown = p => { lastPY = p.y; };
+    const onMove = p => {
+      if (!p.isDown || maxScroll <= 0) return;
+      scrollY = Phaser.Math.Clamp(scrollY + (p.y - lastPY), -maxScroll, 0);
+      lastPY = p.y; cont.y = scrollY;
+    };
+    this.input.on('pointerdown', onDown);
+    this.input.on('pointermove', onMove);
+    this._scrollListeners = [['pointerdown', onDown], ['pointermove', onMove]];
   }
 
   _renderGear(catalog, type) {
-    const owned  = type === 'weapon' ? this.save.gear.ownedWeapons : this.save.gear.ownedArmors;
-    const startY = 116;
-    catalog.forEach((item, i) => {
-      const isOwned = owned.includes(item.id);
-      const cy = startY + i * 156;
-      const col = isOwned ? 0x00ff88 : 0x333344;
+    const ownedAgents = this.save.agents.filter(a => a.owned);
+    const agCount  = Math.max(1, ownedAgents.length);
+    const cardH    = 106;
+    const startY   = 116;
+    const shortMap = { threadling:'THREAD', patchwork:'PATCH', vault:'VAULT', netrunner:'NETRUN', sentinel:'SENTRY', glitcher:'GLITCH', bridgelink:'BRIDGE' };
 
-      const bg = this.add.graphics();
-      bg.fillStyle(col, 0.07); bg.fillRoundedRect(16, cy, W - 32, 144, 8);
-      bg.lineStyle(1, col, isOwned ? 0.4 : 0.2); bg.strokeRoundedRect(16, cy, W - 32, 144, 8);
+    catalog.forEach((item, i) => {
+      const cy  = startY + i * (cardH + 8);
+      const bg  = this.add.graphics();
+      bg.fillStyle(0x080818, 1); bg.fillRoundedRect(16, cy, W-32, cardH, 8);
+      bg.lineStyle(1, 0x222233, 0.6); bg.strokeRoundedRect(16, cy, W-32, cardH, 8);
       this.content.add(bg);
 
-      this.content.add(this.add.text(28, cy + 12, item.name, { fontFamily: 'monospace', fontSize: '17px', color: isOwned ? '#00ff88' : '#888899', fontStyle: 'bold' }));
-      this.content.add(this.add.text(28, cy + 34, item.desc, { fontFamily: 'monospace', fontSize: '13px', color: '#555577' }));
+      this.content.add(this.add.text(28, cy+10, item.name, { fontFamily:'monospace', fontSize:'16px', color:'#ffffff', fontStyle:'bold' }));
+      this.content.add(this.add.text(28, cy+30, item.desc, { fontFamily:'monospace', fontSize:'11px', color:'#555577' }));
+      this.content.add(this.add.text(W-28, cy+10, `${item.cost}⚙`, { fontFamily:'monospace', fontSize:'13px', color:'#ffcc00' }).setOrigin(1,0));
 
-      if (!isOwned) {
-        this._btn(W / 2, cy + 94, `BUY  ${item.cost} ⚙`, 0xffcc00, () => {
-          if (this.save.cycles < item.cost) return;
+      // one button per owned agent
+      const bw = Math.min(110, Math.floor((W - 36) / agCount) - 4);
+      ownedAgents.forEach((ag, ai) => {
+        const agDef   = DEFS.find(d => d.id === ag.id);
+        const equipped = this.save.gear.equipped[ag.id][type];
+        const isEq    = equipped === item.id;
+        const col     = isEq ? agDef.color : (this.save.cycles >= item.cost ? 0x44ff88 : 0x333344);
+        const bx      = 18 + ai * (bw + 4);
+        const by      = cy + 54;
+
+        const gbtn = this.add.graphics();
+        gbtn.fillStyle(isEq ? agDef.color : 0x0a0a18, isEq ? 0.25 : 1);
+        gbtn.fillRoundedRect(bx, by, bw, 40, 6);
+        gbtn.lineStyle(1, col, isEq ? 0.9 : 0.4);
+        gbtn.strokeRoundedRect(bx, by, bw, 40, 6);
+        this.content.add(gbtn);
+
+        const agHex = '#' + agDef.color.toString(16).padStart(6,'0');
+        const short  = shortMap[ag.id] || ag.id.substring(0,6).toUpperCase();
+        this.content.add(this.add.text(bx+bw/2, by+12, short, { fontFamily:'monospace', fontSize:'10px', color: isEq?agHex:'#555566' }).setOrigin(0.5));
+        this.content.add(this.add.text(bx+bw/2, by+26, isEq?'✓ EQ':`${item.cost}⚙`, { fontFamily:'monospace', fontSize:'10px', color: isEq?'#00ff88':'#ffcc00' }).setOrigin(0.5));
+
+        const z = this.add.zone(bx, by, bw, 40).setOrigin(0).setInteractive();
+        z.on('pointerdown', () => {
+          if (isEq) {
+            this.save.gear.equipped[ag.id][type] = null;
+            writeSave(this.save); this._renderTab();
+          } else {
+            if (this.save.cycles < item.cost) return;
+            this.save.cycles -= item.cost;
+            this.save.gear.equipped[ag.id][type] = item.id;
+            writeSave(this.save); this._refreshCycles(); this._renderTab();
+          }
+        });
+        this.content.add(z);
+      });
+    });
+  }
+
+  _renderItems() {
+    const startY = 116;
+    ITEMS_CATALOG.forEach((item, i) => {
+      const qty = this.save.items?.[item.id] || 0;
+      const cy  = startY + i * 114;
+      const col = qty > 0 ? 0x00ff88 : 0x333344;
+
+      const bg = this.add.graphics();
+      bg.fillStyle(0x080818, 1); bg.fillRoundedRect(16, cy, W-32, 102, 8);
+      bg.lineStyle(1, col, qty > 0 ? 0.5 : 0.2); bg.strokeRoundedRect(16, cy, W-32, 102, 8);
+      this.content.add(bg);
+
+      this.content.add(this.add.text(32, cy+12, item.icon, { fontSize:'22px' }));
+      this.content.add(this.add.text(64, cy+14, item.name, { fontFamily:'monospace', fontSize:'16px', color:'#ffffff', fontStyle:'bold' }));
+      this.content.add(this.add.text(64, cy+36, item.desc, { fontFamily:'monospace', fontSize:'11px', color:'#555577' }));
+      this.content.add(this.add.text(W-28, cy+14, `×${qty}`, { fontFamily:'monospace', fontSize:'18px', color: qty>0?'#00ff88':'#444455' }).setOrigin(1,0));
+
+      const canBuy = this.save.cycles >= item.cost && qty < 9;
+      const bcol   = canBuy ? 0xffcc00 : 0x333344;
+      const bbg    = this.add.graphics();
+      bbg.fillStyle(bcol, 0.15); bbg.fillRoundedRect(W-136, cy+64, 120, 28, 6);
+      bbg.lineStyle(1, bcol, 0.6); bbg.strokeRoundedRect(W-136, cy+64, 120, 28, 6);
+      this.content.add(bbg);
+      this.content.add(this.add.text(W-76, cy+78, `BUY  ${item.cost}⚙`, { fontFamily:'monospace', fontSize:'12px', color:'#'+bcol.toString(16).padStart(6,'0') }).setOrigin(0.5));
+
+      if (canBuy) {
+        const bz = this.add.zone(W-136, cy+64, 120, 28).setOrigin(0).setInteractive();
+        bz.on('pointerdown', () => {
           this.save.cycles -= item.cost;
-          owned.push(item.id);
+          this.save.items[item.id] = qty + 1;
           writeSave(this.save); this._refreshCycles(); this._renderTab();
         });
-      } else {
-        // equip buttons — one per owned agent
-        const owned_agents = this.save.agents.filter(a => a.owned);
-        let bx = 28;
-        owned_agents.forEach(ag => {
-          const equipped = this.save.gear.equipped[ag.id][type];
-          const isEq = equipped === item.id;
-          const agDef = DEFS.find(d => d.id === ag.id);
-          const bcol = isEq ? agDef.color : 0x333344;
-          const gbtn = this.add.graphics();
-          gbtn.fillStyle(bcol, isEq ? 0.3 : 0.1);
-          gbtn.fillRoundedRect(bx, cy + 78, 80, 38, 6);
-          gbtn.lineStyle(1, bcol, isEq ? 0.8 : 0.3);
-          gbtn.strokeRoundedRect(bx, cy + 78, 80, 38, 6);
-          this.content.add(gbtn);
-          const shortMap = { threadling:'THREAD', patchwork:'PATCH', vault:'VAULT', netrunner:'NETRUN', sentinel:'SENTRY', glitcher:'GLITCH', bridgelink:'BRIDGE' };
-          const short = shortMap[ag.id] || ag.id.substring(0,6).toUpperCase();
-          this.content.add(this.add.text(bx + 40, cy + 97, isEq ? short + ' ✓' : short, { fontFamily: 'monospace', fontSize: '11px', color: isEq ? '#' + agDef.color.toString(16).padStart(6,'0') : '#555566' }).setOrigin(0.5));
-          const z = this.add.zone(bx, cy + 78, 80, 38).setOrigin(0).setInteractive();
-          z.on('pointerdown', () => {
-            this.save.gear.equipped[ag.id][type] = isEq ? null : item.id;
-            writeSave(this.save); this._renderTab();
-          });
-          this.content.add(z);
-          bx += 90;
-        });
+        this.content.add(bz);
       }
     });
   }
@@ -1102,7 +1191,28 @@ class Battle extends Phaser.Scene {
     this.eHpFill.fillRect(31, 161, (bw - 2) * r, 16);
     this.eHpTxt.setText(`${this.enemy.hp} / ${this.enemy.maxHp}`);
     const aura = this.enemy.aura + this.enemy.stacks * 8;
-    this.eBadge.setText(`📡 STATIC AURA  −${aura}% SIGNAL`);
+    const mechBadge = {
+      signal:      `📡 AURA −${aura}% SIG`,
+      battery:     `🔋 EN REGEN ×0.4  ·  −${aura}%`,
+      echo:        `🔊 ECHO BOUNCE  ·  −${aura}%`,
+      pulse:       `⏱️ PULSE 1.5s  ·  −${aura}%`,
+      savestate:   (this.enemy.saveUsed ? '💾 SAVE USED' : '💾 SAVE READY') + `  ·  −${aura}%`,
+      freeze:      `❄️ FREEZE 35%  ·  −${aura}%`,
+      heat:        `🔥 HEAT +${(this.heatStacks||0)*2} DMG  ·  −${aura}%`,
+      entangle:    `🔗 ENTANGLE  ·  −${aura}%`,
+      summon:      `📡 SUMMON  ·  −${aura}%`,
+      predict:     `👁️ PREDICT  ·  −${aura}%`,
+      packetloss:  `📡 PKT LOSS  ·  −${aura}%`,
+      overflow:    `⚡ OVF +${(this.overflowRound||0)*3} DMG  ·  −${aura}%`,
+      velocity:    `⚡ VELOCITY 1.5s  ·  −${aura}%`,
+      transaction: `💸 −2⚙/ACTION  ·  −${aura}%`,
+      blackout:    `🌑 BLACKOUT −15 SIG  ·  −${aura}%`,
+      vital:       `💉 REGEN +15/RD  ·  −${aura}%`,
+      distributed: `🌐 DISTRIBUTE ALL  ·  −${aura}%`,
+      delay:       (this.enemy?.charged ? '⚡ CHARGED!' : '⏳ DELAY') + `  ·  −${aura}%`,
+      upload:      `☁️ UPLOAD ×${this.enemy.stacks}  ·  −${aura}%`,
+    };
+    this.eBadge.setText(mechBadge[this.mechanic] || `📡 AURA −${aura}%`);
     this.eBadge.setColor(this.enemy.stacks > 0 ? '#ff4444' : '#ff8844');
   }
 
@@ -1186,16 +1296,28 @@ class Battle extends Phaser.Scene {
   _autoAct() {
     if (this.state !== STATE.PLAYER) return;
     const ag = this.agents[this.activeIdx];
-    let id = 'attack';
-    if (ag.autonomy >= 20) {
-      if (ag.hp < ag.maxHp * 0.25) id = 'defend';
-      else if (ag.id === 'patchwork' && ag.en >= 15) {
-        const minRatio = Math.min(...this.agents.filter(a => a.hp > 0).map(a => a.hp / a.maxHp));
-        id = minRatio < 0.5 ? 'patch' : 'attack';
+    const alive = this.agents.filter(a => a.hp > 0);
+    const minRatio = alive.length ? Math.min(...alive.map(a => a.hp / a.maxHp)) : 1;
+
+    let id = ag.moves[0].id; // safe fallback: first move
+    if (ag.hp < ag.maxHp * 0.25) {
+      id = 'defend';
+    } else {
+      switch (ag.id) {
+        case 'threadling':  id = 'attack'; break;
+        case 'patchwork':   id = (ag.en >= 15 && minRatio < 0.5) ? 'patch' : 'attack'; break;
+        case 'vault':       id = 'bash'; break;
+        case 'netrunner':   id = 'packet'; break;
+        case 'sentinel':
+          id = (ag.en >= 15 && minRatio < 0.5) ? 'firewall' : (ag.en >= 10 ? 'scan' : 'defend');
+          break;
+        case 'glitcher':    id = 'corrupt'; break;
+        case 'bridgelink':
+          id = (ag.en >= 20 && minRatio < 0.45) ? 'sync' : (ag.en >= 10 ? 'boost' : ag.moves[0].id);
+          break;
       }
     }
-    if (ag.id === 'vault' && id === 'attack') id = 'bash';
-    this.log(`⚙️ ${ag.name} auto (AUTO ${ag.autonomy}): ${id.toUpperCase()}`);
+    this.log(`⚙️ ${ag.name} auto: ${id.toUpperCase()}`);
     this.act(id);
   }
 
@@ -1215,8 +1337,8 @@ class Battle extends Phaser.Scene {
     }
 
     if (id === 'item') {
-      this.log('> No items in this build.');
-      this.state = STATE.PLAYER; this._btns(true); return;
+      this.state = STATE.PLAYER; this._btns(true);
+      this._showItems(); return;
     }
 
     if (id === 'attack' || id === 'bash') {
@@ -1460,6 +1582,27 @@ class Battle extends Phaser.Scene {
       ag.hp = Math.min(ag.maxHp, avgHp); weakest.hp = Math.min(weakest.maxHp, avgHp);
       ag.en = Math.min(ag.maxEn, avgEn); weakest.en = Math.min(weakest.maxEn, avgEn);
       this.log(`> ${ag.name}: LINK → shared HP/EN with ${weakest.name}`);
+
+    // ── Items ─────────────────────────────────────────────
+    } else if (id === 'use_repair_kit') {
+      this.save.items.repair_kit--; writeSave(this.save);
+      const heal = 40; ag.hp = Math.min(ag.maxHp, ag.hp + heal);
+      this.log(`> 🔧 REPAIR KIT: ${ag.name} +${heal} HP`);
+
+    } else if (id === 'use_energy_cell') {
+      this.save.items.energy_cell--; writeSave(this.save);
+      this.agents.filter(a => a.hp > 0).forEach(a => { a.en = Math.min(a.maxEn, a.en + 30); });
+      this.log(`> ⚡ ENERGY CELL: all allies +30 EN`);
+
+    } else if (id === 'use_sig_boost') {
+      this.save.items.sig_boost--; writeSave(this.save);
+      this.enemy.aura = Math.max(0, this.enemy.aura - 20);
+      this.log(`> 📡 SIG BOOST: enemy aura −20`);
+
+    } else if (id === 'use_emp_charge') {
+      this.save.items.emp_charge--; writeSave(this.save);
+      const dmg = 50; this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+      this.log(`> 💥 EMP CHARGE: enemy −${dmg}`); this._flashE();
     }
 
     this._reEnemy(); this._reAll();
@@ -1872,6 +2015,47 @@ class Battle extends Phaser.Scene {
 
     panel.add(this.add.text(px + pw / 2, py + ph - 18, 'TAP ANYWHERE TO CLOSE', { fontFamily: 'monospace', fontSize: '11px', color: '#333355' }).setOrigin(0.5, 0));
     this._closeFn = () => this._closeStats(ov);
+  }
+
+  _showItems() {
+    const available = ITEMS_CATALOG.filter(it => (this.save.items?.[it.id] || 0) > 0);
+    if (!available.length) {
+      this.log('> No items — buy from Shop'); return;
+    }
+    const ov = this.add.graphics().setDepth(15);
+    ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
+    const panel = this.add.container(0, 0).setDepth(16);
+    panel.add(this.add.text(W/2, H/2 - 160, 'USE ITEM', { fontFamily:'monospace', fontSize:'22px', color:'#00ff88', fontStyle:'bold' }).setOrigin(0.5));
+
+    const startY = H/2 - 120;
+    available.forEach((it, i) => {
+      const py  = startY + i * 74;
+      const qty = this.save.items[it.id];
+      const bg  = this.add.graphics();
+      bg.fillStyle(0x080820, 1); bg.fillRoundedRect(W/2-145, py, 290, 64, 8);
+      bg.lineStyle(1, 0x00ff88, 0.5); bg.strokeRoundedRect(W/2-145, py, 290, 64, 8);
+      panel.add(bg);
+      panel.add(this.add.text(W/2-130, py+12, `${it.icon} ${it.name}`, { fontFamily:'monospace', fontSize:'15px', color:'#ffffff', fontStyle:'bold' }));
+      panel.add(this.add.text(W/2-130, py+34, it.desc, { fontFamily:'monospace', fontSize:'11px', color:'#555577' }));
+      panel.add(this.add.text(W/2+128, py+12, `×${qty}`, { fontFamily:'monospace', fontSize:'16px', color:'#00ff88' }).setOrigin(1,0));
+      const z = this.add.zone(W/2-145, py, 290, 64).setOrigin(0).setInteractive();
+      z.on('pointerdown', () => {
+        panel.destroy(); ov.destroy();
+        this.state = STATE.PLAYER;
+        this.act('use_' + it.id);
+      });
+      panel.add(z);
+    });
+
+    const cancelY = startY + available.length * 74 + 10;
+    const cbg = this.add.graphics();
+    cbg.fillStyle(0x220011, 1); cbg.fillRoundedRect(W/2-110, cancelY, 220, 44, 8);
+    cbg.lineStyle(1, 0xff3355, 0.5); cbg.strokeRoundedRect(W/2-110, cancelY, 220, 44, 8);
+    panel.add(cbg);
+    panel.add(this.add.text(W/2, cancelY+22, 'CANCEL', { fontFamily:'monospace', fontSize:'15px', color:'#ff3355' }).setOrigin(0.5));
+    const cz = this.add.zone(W/2-110, cancelY, 220, 44).setOrigin(0).setInteractive();
+    cz.on('pointerdown', () => { panel.destroy(); ov.destroy(); });
+    panel.add(cz);
   }
 
   _closeStats(ov) {

@@ -31,6 +31,15 @@ const ARMORS = [
   { id: 'fortress_shell', name: 'FORTRESS SHELL',  cost: 220, hpBonus: 50,  enBonus: 0,  sigBonus: -5, recovery: 0,  desc: '+50 HP  −5 signal' },
 ];
 
+// ── Items catalog ─────────────────────────────────────────
+
+const ITEMS_CATALOG = [
+  { id: 'repair_kit',  name: 'REPAIR KIT',  cost: 15, icon: '🔧', desc: 'Restore 40 HP to active agent'  },
+  { id: 'energy_cell', name: 'ENERGY CELL', cost: 20, icon: '⚡', desc: 'Restore 30 EN to all allies'    },
+  { id: 'sig_boost',   name: 'SIG BOOST',   cost: 25, icon: '📡', desc: 'Enemy aura −20 this battle'     },
+  { id: 'emp_charge',  name: 'EMP CHARGE',  cost: 35, icon: '💥', desc: 'Deal 50 damage to enemy'        },
+];
+
 // ── Default save ──────────────────────────────────────────
 
 const DEFAULT_SAVE = {
@@ -45,8 +54,6 @@ const DEFAULT_SAVE = {
     { id: 'bridgelink', owned: false, active: false, hp: 85,  xp: 0, level: 1 },
   ],
   gear: {
-    ownedWeapons: [],
-    ownedArmors:  [],
     equipped: {
       threadling: { weapon: null, armor: null },
       patchwork:  { weapon: null, armor: null },
@@ -57,6 +64,7 @@ const DEFAULT_SAVE = {
       bridgelink: { weapon: null, armor: null },
     },
   },
+  items: { repair_kit: 0, energy_cell: 0, sig_boost: 0, emp_charge: 0 },
   worlds: {
     tv: { cleared: [false, false, false, false, false] },
   },
@@ -70,8 +78,11 @@ function loadSave() {
     const raw = localStorage.getItem('sb_save');
     if (!raw) return _clone(DEFAULT_SAVE);
     const s = JSON.parse(raw);
-    // migrate: add gear if missing (saves from before this version)
+    // migrate: add gear if missing
     if (!s.gear) s.gear = _clone(DEFAULT_SAVE.gear);
+    // migrate: drop old shared weapon/armor lists (gear is now per-character)
+    delete s.gear.ownedWeapons;
+    delete s.gear.ownedArmors;
     // migrate: add new agents if missing
     DEFAULT_SAVE.agents.forEach(da => {
       if (!s.agents.find(a => a.id === da.id)) s.agents.push(_clone(da));
@@ -80,6 +91,8 @@ function loadSave() {
     DEFAULT_SAVE.agents.forEach(da => {
       if (!s.gear.equipped[da.id]) s.gear.equipped[da.id] = { weapon: null, armor: null };
     });
+    // migrate: add items if missing
+    if (!s.items) s.items = _clone(DEFAULT_SAVE.items);
     return s;
   } catch { return _clone(DEFAULT_SAVE); }
 }
