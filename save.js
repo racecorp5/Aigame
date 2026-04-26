@@ -7,9 +7,13 @@ const AGENT_BASES = {
   threadling: { maxHp: 100, maxEn: 50, signal: 85, autonomy: 10 },
   patchwork:  { maxHp: 80,  maxEn: 60, signal: 75, autonomy: 25 },
   vault:      { maxHp: 140, maxEn: 40, signal: 70, autonomy: 8  },
+  netrunner:  { maxHp: 75,  maxEn: 70, signal: 92, autonomy: 35 },
+  sentinel:   { maxHp: 95,  maxEn: 55, signal: 80, autonomy: 15 },
+  glitcher:   { maxHp: 70,  maxEn: 80, signal: 65, autonomy: 40 },
+  bridgelink: { maxHp: 85,  maxEn: 65, signal: 78, autonomy: 20 },
 };
 
-const AGENT_COSTS = { threadling: 0, patchwork: 80, vault: 160 };
+const AGENT_COSTS = { threadling: 0, patchwork: 80, vault: 160, netrunner: 200, sentinel: 240, glitcher: 280, bridgelink: 300 };
 
 // ── Gear catalogs ─────────────────────────────────────────
 
@@ -35,6 +39,10 @@ const DEFAULT_SAVE = {
     { id: 'threadling', owned: true,  active: true,  hp: 100, xp: 0, level: 1 },
     { id: 'patchwork',  owned: false, active: false, hp: 80,  xp: 0, level: 1 },
     { id: 'vault',      owned: false, active: false, hp: 140, xp: 0, level: 1 },
+    { id: 'netrunner',  owned: false, active: false, hp: 75,  xp: 0, level: 1 },
+    { id: 'sentinel',   owned: false, active: false, hp: 95,  xp: 0, level: 1 },
+    { id: 'glitcher',   owned: false, active: false, hp: 70,  xp: 0, level: 1 },
+    { id: 'bridgelink', owned: false, active: false, hp: 85,  xp: 0, level: 1 },
   ],
   gear: {
     ownedWeapons: [],
@@ -43,6 +51,10 @@ const DEFAULT_SAVE = {
       threadling: { weapon: null, armor: null },
       patchwork:  { weapon: null, armor: null },
       vault:      { weapon: null, armor: null },
+      netrunner:  { weapon: null, armor: null },
+      sentinel:   { weapon: null, armor: null },
+      glitcher:   { weapon: null, armor: null },
+      bridgelink: { weapon: null, armor: null },
     },
   },
   worlds: {
@@ -60,6 +72,14 @@ function loadSave() {
     const s = JSON.parse(raw);
     // migrate: add gear if missing (saves from before this version)
     if (!s.gear) s.gear = _clone(DEFAULT_SAVE.gear);
+    // migrate: add new agents if missing
+    DEFAULT_SAVE.agents.forEach(da => {
+      if (!s.agents.find(a => a.id === da.id)) s.agents.push(_clone(da));
+    });
+    // migrate: add new gear slots if missing
+    DEFAULT_SAVE.agents.forEach(da => {
+      if (!s.gear.equipped[da.id]) s.gear.equipped[da.id] = { weapon: null, armor: null };
+    });
     return s;
   } catch { return _clone(DEFAULT_SAVE); }
 }

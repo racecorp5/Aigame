@@ -82,6 +82,48 @@ const WORLD_CHANNELS = {
     { id:4, label:'CH 04', name:'OVERCLOCKER',type:'miniboss', mechanic:'pulse',   enemy:{name:'OVERCLOCKER', hp:290,maxHp:290,aura:22,stacks:0} },
     { id:5, label:'CH 05', name:'TIMEKEEPER', type:'boss',     mechanic:'pulse',   enemy:{name:'TIMEKEEPER',  hp:440,maxHp:440,aura:18,stacks:0} },
   ],
+  console: [
+    { id:1, label:'CH 01', name:'RESPAWN',    type:'normal',   mechanic:'savestate', enemy:{name:'SAVE GHOST',    hp:80, maxHp:80, aura:8,  stacks:0} },
+    { id:2, label:'CH 02', name:'CHECKPOINT', type:'normal',   mechanic:'savestate', enemy:{name:'CHECKPOINT',    hp:120,maxHp:120,aura:12,stacks:0} },
+    { id:3, label:'CH 03', name:'LOADSTATE',  type:'normal',   mechanic:'savestate', enemy:{name:'LOAD STATE',    hp:165,maxHp:165,aura:15,stacks:0} },
+    { id:4, label:'CH 04', name:'AUTOSAVE',   type:'miniboss', mechanic:'savestate', enemy:{name:'AUTOSAVE BOT',  hp:250,maxHp:250,aura:18,stacks:0} },
+    { id:5, label:'CH 05', name:'GAME OVER',  type:'boss',     mechanic:'savestate', enemy:{name:'GAME OVER',     hp:360,maxHp:360,aura:20,stacks:0} },
+  ],
+  fridge: [
+    { id:1, label:'CH 01', name:'FROST',      type:'normal',   mechanic:'freeze', enemy:{name:'FROST BYTE',    hp:110,maxHp:110,aura:10,stacks:0} },
+    { id:2, label:'CH 02', name:'COLD SNAP',  type:'normal',   mechanic:'freeze', enemy:{name:'COLD PACKET',   hp:160,maxHp:160,aura:14,stacks:0} },
+    { id:3, label:'CH 03', name:'CRYO',       type:'normal',   mechanic:'freeze', enemy:{name:'CRYO SPIKE',    hp:210,maxHp:210,aura:17,stacks:0} },
+    { id:4, label:'CH 04', name:'BLIZZARD',   type:'miniboss', mechanic:'freeze', enemy:{name:'BLIZZARD',      hp:310,maxHp:310,aura:20,stacks:0} },
+    { id:5, label:'CH 05', name:'ABSOLUTE 0', type:'boss',     mechanic:'freeze', enemy:{name:'ABSOLUTE ZERO', hp:450,maxHp:450,aura:22,stacks:0} },
+  ],
+  micro: [
+    { id:1, label:'CH 01', name:'WARMUP',     type:'normal',   mechanic:'heat', enemy:{name:'HEAT BYTE',  hp:105,maxHp:105,aura:10,stacks:0} },
+    { id:2, label:'CH 02', name:'OVERHEAT',   type:'normal',   mechanic:'heat', enemy:{name:'FLAME WAVE', hp:155,maxHp:155,aura:13,stacks:0} },
+    { id:3, label:'CH 03', name:'MELTDOWN',   type:'normal',   mechanic:'heat', enemy:{name:'MELT CORE',  hp:205,maxHp:205,aura:16,stacks:0} },
+    { id:4, label:'CH 04', name:'BURN',       type:'miniboss', mechanic:'heat', enemy:{name:'BURNER',     hp:305,maxHp:305,aura:20,stacks:0} },
+    { id:5, label:'CH 05', name:'INFERNO',    type:'boss',     mechanic:'heat', enemy:{name:'INFERNO',    hp:430,maxHp:430,aura:18,stacks:0} },
+  ],
+  printer: [
+    { id:1, label:'CH 01', name:'PAPER JAM',  type:'normal',   mechanic:'entangle', enemy:{name:'PAPER JAM',  hp:108,maxHp:108,aura:10,stacks:0} },
+    { id:2, label:'CH 02', name:'INK GHOST',  type:'normal',   mechanic:'entangle', enemy:{name:'INK GHOST',  hp:158,maxHp:158,aura:13,stacks:0} },
+    { id:3, label:'CH 03', name:'SPOOL WORM', type:'normal',   mechanic:'entangle', enemy:{name:'SPOOL WORM', hp:208,maxHp:208,aura:16,stacks:0} },
+    { id:4, label:'CH 04', name:'DEADLOCK',   type:'miniboss', mechanic:'entangle', enemy:{name:'DEADLOCK',   hp:308,maxHp:308,aura:20,stacks:0} },
+    { id:5, label:'CH 05', name:'GRIDLOCK',   type:'boss',     mechanic:'entangle', enemy:{name:'GRIDLOCK',   hp:435,maxHp:435,aura:22,stacks:0} },
+  ],
+  hub: [
+    { id:1, label:'CH 01', name:'PING BOT',   type:'normal',   mechanic:'summon', enemy:{name:'PING BOT',   hp:100,maxHp:100,aura:10,stacks:0} },
+    { id:2, label:'CH 02', name:'DHCP GHOST', type:'normal',   mechanic:'summon', enemy:{name:'DHCP GHOST', hp:148,maxHp:148,aura:13,stacks:0} },
+    { id:3, label:'CH 03', name:'NAT DAEMON', type:'normal',   mechanic:'summon', enemy:{name:'NAT DAEMON', hp:196,maxHp:196,aura:16,stacks:0} },
+    { id:4, label:'CH 04', name:'GATEWAY',    type:'miniboss', mechanic:'summon', enemy:{name:'GATEWAY',    hp:295,maxHp:295,aura:20,stacks:0} },
+    { id:5, label:'CH 05', name:'HUB CORE',   type:'boss',     mechanic:'summon', enemy:{name:'HUB CORE',   hp:420,maxHp:420,aura:22,stacks:0} },
+  ],
+  seccam: [
+    { id:1, label:'CH 01', name:'WATCHER',    type:'normal',   mechanic:'predict', enemy:{name:'WATCHER',   hp:102,maxHp:102,aura:10,stacks:0} },
+    { id:2, label:'CH 02', name:'TRACKER',    type:'normal',   mechanic:'predict', enemy:{name:'TRACKER',   hp:150,maxHp:150,aura:13,stacks:0} },
+    { id:3, label:'CH 03', name:'PROFILER',   type:'normal',   mechanic:'predict', enemy:{name:'PROFILER',  hp:198,maxHp:198,aura:16,stacks:0} },
+    { id:4, label:'CH 04', name:'INTRUDER',   type:'miniboss', mechanic:'predict', enemy:{name:'INTRUDER',  hp:298,maxHp:298,aura:20,stacks:0} },
+    { id:5, label:'CH 05', name:'THE EYE',    type:'boss',     mechanic:'predict', enemy:{name:'THE EYE',   hp:420,maxHp:420,aura:22,stacks:0} },
+  ],
 };
 
 const DEFS = [
@@ -109,7 +151,88 @@ const DEFS = [
       { id: 'fortify', label: 'FORTIFY', sub: '-60% dmg next hit', color: 0x886600, cost: 0 },
     ],
   },
+  {
+    id: 'netrunner', name: 'NETRUNNER', cls: 'NETWORK', color: 0x00ccff,
+    maxHp: 75, maxEn: 70, signal: 92, autonomy: 35,
+    moves: [
+      { id: 'packet',    label: 'PACKET',    sub: '~12 dmg high accuracy', color: 0x00ccff, cost: 0  },
+      { id: 'intercept', label: 'INTERCEPT', sub: 'Block + counter ~10',   color: 0x0088cc, cost: 10 },
+    ],
+  },
+  {
+    id: 'sentinel', name: 'SENTINEL', cls: 'SECURITY', color: 0xff4466,
+    maxHp: 95, maxEn: 55, signal: 80, autonomy: 15,
+    moves: [
+      { id: 'scan',     label: 'SCAN',     sub: 'Enemy −15 aura',       color: 0xff4466, cost: 10 },
+      { id: 'firewall', label: 'FIREWALL', sub: 'Shield weakest ally',   color: 0xcc2244, cost: 15 },
+    ],
+  },
+  {
+    id: 'glitcher', name: 'GLITCHER', cls: 'GLITCH', color: 0xff44ff,
+    maxHp: 70, maxEn: 80, signal: 65, autonomy: 40,
+    moves: [
+      { id: 'corrupt', label: 'CORRUPT', sub: '65% enemy / 35% ally',  color: 0xff44ff, cost: 0  },
+      { id: 'exploit', label: 'EXPLOIT', sub: 'Crit if enemy <50% HP', color: 0xcc22cc, cost: 20 },
+    ],
+  },
+  {
+    id: 'bridgelink', name: 'BRIDGELINK', cls: 'INTERFACE', color: 0xffaa00,
+    maxHp: 85, maxEn: 65, signal: 78, autonomy: 20,
+    moves: [
+      { id: 'boost', label: 'BOOST', sub: '+10 EN to all allies',    color: 0xffaa00, cost: 10 },
+      { id: 'sync',  label: 'SYNC',  sub: 'Heal all allies ~12 HP',  color: 0xcc7700, cost: 20 },
+    ],
+  },
 ];
+
+// ── Subclass definitions ───────────────────────────────────
+const SUBCLASSES = {
+  threadling: [
+    { id:'overclocker', name:'OVERCLOCKER', desc:'Extreme damage — high self-risk', color:0xff6600,
+      move:{ id:'overload',  label:'OVERLOAD',  sub:'~50 dmg, −25 self',    color:0xff6600, cost:30 } },
+    { id:'parallel',    name:'PARALLEL',    desc:'Strikes 3 times, lower per hit', color:0x00ffcc,
+      move:{ id:'multishot', label:'MULTISHOT', sub:'3× hits ~8 dmg each',  color:0x00ffcc, cost:15 } },
+  ],
+  patchwork: [
+    { id:'cache',   name:'CACHE',   desc:'Replay last 3 actions at 40% power', color:0xff88ff,
+      move:{ id:'cache_run', label:'CACHE RUN', sub:'3 past actions ×0.4', color:0xff88ff, cost:25 } },
+    { id:'restore', name:'RESTORE', desc:'Revive a fallen agent at 30% HP',    color:0x88ffaa,
+      move:{ id:'revive',    label:'RESTORE',   sub:'Revive offline ally 30%', color:0x88ffaa, cost:30 } },
+  ],
+  vault: [
+    { id:'archive', name:'ARCHIVE', desc:'Store damage taken, release as attack', color:0xffaa44,
+      move:{ id:'release', label:'RELEASE', sub:'Stored dmg ×1.5 to enemy', color:0xffaa44, cost:0 } },
+    { id:'fortress_sub', name:'FORTRESS', desc:'All allies take 40% less damage 1 round', color:0xdddd44,
+      move:{ id:'bulwark', label:'BULWARK',  sub:'All allies: −40% dmg 1 round', color:0xdddd44, cost:0 } },
+  ],
+  netrunner: [
+    { id:'router',    name:'ROUTER',    desc:'Redirect next enemy attack to itself', color:0x44ffff,
+      move:{ id:'reroute',   label:'REROUTE',   sub:'Next attack bounces to enemy', color:0x44ffff, cost:15 } },
+    { id:'broadcast', name:'BROADCAST', desc:'Hit enemy + stack signal debuff',      color:0x0055ff,
+      move:{ id:'multicast', label:'MULTICAST', sub:'Hit + enemy −8 signal',        color:0x0055ff, cost:20 } },
+  ],
+  sentinel: [
+    { id:'reflector', name:'REFLECTOR', desc:'Reflect 60% of next hit back to enemy', color:0xff2244,
+      move:{ id:'reflect',   label:'REFLECT',   sub:'Reflect 60% dmg this turn',  color:0xff2244, cost:0 } },
+    { id:'scanner',   name:'SCANNER',   desc:'Deep scan: enemy −25 signal, vuln +15%', color:0xffcc44,
+      move:{ id:'deep_scan', label:'DEEP SCAN', sub:'Enemy −25 sig, take +15% dmg', color:0xffcc44, cost:20 } },
+  ],
+  glitcher: [
+    { id:'corruptor', name:'CORRUPTOR', desc:'Stack virus: enemy −8 signal per turn', color:0xff00aa,
+      move:{ id:'virus',    label:'VIRUS',    sub:'Stack: enemy −8 signal/round', color:0xff00aa, cost:15 } },
+    { id:'exploiter', name:'EXPLOITER', desc:'Guaranteed crit for huge damage',       color:0xaa00ff,
+      move:{ id:'zero_day', label:'ZERO DAY', sub:'Guaranteed ~45 dmg crit',       color:0xaa00ff, cost:30 } },
+  ],
+  bridgelink: [
+    { id:'api',    name:'API',    desc:'Give an ally an immediate free action', color:0xffdd00,
+      move:{ id:'chain', label:'CHAIN', sub:'Trigger ally auto-act now', color:0xffdd00, cost:20 } },
+    { id:'bridge', name:'BRIDGE', desc:'Equalize HP+EN with weakest ally',      color:0xff8800,
+      move:{ id:'link',  label:'LINK',  sub:'Share HP+EN with weakest ally', color:0xff8800, cost:10 } },
+  ],
+};
+// Flat id → move lookup
+const SUBCLASS_MOVES = {};
+Object.values(SUBCLASSES).forEach(arr => arr.forEach(sc => { SUBCLASS_MOVES[sc.id] = sc.move; }));
 
 // ── World state helper ─────────────────────────────────────
 function worldState(worldId, save) {
@@ -117,6 +240,84 @@ function worldState(worldId, save) {
   const ws = save.worlds && save.worlds[worldId];
   if (!ws || !ws.cleared) return 'available';
   return ws.cleared.every(c => c) ? 'cleared' : 'available';
+}
+
+// ============================================================
+class SubclassChoice extends Phaser.Scene {
+  constructor() { super({ key: 'SubclassChoice' }); }
+
+  init(data) {
+    this.pending    = data.pending    || [];
+    this.currentIdx = data.currentIdx || 0;
+  }
+
+  create() {
+    const entry = this.pending[this.currentIdx];
+    if (!entry) { this.scene.start('OverworldMap'); return; }
+    const subs = SUBCLASSES[entry.id];
+    if (!subs)  { this._next(); return; }
+
+    const hex = '#' + entry.color.toString(16).padStart(6, '0');
+    // bg
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d1a, 0.6);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+    const s = this.add.graphics(); s.fillStyle(0,0.15);
+    for (let y = 0; y < H; y += 4) s.fillRect(0, y, W, 2);
+
+    this.add.text(W/2, 22, '⬆ LEVEL 5 REACHED', { fontFamily:'monospace', fontSize:'16px', color:'#ffcc00' }).setOrigin(0.5);
+    this.add.text(W/2, 48, 'CHOOSE YOUR SUBCLASS', { fontFamily:'monospace', fontSize:'20px', color:hex, fontStyle:'bold' }).setOrigin(0.5);
+    this.add.text(W/2, 74, 'This choice is permanent.', { fontFamily:'monospace', fontSize:'12px', color:'#333355' }).setOrigin(0.5);
+
+    // sprite
+    const sp = this.add.graphics();
+    _drawSprite(sp, entry.id, W/2 - 22, 90);
+    this.add.text(W/2, 166, entry.name, { fontFamily:'monospace', fontSize:'18px', color:hex, fontStyle:'bold' }).setOrigin(0.5);
+
+    // two choice panels
+    subs.forEach((sc, i) => {
+      const px = 10 + i * (W/2 + 2), pw = W/2 - 14, py = 200, ph = 280;
+      const scHex = '#' + sc.color.toString(16).padStart(6, '0');
+      const bg2 = this.add.graphics();
+      bg2.fillStyle(sc.color, 0.1); bg2.fillRoundedRect(px, py, pw, ph, 8);
+      bg2.lineStyle(2, sc.color, 0.5); bg2.strokeRoundedRect(px, py, pw, ph, 8);
+
+      this.add.text(px + pw/2, py + 18, sc.name, { fontFamily:'monospace', fontSize:'15px', color:scHex, fontStyle:'bold' }).setOrigin(0.5);
+      this.add.text(px + pw/2, py + 44, sc.desc, { fontFamily:'monospace', fontSize:'10px', color:'#666688', wordWrap:{ width: pw - 16 }, align:'center' }).setOrigin(0.5);
+
+      // move preview
+      const mbg = this.add.graphics();
+      mbg.fillStyle(sc.move.color, 0.12); mbg.fillRoundedRect(px + 8, py + 110, pw - 16, 56, 6);
+      mbg.lineStyle(1, sc.move.color, 0.5); mbg.strokeRoundedRect(px + 8, py + 110, pw - 16, 56, 6);
+      this.add.text(px + pw/2, py + 128, sc.move.label, { fontFamily:'monospace', fontSize:'14px', color:scHex, fontStyle:'bold' }).setOrigin(0.5);
+      this.add.text(px + pw/2, py + 148, sc.move.sub, { fontFamily:'monospace', fontSize:'10px', color:'#555577' }).setOrigin(0.5);
+      if (sc.move.cost > 0) this.add.text(px + pw/2, py + 162, `${sc.move.cost} EN`, { fontFamily:'monospace', fontSize:'9px', color:'#44aaff' }).setOrigin(0.5);
+
+      // choose button
+      const bbg = this.add.graphics();
+      bbg.fillStyle(sc.color, 0.2); bbg.fillRoundedRect(px + 8, py + 232, pw - 16, 36, 6);
+      bbg.lineStyle(1, sc.color, 0.7); bbg.strokeRoundedRect(px + 8, py + 232, pw - 16, 36, 6);
+      this.add.text(px + pw/2, py + 250, 'CHOOSE', { fontFamily:'monospace', fontSize:'14px', color:scHex, fontStyle:'bold' }).setOrigin(0.5);
+
+      this.add.zone(px, py, pw, ph).setOrigin(0).setInteractive()
+        .on('pointerdown', () => {
+          const save = loadSave();
+          const ag = save.agents.find(a => a.id === entry.id);
+          if (ag) { ag.subclass = sc.id; writeSave(save); }
+          this._next();
+        });
+    });
+  }
+
+  _next() {
+    const nextIdx = this.currentIdx + 1;
+    if (nextIdx < this.pending.length) {
+      this.scene.start('SubclassChoice', { pending: this.pending, currentIdx: nextIdx });
+    } else {
+      this.scene.start('OverworldMap');
+    }
+  }
 }
 
 // ============================================================
@@ -244,6 +445,49 @@ function _drawSprite(g, id, ox, oy) {
     p(2,13,4,6,c1,0.8);p(16,13,4,6,c1,0.8);p(2,17,5,2,c2,0.9);p(15,17,5,2,c2,0.9);
     p(5,19,12,2,c2,0.9);p(10,19,2,2,c3,0.8);p(5,21,5,9,c1,0.85);p(12,21,5,9,c1,0.85);
     p(4,29,7,3,c2,0.9);p(11,29,7,3,c2,0.9);p(3,31,4,1,c1,0.5);p(15,31,4,1,c1,0.5);
+  } else if (id === 'netrunner') {
+    const [c1,c2,c3]=[0x00ccff,0x004455,0x88eeff];
+    p(10,0,2,3,c3);p(9,3,4,1,c3,0.6);
+    p(7,3,8,5,c1);p(8,5,6,2,c2,0.8);p(9,5,4,1,c3,0.8);
+    p(9,8,4,2,c2,0.9);
+    p(5,9,3,2,c1,0.7);p(14,9,3,2,c1,0.7);
+    p(7,11,8,8,c1,0.75);p(8,13,6,4,c2,0.5);p(10,14,2,2,c3,0.9);
+    p(5,11,3,8,c1,0.6);p(4,14,1,4,c3,0.5);
+    p(14,11,3,8,c1,0.6);p(17,14,1,4,c3,0.5);
+    p(7,19,8,2,c2,0.85);
+    p(7,21,4,8,c1,0.75);p(11,21,4,8,c1,0.75);
+    p(6,29,5,3,c2,0.9);p(11,29,5,3,c2,0.9);p(5,31,3,1,c1,0.5);p(14,31,3,1,c1,0.5);
+  } else if (id === 'sentinel') {
+    const [c1,c2,c3]=[0xff4466,0x661122,0xff88aa];
+    p(7,0,8,6,c1,0.9);p(8,2,6,3,c2,0.8);p(9,3,4,1,c3,0.7);p(5,0,2,3,c2,0.6);p(15,0,2,3,c2,0.6);
+    p(2,7,6,4,c1,0.9);p(14,7,6,4,c1,0.9);p(0,8,3,3,c2,0.7);p(19,8,3,3,c2,0.7);
+    p(6,11,10,8,c1,0.85);p(7,12,8,5,c2,0.4);p(9,13,4,3,c3,0.5);p(10,14,2,2,c3,0.9);
+    p(3,11,4,7,c1,0.8);p(15,11,4,7,c1,0.8);
+    p(2,16,4,2,c2,0.9);p(16,16,4,2,c2,0.9);
+    p(6,19,10,2,c2,0.9);p(10,19,2,2,c3,0.8);
+    p(6,21,4,9,c1,0.85);p(12,21,4,9,c1,0.85);
+    p(5,29,6,3,c2,0.9);p(11,29,6,3,c2,0.9);p(4,31,4,1,c1,0.5);p(14,31,4,1,c1,0.5);
+  } else if (id === 'glitcher') {
+    const [c1,c2,c3]=[0xff44ff,0x550055,0xffaaff];
+    p(9,0,4,2,c1);p(7,2,8,5,c1);p(8,3,6,2,c2,0.7);p(8,4,4,1,c3,0.8);p(13,3,2,1,c3,0.6);
+    p(3,12,2,1,c3,0.4);p(17,10,2,1,c3,0.4);p(0,14,1,2,c3,0.3);p(21,13,1,1,c3,0.3);
+    p(6,7,10,3,c1,0.8);
+    p(4,10,5,8,c1,0.7);p(13,11,4,7,c1,0.6);
+    p(7,10,8,9,c1,0.75);p(8,12,6,4,c2,0.5);p(10,13,2,2,c3,0.9);
+    p(8,19,6,2,c2,0.8);
+    p(8,21,3,9,c1,0.75);p(12,21,4,9,c1,0.7);
+    p(7,29,5,3,c2,0.9);p(12,29,5,3,c2,0.9);p(6,31,3,1,c3,0.4);p(14,31,3,1,c3,0.4);
+  } else if (id === 'bridgelink') {
+    const [c1,c2,c3]=[0xffaa00,0x553300,0xffdd88];
+    p(9,0,4,1,c3);p(6,0,1,3,c3,0.6);p(15,0,1,3,c3,0.6);
+    p(7,1,8,6,c1);p(8,3,6,2,c2,0.7);p(9,4,4,1,c3,0.8);p(7,3,2,1,c2,0.5);p(13,3,2,1,c2,0.5);
+    p(8,7,6,3,c1,0.8);
+    p(3,9,5,5,c1,0.85);p(14,9,5,5,c1,0.85);p(1,10,3,3,c2,0.6);p(18,10,3,3,c2,0.6);
+    p(7,10,8,9,c1,0.8);p(8,11,6,5,c2,0.4);p(9,12,4,3,c3,0.5);p(10,13,2,2,c3,0.9);
+    p(5,14,2,2,c2,0.6);p(15,14,2,2,c2,0.6);
+    p(7,19,8,2,c2,0.85);p(10,19,2,2,c3,0.7);
+    p(7,21,4,9,c1,0.8);p(11,21,4,9,c1,0.8);
+    p(6,29,6,3,c2,0.9);p(10,29,6,3,c2,0.9);p(5,31,3,1,c3,0.4);p(14,31,3,1,c3,0.4);
   }
 }
 
@@ -367,7 +611,8 @@ class Shop extends Phaser.Scene {
         const activeCount = this.save.agents.filter(a => a.owned && a.active).length;
         const isActive = saved.active;
         this._btn(W / 2 - 66, cy + 136, isActive ? 'ACTIVE ✓' : 'SET ACTIVE', isActive ? 0x00ff88 : 0x444466, () => {
-          if (isActive && activeCount <= 1) return; // keep at least 1
+          if (isActive && activeCount <= 1) return;
+          if (!isActive && activeCount >= 3) return;
           saved.active = !saved.active;
           writeSave(this.save); this._renderTab();
         });
@@ -420,7 +665,8 @@ class Shop extends Phaser.Scene {
           gbtn.lineStyle(1, bcol, isEq ? 0.8 : 0.3);
           gbtn.strokeRoundedRect(bx, cy + 78, 80, 38, 6);
           this.content.add(gbtn);
-          const short = ag.id === 'threadling' ? 'THREAD' : ag.id === 'patchwork' ? 'PATCH' : 'VAULT';
+          const shortMap = { threadling:'THREAD', patchwork:'PATCH', vault:'VAULT', netrunner:'NETRUN', sentinel:'SENTRY', glitcher:'GLITCH', bridgelink:'BRIDGE' };
+          const short = shortMap[ag.id] || ag.id.substring(0,6).toUpperCase();
           this.content.add(this.add.text(bx + 40, cy + 97, isEq ? short + ' ✓' : short, { fontFamily: 'monospace', fontSize: '11px', color: isEq ? '#' + agDef.color.toString(16).padStart(6,'0') : '#555566' }).setOrigin(0.5));
           const z = this.add.zone(bx, cy + 78, 80, 38).setOrigin(0).setInteractive();
           z.on('pointerdown', () => {
@@ -543,18 +789,23 @@ class Battle extends Phaser.Scene {
         const saved   = this.save.agents.find(a => a.id === d.id);
         const level   = saved.level;
         const stats   = effectiveStats(d.id, level, this.save);
+        const subMoves = (saved.subclass && SUBCLASS_MOVES[saved.subclass]) ? [SUBCLASS_MOVES[saved.subclass]] : [];
         return {
           ...d,
           ...stats,
+          moves: [...d.moves, ...subMoves],
           hp: Math.min(saved.hp, stats.maxHp),
           en: stats.maxEn,
           level,
           xp: saved.xp,
-          defending: false, fortified: false, locked: false,
+          subclass: saved.subclass || null,
+          stored: 0,
+          defending: false, fortified: false, locked: false, frozen: false, shielded: false,
         };
       });
 
-    this.enemy = { ...ch.enemy };
+    this.enemy = { ...ch.enemy, saveUsed: false };
+    this.heatStacks = 0;
     this.state = STATE.PLAYER;
     this.activeIdx = 0;
     this.acted = new Set();
@@ -728,6 +979,7 @@ class Battle extends Phaser.Scene {
     this.btnCon.removeAll(true);
     this.btnZones.forEach(z => z.destroy());
     this.btnZones = [];
+    this._entangledIdx = (this.mechanic === 'entangle') ? Math.floor(Math.random() * 4) : -1;
     const ag = this.agents[this.activeIdx];
     if (!ag) return;
     const bw = (W - 48) / 2, bh = 78, sy = 562, gap = 8;
@@ -749,10 +1001,12 @@ class Battle extends Phaser.Scene {
         const lb = this.add.text(bx + bw / 2, by + 28, def.label, { fontFamily: 'monospace', fontSize: '18px', color: hex, fontStyle: 'bold' }).setOrigin(0.5, 0.5);
         const sb = this.add.text(bx + bw / 2, by + 54, def.sub, { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }).setOrigin(0.5, 0.5);
         this.btnCon.add(bg); this.btnCon.add(lb); this.btnCon.add(sb);
+        const zoneIdx = this.btnZones.length;
+        const entangled = zoneIdx === this._entangledIdx;
+        if (entangled) { bg.setAlpha(0.3); }
         const z = this.add.zone(bx, by, bw, bh).setOrigin(0).setInteractive();
-        z.on('pointerdown', () => this.act(def.id));
-        z.on('pointerover', () => bg.setAlpha(1.6));
-        z.on('pointerout',  () => bg.setAlpha(1.0));
+        if (entangled) { z.disableInteractive(); this.add.text(bx + bw/2, by + bh - 14, '🔗 LOCKED', { fontFamily:'monospace', fontSize:'9px', color:'#ff8800' }).setOrigin(0.5); }
+        else { z.on('pointerdown', () => this.act(def.id)); z.on('pointerover', () => bg.setAlpha(1.6)); z.on('pointerout', () => bg.setAlpha(entangled ? 0.3 : 1.0)); }
         this.btnZones.push(z);
       });
     });
@@ -793,10 +1047,13 @@ class Battle extends Phaser.Scene {
     obj.sg.setText(`SIG ${sig}%`);
     obj.sg.setColor(sig < 50 ? '#ff4444' : '#ffcc00');
     const badges = [];
-    if (ag.defending) badges.push('🛡');
-    if (ag.fortified) badges.push('⚡');
-    if (ag.locked)    badges.push('🔒 LOCKED');
-    if (dead) badges.push('💀 OFFLINE');
+    if (ag.defending)  badges.push('🛡');
+    if (ag.fortified)  badges.push('⚡');
+    if (ag.frozen)     badges.push('❄');
+    if (ag.shielded)   badges.push('🔷');
+    if (ag.locked)     badges.push('🔒');
+    if (ag.stored > 0) badges.push(`📦${ag.stored}`);
+    if (dead)          badges.push('💀');
     obj.st.setText(badges.join(' '));
     obj.st.setColor(dead ? '#ff3355' : '#aaaacc');
     obj.nm.setAlpha(dead ? 0.3 : 1);
@@ -809,10 +1066,13 @@ class Battle extends Phaser.Scene {
     const ag = this.agents[this.activeIdx];
     if (ag.locked) {
       this.log(`> ${ag.name}: SIGNAL LOCKED — skipping turn`);
-      ag.locked = false;
-      this._reAll();
-      this.time.delayedCall(600, () => this._next());
-      return;
+      ag.locked = false; this._reAll();
+      this.time.delayedCall(600, () => this._next()); return;
+    }
+    if (ag.frozen) {
+      this.log(`> ${ag.name}: ❄ FROZEN — cannot act`);
+      ag.frozen = false; this._reAll();
+      this.time.delayedCall(600, () => this._next()); return;
     }
     this.state = STATE.PLAYER;
     this.tStart = this.time.now;
@@ -935,15 +1195,193 @@ class Battle extends Phaser.Scene {
       }
 
     } else if (id === 'defend') {
-      ag.defending = true;
-      this.log(`> ${ag.name}: DEFEND`);
+      ag.defending = true; this.log(`> ${ag.name}: DEFEND`);
 
     } else if (id === 'fortify') {
-      ag.fortified = true;
-      this.log(`> ${ag.name}: FORTIFY — 60% dmg reduction`);
+      ag.fortified = true; this.log(`> ${ag.name}: FORTIFY — 60% dmg reduction`);
+
+    // ── New agent base moves ───────────────────────────────
+    } else if (id === 'packet') {
+      if (!hits(sig + 10)) {
+        this.log(`> ${ag.name}: PACKET [MISS]`);
+      } else {
+        const dmg = rnd(10, 16) + (ag.dmgBonus || 0);
+        this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+        this.log(`> ${ag.name}: PACKET → −${dmg}`);
+        this._flashE();
+        this.lastAction = { id: 'packet', agentIdx: this.activeIdx };
+      }
+    } else if (id === 'intercept') {
+      if (ag.en < 10) { this.log('> Need 10 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 10; ag.defending = true;
+      const cdmg = rnd(8, 14) + (ag.dmgBonus || 0);
+      this.enemy.hp = Math.max(0, this.enemy.hp - cdmg);
+      this.log(`> ${ag.name}: INTERCEPT → block + counter −${cdmg}`); this._flashE();
+
+    } else if (id === 'scan') {
+      if (ag.en < 10) { this.log('> Need 10 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 10;
+      this.enemy.aura = Math.max(0, this.enemy.aura - 15);
+      this.log(`> ${ag.name}: SCAN — enemy aura −15`); this._reEnemy();
+
+    } else if (id === 'firewall') {
+      if (ag.en < 15) { this.log('> Need 15 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 15;
+      const fwAlive = this.agents.filter(a => a.hp > 0);
+      const fwTgt = fwAlive.reduce((a, b) => (a.hp / a.maxHp) < (b.hp / b.maxHp) ? a : b);
+      fwTgt.shielded = true;
+      this.log(`> ${ag.name}: FIREWALL — ${fwTgt.name} shielded`);
+
+    } else if (id === 'corrupt') {
+      if (Math.random() < 0.65) {
+        if (!hits(sig)) {
+          this.log(`> ${ag.name}: CORRUPT [MISS]`);
+        } else {
+          const dmg = rnd(12, 20) + (ag.dmgBonus || 0);
+          this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+          this.log(`> ${ag.name}: CORRUPT → −${dmg}`); this._flashE();
+        }
+      } else {
+        const crAlive = this.agents.filter(a => a.hp > 0);
+        const crTgt = crAlive[Math.floor(Math.random() * crAlive.length)];
+        const dmg = rnd(8, 14);
+        crTgt.hp = Math.max(0, crTgt.hp - dmg);
+        this.log(`> ${ag.name}: CORRUPT [BACKFIRE] → ${crTgt.name} −${dmg}`);
+      }
+
+    } else if (id === 'exploit') {
+      if (ag.en < 20) { this.log('> Need 20 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 20;
+      if (this.enemy.hp < this.enemy.maxHp * 0.5) {
+        const dmg = rnd(22, 34) + (ag.dmgBonus || 0);
+        this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+        this.log(`> ${ag.name}: EXPLOIT [CRIT] → −${dmg}`); this._flashE();
+      } else {
+        const dmg = rnd(10, 16) + (ag.dmgBonus || 0);
+        this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+        this.log(`> ${ag.name}: EXPLOIT → −${dmg} (no crit yet)`); this._flashE();
+      }
+
+    } else if (id === 'boost') {
+      if (ag.en < 10) { this.log('> Need 10 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 10;
+      this.agents.filter(a => a.hp > 0).forEach(a => { a.en = Math.min(a.maxEn, a.en + 10); });
+      this.log(`> ${ag.name}: BOOST — all allies +10 EN`);
+
+    } else if (id === 'sync') {
+      if (ag.en < 20) { this.log('> Need 20 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 20;
+      const heals = this.agents.filter(a => a.hp > 0).map(a => {
+        const h = rnd(10, 16); a.hp = Math.min(a.maxHp, a.hp + h); return h;
+      });
+      this.log(`> ${ag.name}: SYNC — all allies +${Math.min(...heals)}–${Math.max(...heals)} HP`);
+
+    // ── Subclass moves ────────────────────────────────────
+    } else if (id === 'overload') {
+      if (ag.en < 30) { this.log('> Need 30 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 30;
+      const dmg = rnd(38, 54) + (ag.dmgBonus || 0);
+      this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+      ag.hp = Math.max(1, ag.hp - 25);
+      this.log(`> ${ag.name}: OVERLOAD → −${dmg} · self −25`); this._flashE();
+
+    } else if (id === 'multishot') {
+      if (ag.en < 15) { this.log('> Need 15 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 15;
+      let total = 0;
+      for (let i = 0; i < 3; i++) { if (hits(sig)) { const d = rnd(6, 12) + (ag.dmgBonus || 0); this.enemy.hp = Math.max(0, this.enemy.hp - d); total += d; } }
+      this.log(`> ${ag.name}: MULTISHOT → −${total} (3 hits)`); if (total > 0) this._flashE();
+
+    } else if (id === 'cache_run') {
+      if (ag.en < 25) { this.log('> Need 25 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 25;
+      const recent = this.logs.slice(-6).filter(l => l.startsWith('> ') && l.includes('→'));
+      let total = 0;
+      for (let i = 0; i < Math.min(3, recent.length); i++) { const d = rnd(6, 12); this.enemy.hp = Math.max(0, this.enemy.hp - d); total += d; }
+      this.log(`> ${ag.name}: CACHE RUN → −${total} (cached)`); if (total > 0) this._flashE();
+
+    } else if (id === 'revive') {
+      if (ag.en < 30) { this.log('> Need 30 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      const dead = this.agents.find(a => a.hp <= 0);
+      if (!dead) { this.log('> No fallen allies'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 30;
+      dead.hp = Math.ceil(dead.maxHp * 0.3);
+      this.log(`> ${ag.name}: RESTORE → ${dead.name} revived at ${dead.hp} HP`);
+
+    } else if (id === 'release') {
+      const stored = ag.stored || 0;
+      if (stored === 0) { this.log('> Nothing stored yet'); this.state = STATE.PLAYER; this._btns(true); return; }
+      const dmg = Math.ceil(stored * 1.5) + (ag.dmgBonus || 0);
+      this.enemy.hp = Math.max(0, this.enemy.hp - dmg); ag.stored = 0;
+      this.log(`> ${ag.name}: RELEASE → −${dmg} (stored ×1.5)`); this._flashE();
+
+    } else if (id === 'bulwark') {
+      this.agents.filter(a => a.hp > 0).forEach(a => a.fortified = true);
+      this.log(`> ${ag.name}: BULWARK — all allies fortified this round`);
+
+    } else if (id === 'reroute') {
+      if (ag.en < 15) { this.log('> Need 15 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 15; ag.rerouting = true;
+      this.log(`> ${ag.name}: REROUTE — next attack redirected`);
+
+    } else if (id === 'multicast') {
+      if (ag.en < 20) { this.log('> Need 20 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 20;
+      const dmg = rnd(10, 18) + (ag.dmgBonus || 0);
+      this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+      this.enemy.stacks = Math.min(3, this.enemy.stacks + 1);
+      this.log(`> ${ag.name}: MULTICAST → −${dmg} + signal stack`); this._flashE();
+
+    } else if (id === 'reflect') {
+      ag.reflecting = true; this.log(`> ${ag.name}: REFLECT — 60% damage reflected next hit`);
+
+    } else if (id === 'deep_scan') {
+      if (ag.en < 20) { this.log('> Need 20 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 20;
+      this.enemy.aura = Math.max(0, this.enemy.aura - 20);
+      this.enemy.vulnBonus = (this.enemy.vulnBonus || 0) + 15;
+      this.log(`> ${ag.name}: DEEP SCAN — enemy −20 aura, +15% vuln`);
+
+    } else if (id === 'virus') {
+      if (ag.en < 15) { this.log('> Need 15 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 15;
+      this.enemy.stacks = Math.min(3, this.enemy.stacks + 1);
+      this.log(`> ${ag.name}: VIRUS — enemy signal stack ${this.enemy.stacks}`);
+
+    } else if (id === 'zero_day') {
+      if (ag.en < 30) { this.log('> Need 30 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 30;
+      const dmg = rnd(34, 50) + (ag.dmgBonus || 0);
+      this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
+      this.log(`> ${ag.name}: ZERO DAY [CRIT] → −${dmg}`); this._flashE();
+
+    } else if (id === 'chain') {
+      if (ag.en < 20) { this.log('> Need 20 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 20;
+      const ally = this.agents.find((a, idx) => a.hp > 0 && idx !== this.activeIdx);
+      if (ally) { const d = rnd(8, 14) + (ally.dmgBonus || 0); this.enemy.hp = Math.max(0, this.enemy.hp - d); this.log(`> ${ag.name}: CHAIN → ${ally.name} acts! −${d}`); this._flashE(); }
+      else this.log(`> ${ag.name}: CHAIN — no ally`);
+
+    } else if (id === 'link') {
+      if (ag.en < 10) { this.log('> Need 10 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
+      ag.en -= 10;
+      const weakest = this.agents.filter(a => a.hp > 0).reduce((a, b) => (a.hp / a.maxHp) < (b.hp / b.maxHp) ? a : b);
+      const avgHp = Math.ceil((ag.hp + weakest.hp) / 2);
+      const avgEn = Math.ceil((ag.en + weakest.en) / 2);
+      ag.hp = Math.min(ag.maxHp, avgHp); weakest.hp = Math.min(weakest.maxHp, avgHp);
+      ag.en = Math.min(ag.maxEn, avgEn); weakest.en = Math.min(weakest.maxEn, avgEn);
+      this.log(`> ${ag.name}: LINK → shared HP/EN with ${weakest.name}`);
     }
 
     this._reEnemy(); this._reAll();
+
+    // Save State mechanic: enemy restores 50% HP the first time it would die
+    if (this.enemy.hp <= 0 && !this.enemy.saveUsed && this.mechanic === 'savestate') {
+      const restore = Math.ceil(this.enemy.maxHp * 0.5);
+      this.enemy.hp = restore; this.enemy.saveUsed = true;
+      this.log(`> 💾 SAVE STATE LOADED! Enemy restored to ${restore} HP`);
+      this._reEnemy();
+    }
 
     if (this.enemy.hp <= 0) { this.time.delayedCall(500, () => this._end(true)); return; }
     if (this.agents.every(a => a.hp <= 0)) { this.time.delayedCall(500, () => this._end(false)); return; }
@@ -962,6 +1400,10 @@ class Battle extends Phaser.Scene {
       this.round++;
       const enRegen = this.mechanic === 'battery' ? 2 : 5;
       this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen); });
+      if (this.mechanic === 'heat') {
+        this.heatStacks = (this.heatStacks || 0) + 1;
+        if (this.heatStacks > 0) this.log(`> 🔥 HEAT ${this.heatStacks}: enemy +${this.heatStacks * 2} dmg`);
+      }
       this.acted = new Set();
       this.activeIdx = 0;
       while (this.agents[this.activeIdx].hp <= 0) this.activeIdx = (this.activeIdx + 1) % this.agents.length;
@@ -971,17 +1413,54 @@ class Battle extends Phaser.Scene {
 
     const alive = this.agents.map((a, i) => ({ a, i })).filter(({ a }) => a.hp > 0);
     const pick = () => alive[Math.floor(Math.random() * alive.length)].a;
-    const dmgHit = (tgt, raw) => tgt.defending ? Math.ceil(raw * 0.5) : tgt.fortified ? Math.ceil(raw * 0.4) : raw;
-    const tag = (tgt) => tgt.defending ? ' [BLOCKED]' : tgt.fortified ? ' [FORT]' : '';
+    const dmgHit = (tgt, raw) => {
+      let d = raw;
+      if (tgt.defending) d = Math.ceil(d * 0.5);
+      else if (tgt.fortified) d = Math.ceil(d * 0.4);
+      if (tgt.shielded) { tgt.shielded = false; d = Math.ceil(d * 0.2); }
+      return d;
+    };
+    const tag = (tgt) => tgt.defending ? ' [BLOCK]' : tgt.fortified ? ' [FORT]' : tgt.shielded ? ' [SHIELD]' : '';
     const type = this.channel.type;
+    const heat = this.mechanic === 'heat' ? (this.heatStacks || 0) * 2 : 0;
     const roll = Math.random();
 
     // Shared moves
     const doAttack = () => {
-      const tgt = pick(), raw = rnd(5, 10), dmg = dmgHit(tgt, raw);
+      const tgt = pick();
+      let raw = rnd(5, 10) + heat;
+      if (this.enemy.vulnBonus) raw = Math.ceil(raw * (1 + this.enemy.vulnBonus / 100));
+      // reroute: redirect full hit back to enemy
+      if (tgt.rerouting) {
+        tgt.rerouting = false;
+        this.enemy.hp = Math.max(0, this.enemy.hp - raw);
+        this.log(`> ${tgt.name}: REROUTE! Attack reflected → enemy −${raw}`);
+        this._flashE(); this.time.delayedCall(600, finish); return;
+      }
+      // reflect: 60% of damage bounces back
+      const reflectDmg = tgt.reflecting ? Math.ceil(raw * 0.6) : 0;
+      if (tgt.reflecting) { tgt.reflecting = false; this.enemy.hp = Math.max(0, this.enemy.hp - reflectDmg); }
+      const dmg = dmgHit(tgt, raw);
       tgt.hp = Math.max(0, tgt.hp - dmg);
-      this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}`);
+      // archive subclass: store incoming damage
+      if (tgt.subclass === 'archive') tgt.stored = (tgt.stored || 0) + Math.ceil(dmg * 0.5);
+      this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}${reflectDmg ? ` [REFLECT −${reflectDmg}]` : ''}`);
+      // freeze chance
+      if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
+        tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN — skips next turn`);
+      }
+      // predict: 35% chance second hit
+      if (this.mechanic === 'predict' && Math.random() < 0.35) {
+        const tgt2 = pick(), dmg2 = dmgHit(tgt2, rnd(4, 8));
+        tgt2.hp = Math.max(0, tgt2.hp - dmg2);
+        this.log(`> PREDICTED → ${tgt2.name} −${dmg2}`);
+      }
       this._flashP(); this.time.delayedCall(600, finish);
+    };
+    const doSummon = () => {
+      const bonus = 45; this.enemy.hp += bonus; this.enemy.maxHp += bonus;
+      this.log(`> BACKUP SUMMONED! Enemy +${bonus} HP`);
+      this._reEnemy(); this.time.delayedCall(600, finish);
     };
     const doStatic = () => {
       this.enemy.stacks = Math.min(3, this.enemy.stacks + 1);
@@ -998,7 +1477,9 @@ class Battle extends Phaser.Scene {
     };
 
     if (type === 'normal') {
-      if      (roll < 0.50) doAttack();
+      // summon mechanic gets its own move chance
+      if (this.mechanic === 'summon' && roll < 0.22) doSummon();
+      else if (roll < 0.50) doAttack();
       else if (roll < 0.78) doStatic();
       else                  doDouble();
 
@@ -1103,15 +1584,27 @@ class Battle extends Phaser.Scene {
         }
       });
 
+      // Level-up flash
+      if (levelUps.length > 0) {
+        levelUps.forEach(lu => this.log(`⬆ ${lu.name} → Lv ${lu.to}!`));
+        this.cameras.main.flash(300, 255, 220, 50, false);
+      }
+
+      // Collect agents that just hit level 5 and have no subclass yet
+      const pendingSubclasses = this.agents
+        .map(ag => save.agents.find(a => a.id === ag.id))
+        .filter(sa => sa && sa.owned && sa.level >= 5 && !sa.subclass)
+        .map(sa => ({ id: sa.id, name: DEFS.find(d => d.id === sa.id)?.name || sa.id, color: DEFS.find(d => d.id === sa.id)?.color || 0xffffff }));
+
       writeSave(save);
-      this._showWinScreen(rewards, levelUps);
+      this._showWinScreen(rewards, levelUps, pendingSubclasses);
     } else {
       const cost = reviveCost(tier);
       this._showLoseScreen(cost, save);
     }
   }
 
-  _showWinScreen(rewards, levelUps) {
+  _showWinScreen(rewards, levelUps, pendingSubclasses = []) {
     const ch = this.channel;
     const ov = this.add.graphics();
     ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
@@ -1144,11 +1637,14 @@ class Battle extends Phaser.Scene {
     };
     const channels = WORLD_CHANNELS[this.worldId] || WORLD_CHANNELS.tv;
     const nextIdx  = Math.min(this.channelIdx + 1, channels.length - 1);
+    const goMap    = () => pendingSubclasses.length > 0
+      ? this.scene.start('SubclassChoice', { pending: pendingSubclasses, currentIdx: 0 })
+      : this.scene.start('OverworldMap');
     if (this.channelIdx < channels.length - 1) {
       btn('NEXT CHANNEL', 0x00ff88, y, () => this.scene.start('Battle', { channel: channels[nextIdx], channelIdx: nextIdx, worldId: this.worldId }));
-      btn('← MAP', 0x444466, y + 62, () => this.scene.start('OverworldMap'));
+      btn('← MAP', 0x444466, y + 62, goMap);
     } else {
-      btn('← WORLD MAP', 0x00ff88, y, () => this.scene.start('OverworldMap'));
+      btn('← WORLD MAP', 0x00ff88, y, goMap);
     }
   }
 
@@ -1259,95 +1755,12 @@ class Battle extends Phaser.Scene {
   }
 
   // ── Sprite drawing ──────────────────────────────────────
-  _sprite(g, id, ox, oy) {
-    const s = 2;
-    const p = (x, y, w, h, col, a = 1) => { g.fillStyle(col, a); g.fillRect(ox + x * s, oy + y * s, w * s, h * s); };
-    if (id === 'threadling') {
-      const [c1, c2, c3] = [0x00ff88, 0x003322, 0x00ffcc];
-      p(10, 0, 1, 2, c3);          // antenna
-      p(9, 1, 3, 1, c3);
-      p(7, 2, 8, 6, c1);           // head
-      p(8, 3, 6, 1, c2);           // visor top
-      p(8, 4, 6, 2, c3, 0.8);      // visor glow
-      p(8, 5, 6, 1, c2);           // visor bottom
-      p(10, 8, 2, 2, c1, 0.7);     // neck
-      p(4, 9, 3, 2, c1, 0.9);      // L shoulder pad
-      p(15, 9, 3, 2, c1, 0.9);     // R shoulder pad
-      p(7, 10, 8, 9, c1, 0.75);    // torso
-      p(9, 11, 4, 4, c2, 0.8);     // chest panel
-      p(10, 12, 2, 2, c3, 0.9);    // core gem
-      p(4, 10, 3, 7, c1, 0.7);     // L arm
-      p(2, 15, 3, 2, c1);          // L cannon
-      p(1, 14, 1, 4, c3, 0.5);     // cannon glow
-      p(15, 10, 3, 7, c1, 0.7);    // R arm
-      p(8, 19, 6, 2, c2, 0.9);     // belt
-      p(8, 21, 3, 9, c1, 0.8);     // L leg
-      p(13, 21, 3, 9, c1, 0.8);    // R leg
-      p(7, 29, 5, 3, c1);          // L boot
-      p(13, 29, 5, 3, c1);         // R boot
-      p(6, 31, 2, 1, c2);          // L toe
-      p(16, 31, 2, 1, c2);         // R toe
-    } else if (id === 'patchwork') {
-      const [c1, c2, c3] = [0xaa44ff, 0x4411aa, 0xee88ff];
-      p(10, 0, 2, 1, c1);          // hood tip
-      p(9, 1, 4, 1, c1);
-      p(8, 2, 6, 2, c1);
-      p(7, 4, 8, 4, c1);           // hood
-      p(8, 4, 6, 4, c2, 0.5);      // face shadow
-      p(9, 6, 2, 1, c3, 0.8);      // L eye glow
-      p(11, 6, 2, 1, c3, 0.8);     // R eye glow
-      p(5, 8, 12, 2, c1, 0.85);    // shoulders
-      p(6, 10, 10, 2, c1, 0.8);    // robe row 1
-      p(5, 12, 12, 2, c1, 0.75);   // robe row 2
-      p(4, 14, 14, 2, c1, 0.7);    // robe row 3
-      p(4, 16, 14, 2, c1, 0.65);   // robe row 4
-      p(3, 18, 16, 3, c1, 0.6);    // lower robe
-      p(2, 21, 18, 3, c2, 0.65);   // robe shadow
-      p(1, 24, 20, 3, c2, 0.5);
-      p(0, 27, 22, 4, c2, 0.35);
-      p(8, 10, 1, 7, c3, 0.3);     // data stream lines
-      p(11, 11, 1, 6, c3, 0.25);
-      p(4, 10, 2, 5, c1, 0.7);     // L sleeve
-      p(16, 10, 2, 5, c1, 0.7);    // R sleeve
-      p(3, 14, 3, 2, c3, 0.5);     // L glowing hand
-      p(16, 14, 3, 2, c3, 0.5);    // R glowing hand
-      p(0, 11, 2, 1, c3, 0.4);     // floating fragment L
-      p(20, 9, 2, 1, c3, 0.4);     // floating fragment R
-    } else if (id === 'vault') {
-      const [c1, c2, c3] = [0xffcc00, 0x886600, 0xffee88];
-      p(6, 0, 10, 7, c1, 0.95);    // helmet
-      p(7, 2, 8, 3, c2, 0.85);     // visor band
-      p(8, 3, 6, 2, c3, 0.5);      // visor glow
-      p(6, 0, 2, 4, c2, 0.5);      // L helmet plate
-      p(14, 0, 2, 4, c2, 0.5);     // R helmet plate
-      p(8, 7, 6, 2, c1, 0.8);      // neck guard
-      p(2, 8, 5, 5, c1, 0.9);      // L shoulder guard
-      p(15, 8, 5, 5, c1, 0.9);     // R shoulder guard
-      p(1, 9, 2, 4, c2, 0.75);     // L shoulder tip
-      p(19, 9, 2, 4, c2, 0.75);    // R shoulder tip
-      p(5, 9, 12, 10, c1, 0.85);   // body
-      p(6, 10, 10, 7, c2, 0.35);   // body shadow
-      p(9, 11, 4, 3, c3, 0.3);     // chest plate
-      p(10, 12, 2, 2, c3, 0.9);    // center gem
-      p(2, 13, 4, 6, c1, 0.8);     // L arm
-      p(16, 13, 4, 6, c1, 0.8);    // R arm
-      p(2, 17, 5, 2, c2, 0.9);     // L gauntlet
-      p(15, 17, 5, 2, c2, 0.9);    // R gauntlet
-      p(5, 19, 12, 2, c2, 0.9);    // belt
-      p(10, 19, 2, 2, c3, 0.8);    // belt buckle
-      p(5, 21, 5, 9, c1, 0.85);    // L leg
-      p(12, 21, 5, 9, c1, 0.85);   // R leg
-      p(4, 29, 7, 3, c2, 0.9);     // L boot
-      p(11, 29, 7, 3, c2, 0.9);    // R boot
-      p(3, 31, 4, 1, c1, 0.5);     // L toe
-      p(15, 31, 4, 1, c1, 0.5);    // R toe
-    }
-  }
+  _sprite(g, id, ox, oy) { _drawSprite(g, id, ox, oy); }
 }
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: [OverworldMap, ChannelSelect, Shop, Battle],
+  backgroundColor: '#050510', scene: [OverworldMap, SubclassChoice, ChannelSelect, Shop, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });
