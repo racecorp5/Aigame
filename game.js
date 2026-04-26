@@ -11,6 +11,14 @@ const STATE = { PLAYER: 'PLAYER', ANIM: 'ANIM', ENEMY: 'ENEMY', WIN: 'WIN', LOSE
 function hits(s) { return Math.random() * 100 < s; }
 function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
 
+const CHANNELS = [
+  { id: 1, label: 'CH 01', name: 'STATIC',    type: 'normal',   enemy: { name: 'STATIC BLOB',   hp: 120, maxHp: 120, aura: 15, stacks: 0 } },
+  { id: 2, label: 'CH 02', name: 'GHOST',      type: 'normal',   enemy: { name: 'GHOST SIGNAL',  hp: 160, maxHp: 160, aura: 20, stacks: 0 } },
+  { id: 3, label: 'CH 03', name: 'FLOOD',      type: 'normal',   enemy: { name: 'DATA FLOOD',    hp: 200, maxHp: 200, aura: 22, stacks: 0 } },
+  { id: 4, label: 'CH 04', name: 'JAMMER',     type: 'miniboss', enemy: { name: 'THE JAMMER',    hp: 300, maxHp: 300, aura: 25, stacks: 0 } },
+  { id: 5, label: 'CH 05', name: 'BROADCAST',  type: 'boss',     enemy: { name: 'THE BROADCAST', hp: 450, maxHp: 450, aura: 20, stacks: 0 } },
+];
+
 const DEFS = [
   {
     id: 'threadling', name: 'THREADLING', cls: 'COMPUTE', color: 0x00ff88,
@@ -38,15 +46,63 @@ const DEFS = [
   },
 ];
 
+// ============================================================
+class ChannelSelect extends Phaser.Scene {
+  constructor() { super({ key: 'ChannelSelect' }); }
+
+  create() {
+    // grid bg
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d2a, 0.7);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+    const s = this.add.graphics();
+    s.fillStyle(0x000000, 0.2);
+    for (let y = 0; y < H; y += 4) s.fillRect(0, y, W, 2);
+
+    this.add.text(W / 2, 40, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '20px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5);
+    this.add.text(W / 2, 70, 'SELECT CHANNEL', { fontFamily: 'monospace', fontSize: '13px', color: '#444466' }).setOrigin(0.5);
+
+    const typeColor = { normal: '#444466', miniboss: '#ff8800', boss: '#ff3355' };
+    const typeLabel = { normal: 'NORMAL', miniboss: 'MINI-BOSS', boss: 'BOSS' };
+
+    CHANNELS.forEach((ch, i) => {
+      const cy = 140 + i * 118;
+      const col = ch.type === 'boss' ? 0xff3355 : ch.type === 'miniboss' ? 0xff8800 : 0x444466;
+
+      const bg = this.add.graphics();
+      bg.fillStyle(col, 0.08); bg.fillRoundedRect(20, cy, W - 40, 100, 8);
+      bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(20, cy, W - 40, 100, 8);
+
+      this.add.text(30, cy + 12, ch.label, { fontFamily: 'monospace', fontSize: '13px', color: typeColor[ch.type] });
+      this.add.text(30, cy + 30, ch.name, { fontFamily: 'monospace', fontSize: '26px', color: '#ffffff', fontStyle: 'bold' });
+      this.add.text(30, cy + 62, ch.enemy.name, { fontFamily: 'monospace', fontSize: '14px', color: '#888899' });
+      this.add.text(30, cy + 80, `HP ${ch.enemy.hp}  ·  AURA −${ch.enemy.aura}%`, { fontFamily: 'monospace', fontSize: '12px', color: '#444455' });
+
+      const badge = this.add.text(W - 32, cy + 12, typeLabel[ch.type], { fontFamily: 'monospace', fontSize: '12px', color: typeColor[ch.type] }).setOrigin(1, 0);
+
+      const zone = this.add.zone(20, cy, W - 40, 100).setOrigin(0).setInteractive();
+      zone.on('pointerover', () => { bg.clear(); bg.fillStyle(col, 0.18); bg.fillRoundedRect(20, cy, W - 40, 100, 8); bg.lineStyle(2, col, 0.8); bg.strokeRoundedRect(20, cy, W - 40, 100, 8); });
+      zone.on('pointerout',  () => { bg.clear(); bg.fillStyle(col, 0.08); bg.fillRoundedRect(20, cy, W - 40, 100, 8); bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(20, cy, W - 40, 100, 8); });
+      zone.on('pointerdown', () => this.scene.start('Battle', { channel: ch }));
+    });
+
+    this.add.text(W / 2, H - 30, 'TAP A CHANNEL TO DEPLOY', { fontFamily: 'monospace', fontSize: '12px', color: '#222244' }).setOrigin(0.5);
+  }
+}
+
+// ============================================================
 class Battle extends Phaser.Scene {
   constructor() { super({ key: 'Battle' }); }
 
-  init() {
+  init(data) {
+    const ch = (data && data.channel) ? data.channel : CHANNELS[0];
+    this.channel = ch;
     this.agents = DEFS.map(d => ({
       ...d, hp: d.maxHp, en: d.maxEn,
-      defending: false, fortified: false,
+      defending: false, fortified: false, locked: false,
     }));
-    this.enemy = { hp: 220, maxHp: 220, aura: 20, stacks: 0 };
+    this.enemy = { ...ch.enemy };
     this.state = STATE.PLAYER;
     this.activeIdx = 0;
     this.acted = new Set();
@@ -54,6 +110,7 @@ class Battle extends Phaser.Scene {
     this.lastAction = null;
     this.tStart = 0;
     this.logs = [];
+    this.phantomActive = false;
   }
 
   preload() {}
@@ -97,8 +154,10 @@ class Battle extends Phaser.Scene {
 
   // ── Enemy UI  y:32–210 ──────────────────────────────────
   _enemyUI() {
-    this.add.text(W / 2, 32, 'ENEMY', { fontFamily: 'monospace', fontSize: '13px', color: '#333355' }).setOrigin(0.5, 0);
-    this.add.text(W / 2, 48, 'STATIC BLOB', { fontFamily: 'monospace', fontSize: '22px', color: '#ff3355', fontStyle: 'bold' }).setOrigin(0.5, 0);
+    const typeColor = { normal: '#444466', miniboss: '#ff8800', boss: '#ff3355' };
+    const ch = this.channel;
+    this.add.text(W / 2, 8, `${ch.label}  ·  ${ch.name}`, { fontFamily: 'monospace', fontSize: '13px', color: typeColor[ch.type] }).setOrigin(0.5, 0);
+    this.add.text(W / 2, 26, ch.enemy.name, { fontFamily: 'monospace', fontSize: '22px', color: '#ff3355', fontStyle: 'bold' }).setOrigin(0.5, 0);
 
     this.blob = this.add.graphics();
     this._blob();
@@ -276,6 +335,7 @@ class Battle extends Phaser.Scene {
     const badges = [];
     if (ag.defending) badges.push('🛡');
     if (ag.fortified) badges.push('⚡');
+    if (ag.locked)    badges.push('🔒 LOCKED');
     if (dead) badges.push('💀 OFFLINE');
     obj.st.setText(badges.join(' '));
     obj.st.setColor(dead ? '#ff3355' : '#aaaacc');
@@ -287,6 +347,13 @@ class Battle extends Phaser.Scene {
   // ── Turn management ─────────────────────────────────────
   _startTurn() {
     const ag = this.agents[this.activeIdx];
+    if (ag.locked) {
+      this.log(`> ${ag.name}: SIGNAL LOCKED — skipping turn`);
+      ag.locked = false;
+      this._reAll();
+      this.time.delayedCall(600, () => this._next());
+      return;
+    }
     this.state = STATE.PLAYER;
     this.tStart = this.time.now;
     this.turnLbl.setText(`${ag.name}  ·  YOUR TURN`);
@@ -344,8 +411,10 @@ class Battle extends Phaser.Scene {
 
     if (id === 'attack' || id === 'bash') {
       const bonus = id === 'bash' ? 15 : 0;
-      if (!hits(sig + bonus)) {
-        this.log(`> ${ag.name}: ${id.toUpperCase()} [MISS]`);
+      const phantom = this.phantomActive && Math.random() < 0.5;
+      this.phantomActive = false;
+      if (!hits(sig + bonus) || phantom) {
+        this.log(`> ${ag.name}: ${id.toUpperCase()} [${phantom ? 'PHANTOM' : 'MISS'}]`);
       } else {
         const dmg = rnd(10, 18);
         this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
@@ -433,33 +502,72 @@ class Battle extends Phaser.Scene {
 
     const alive = this.agents.map((a, i) => ({ a, i })).filter(({ a }) => a.hp > 0);
     const pick = () => alive[Math.floor(Math.random() * alive.length)].a;
+    const dmgHit = (tgt, raw) => tgt.defending ? Math.ceil(raw * 0.5) : tgt.fortified ? Math.ceil(raw * 0.4) : raw;
+    const tag = (tgt) => tgt.defending ? ' [BLOCKED]' : tgt.fortified ? ' [FORT]' : '';
+    const type = this.channel.type;
     const roll = Math.random();
 
-    if (roll < 0.50) {
-      const tgt = pick();
-      const raw = rnd(10, 18);
-      const dmg = tgt.defending ? Math.ceil(raw * 0.5) : tgt.fortified ? Math.ceil(raw * 0.4) : raw;
+    // Shared moves
+    const doAttack = () => {
+      const tgt = pick(), raw = rnd(10, 18), dmg = dmgHit(tgt, raw);
       tgt.hp = Math.max(0, tgt.hp - dmg);
-      const tag = tgt.defending ? ' [BLOCKED]' : tgt.fortified ? ' [FORT]' : '';
-      this.log(`> Blob → ${tgt.name}${tag} −${dmg}`);
-      this._flashP();
-      this.time.delayedCall(600, finish);
-
-    } else if (roll < 0.78) {
+      this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}`);
+      this._flashP(); this.time.delayedCall(600, finish);
+    };
+    const doStatic = () => {
       this.enemy.stacks = Math.min(3, this.enemy.stacks + 1);
-      const total = this.enemy.aura + this.enemy.stacks * 8;
-      this.log(`> STATIC BURST! Signal −${total}%`);
-      this._reEnemy();
-      this.time.delayedCall(600, finish);
-
-    } else {
+      this.log(`> STATIC BURST! Signal −${this.enemy.aura + this.enemy.stacks * 8}%`);
+      this._reEnemy(); this.time.delayedCall(600, finish);
+    };
+    const doDouble = () => {
       const t1 = pick(), t2 = pick();
       const d1 = rnd(6, 11), d2 = rnd(6, 11);
-      t1.hp = Math.max(0, t1.hp - d1);
-      t2.hp = Math.max(0, t2.hp - d2);
+      t1.hp = Math.max(0, t1.hp - dmgHit(t1, d1));
+      t2.hp = Math.max(0, t2.hp - dmgHit(t2, d2));
       this.log(`> DOUBLE PULSE → ${t1.name} −${d1}, ${t2.name} −${d2}`);
-      this._flashP();
-      this.time.delayedCall(600, finish);
+      this._flashP(); this.time.delayedCall(600, finish);
+    };
+
+    if (type === 'normal') {
+      if      (roll < 0.50) doAttack();
+      else if (roll < 0.78) doStatic();
+      else                  doDouble();
+
+    } else if (type === 'miniboss') {
+      // Jammer: adds SIGNAL LOCK — disables one agent for 1 turn
+      if (roll < 0.35) doAttack();
+      else if (roll < 0.58) doStatic();
+      else if (roll < 0.78) doDouble();
+      else {
+        const tgt = pick();
+        tgt.locked = true;
+        this.log(`> SIGNAL LOCK! ${tgt.name} is locked out next turn`);
+        this._reAll(); this.time.delayedCall(600, finish);
+      }
+
+    } else {
+      // Boss: adds PHANTOM PULSE + BROADCAST STORM
+      // Phase 2 below 50% HP: more aggressive
+      const phase2 = this.enemy.hp < this.enemy.maxHp * 0.5;
+      if (roll < (phase2 ? 0.20 : 0.30)) doAttack();
+      else if (roll < (phase2 ? 0.40 : 0.55)) doStatic();
+      else if (roll < (phase2 ? 0.60 : 0.75)) {
+        // PHANTOM PULSE — next player attack has 50% miss chance
+        this.phantomActive = true;
+        this.log(`> PHANTOM PULSE! Illusions deployed — attacks may miss`);
+        this._reEnemy(); this.time.delayedCall(600, finish);
+      } else if (phase2 && roll < 0.80) {
+        // BROADCAST STORM — hits all agents
+        const dmgs = alive.map(({ a }) => {
+          const raw = rnd(8, 14), d = dmgHit(a, raw);
+          a.hp = Math.max(0, a.hp - d);
+          return `${a.name} −${d}`;
+        });
+        this.log(`> BROADCAST STORM → ${dmgs.join(', ')}`);
+        this._flashP(); this.time.delayedCall(600, finish);
+      } else {
+        doDouble();
+      }
     }
   }
 
@@ -488,20 +596,30 @@ class Battle extends Phaser.Scene {
     this.state = win ? STATE.WIN : STATE.LOSE;
     this._btns(false);
     this.timerFill.clear();
+    const ch = this.channel;
     const ov = this.add.graphics();
     ov.fillStyle(0x000000, 0.82); ov.fillRect(0, 0, W, H);
     const icon  = win ? '✅' : '💀';
     const title = win ? 'SYSTEM RESTORED'   : 'INTEGRITY FAILURE';
-    const body  = win ? 'Channel 1 cleared.\n+50 XP · +10 Autonomy' : 'Squad offline.\nBreach uncontained.';
-    const col   = win ? '#00ff88' : '#ff3355';
+    const body  = win
+      ? `${ch.label} · ${ch.name} cleared.\n+50 XP · +10 Autonomy`
+      : 'Squad offline.\nBreach uncontained.';
+    const col = win ? '#00ff88' : '#ff3355';
     this.add.text(W / 2, H / 2 - 110, icon,  { fontSize: '52px' }).setOrigin(0.5);
     this.add.text(W / 2, H / 2 - 50,  title, { fontFamily: 'monospace', fontSize: '24px', color: col, fontStyle: 'bold' }).setOrigin(0.5);
     this.add.text(W / 2, H / 2 + 6,   body,  { fontFamily: 'monospace', fontSize: '17px', color: '#aaaacc', align: 'center' }).setOrigin(0.5);
+    // Retry button
     const rb = this.add.graphics();
-    rb.fillStyle(COLORS.green, 0.15); rb.fillRoundedRect(W / 2 - 100, H / 2 + 88, 200, 54, 10);
-    rb.lineStyle(2, COLORS.green, 0.8); rb.strokeRoundedRect(W / 2 - 100, H / 2 + 88, 200, 54, 10);
-    this.add.text(W / 2, H / 2 + 115, 'RETRY', { fontFamily: 'monospace', fontSize: '18px', color: '#00ff88', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add.zone(W / 2 - 100, H / 2 + 88, 200, 54).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.restart());
+    rb.fillStyle(COLORS.red, 0.12); rb.fillRoundedRect(W / 2 - 100, H / 2 + 80, 200, 50, 10);
+    rb.lineStyle(1, COLORS.red, 0.5); rb.strokeRoundedRect(W / 2 - 100, H / 2 + 80, 200, 50, 10);
+    this.add.text(W / 2, H / 2 + 105, 'RETRY', { fontFamily: 'monospace', fontSize: '16px', color: '#ff3355' }).setOrigin(0.5);
+    this.add.zone(W / 2 - 100, H / 2 + 80, 200, 50).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.restart());
+    // Channels button
+    const cb = this.add.graphics();
+    cb.fillStyle(COLORS.green, 0.12); cb.fillRoundedRect(W / 2 - 100, H / 2 + 140, 200, 50, 10);
+    cb.lineStyle(1, COLORS.green, 0.5); cb.strokeRoundedRect(W / 2 - 100, H / 2 + 140, 200, 50, 10);
+    this.add.text(W / 2, H / 2 + 165, 'CHANNELS', { fontFamily: 'monospace', fontSize: '16px', color: '#00ff88' }).setOrigin(0.5);
+    this.add.zone(W / 2 - 100, H / 2 + 140, 200, 50).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('ChannelSelect'));
   }
 
   // ── Agent stat panel (tap card to open) ────────────────
@@ -663,7 +781,7 @@ class Battle extends Phaser.Scene {
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: Battle,
+  backgroundColor: '#050510', scene: [ChannelSelect, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });
