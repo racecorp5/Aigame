@@ -11,13 +11,78 @@ const STATE = { PLAYER: 'PLAYER', ANIM: 'ANIM', ENEMY: 'ENEMY', WIN: 'WIN', LOSE
 function hits(s) { return Math.random() * 100 < s; }
 function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
 
-const CHANNELS = [
-  { id: 1, label: 'CH 01', name: 'STATIC',    type: 'normal',   enemy: { name: 'STATIC BLOB',   hp: 120, maxHp: 120, aura: 15, stacks: 0 } },
-  { id: 2, label: 'CH 02', name: 'GHOST',      type: 'normal',   enemy: { name: 'GHOST SIGNAL',  hp: 160, maxHp: 160, aura: 20, stacks: 0 } },
-  { id: 3, label: 'CH 03', name: 'FLOOD',      type: 'normal',   enemy: { name: 'DATA FLOOD',    hp: 200, maxHp: 200, aura: 22, stacks: 0 } },
-  { id: 4, label: 'CH 04', name: 'JAMMER',     type: 'miniboss', enemy: { name: 'THE JAMMER',    hp: 300, maxHp: 300, aura: 25, stacks: 0 } },
-  { id: 5, label: 'CH 05', name: 'BROADCAST',  type: 'boss',     enemy: { name: 'THE BROADCAST', hp: 450, maxHp: 450, aura: 20, stacks: 0 } },
+// ── World map ─────────────────────────────────────────────
+const WORLDS = [
+  { id:'tv',       num:1,  abbr:'TV', device:'TV',         name:'STATIC WASTES',   tier:1, act:1, x:195, y:710, color:0x00ff88 },
+  { id:'phone',    num:2,  abbr:'PH', device:'PHONE',      name:'NOTIF STORM',     tier:1, act:1, x:315, y:630, color:0x44aaff },
+  { id:'speaker',  num:3,  abbr:'SP', device:'SPEAKER',    name:'ECHO CHAMBER',    tier:1, act:1, x:195, y:630, color:0x44aaff },
+  { id:'watch',    num:4,  abbr:'WA', device:'WATCH',      name:'PULSE GRID',      tier:1, act:1, x:75,  y:630, color:0x44aaff },
+  { id:'console',  num:5,  abbr:'CO', device:'CONSOLE',    name:'SAVE STATE',      tier:2, act:1, x:315, y:550, color:0xff8800 },
+  { id:'fridge',   num:6,  abbr:'FR', device:'FRIDGE',     name:'FROZEN SECTOR',   tier:2, act:2, x:75,  y:550, color:0xff8800 },
+  { id:'micro',    num:7,  abbr:'MW', device:'MICROWAVE',  name:'HEAT SPIRAL',     tier:2, act:2, x:195, y:550, color:0xff8800 },
+  { id:'printer',  num:8,  abbr:'PR', device:'PRINTER',    name:'PAPER CHAINS',    tier:2, act:2, x:315, y:470, color:0xaa44ff },
+  { id:'hub',      num:9,  abbr:'HB', device:'SMART HUB',  name:'COMMAND HUB',     tier:2, act:2, x:195, y:470, color:0xaa44ff },
+  { id:'seccam',   num:10, abbr:'SC', device:'SEC CAM',    name:'SURVEILLANCE',    tier:2, act:2, x:75,  y:470, color:0xaa44ff },
+  { id:'router',   num:11, abbr:'RO', device:'ROUTER',     name:'PACKET LOSS',     tier:3, act:3, x:315, y:390, color:0xff3355 },
+  { id:'computer', num:12, abbr:'PC', device:'COMPUTER',   name:'OVERFLOW',        tier:3, act:3, x:75,  y:390, color:0xff3355 },
+  { id:'car',      num:13, abbr:'CA', device:'SMART CAR',  name:'VELOCITY',        tier:3, act:3, x:315, y:310, color:0xff3355 },
+  { id:'atm',      num:14, abbr:'AT', device:'ATM',        name:'TRANSACTION TAX', tier:3, act:3, x:75,  y:310, color:0xff3355 },
+  { id:'grid',     num:15, abbr:'PG', device:'POWER GRID', name:'BLACKOUT ZONE',   tier:4, act:4, x:315, y:230, color:0xffcc00 },
+  { id:'medical',  num:16, abbr:'MD', device:'MEDICAL',    name:'VITAL LOOP',      tier:4, act:4, x:75,  y:230, color:0xffcc00 },
+  { id:'farm',     num:17, abbr:'SF', device:'SERVER FARM',name:'DISTRIBUTED',     tier:4, act:4, x:120, y:150, color:0xffcc00 },
+  { id:'satellite',num:18, abbr:'SA', device:'SATELLITE',  name:'SIGNAL DELAY',    tier:4, act:4, x:270, y:150, color:0xffcc00 },
+  { id:'cloud',    num:19, abbr:'CL', device:'CLOUD',      name:'THE CLOUD',       tier:5, act:4, x:195, y:70,  color:0xff3355 },
 ];
+
+const WORLD_EDGES = [
+  [1,2],[1,3],[1,4],[2,3],[3,4],
+  [2,5],[3,7],[4,6],[6,7],
+  [5,8],[7,9],[6,10],[8,9],[9,10],
+  [8,11],[10,12],[11,12],
+  [11,13],[12,14],[13,14],
+  [13,15],[14,16],
+  [16,17],[15,18],[17,18],
+  [17,19],[18,19],
+];
+
+const WORLD_UNLOCKS = {
+  tv:['phone','speaker','watch'], phone:['console'], speaker:['micro'],
+  watch:['fridge'], console:['printer'], fridge:['seccam'], micro:['hub'],
+  printer:['router'], hub:['router'], seccam:['computer'],
+  router:['car'], computer:['atm'], car:['grid'], atm:['medical'],
+  grid:['satellite'], medical:['farm'], farm:['cloud'], satellite:['cloud'],
+};
+
+const WORLD_CHANNELS = {
+  tv: [
+    { id:1, label:'CH 01', name:'STATIC',    type:'normal',   mechanic:'signal',  enemy:{name:'STATIC BLOB',   hp:120,maxHp:120,aura:15,stacks:0} },
+    { id:2, label:'CH 02', name:'GHOST',     type:'normal',   mechanic:'signal',  enemy:{name:'GHOST SIGNAL',  hp:160,maxHp:160,aura:20,stacks:0} },
+    { id:3, label:'CH 03', name:'FLOOD',     type:'normal',   mechanic:'signal',  enemy:{name:'DATA FLOOD',    hp:200,maxHp:200,aura:22,stacks:0} },
+    { id:4, label:'CH 04', name:'JAMMER',    type:'miniboss', mechanic:'signal',  enemy:{name:'THE JAMMER',    hp:300,maxHp:300,aura:25,stacks:0} },
+    { id:5, label:'CH 05', name:'BROADCAST', type:'boss',     mechanic:'signal',  enemy:{name:'THE BROADCAST', hp:450,maxHp:450,aura:20,stacks:0} },
+  ],
+  phone: [
+    { id:1, label:'CH 01', name:'APP GHOST',  type:'normal',   mechanic:'battery', enemy:{name:'APP GHOST',   hp:130,maxHp:130,aura:10,stacks:0} },
+    { id:2, label:'CH 02', name:'NOTIF BOMB', type:'normal',   mechanic:'battery', enemy:{name:'NOTIF BOMB',  hp:175,maxHp:175,aura:12,stacks:0} },
+    { id:3, label:'CH 03', name:'DATA LEECH', type:'normal',   mechanic:'battery', enemy:{name:'DATA LEECH',  hp:215,maxHp:215,aura:14,stacks:0} },
+    { id:4, label:'CH 04', name:'SPAM BOT',   type:'miniboss', mechanic:'battery', enemy:{name:'SPAM BOT',    hp:320,maxHp:320,aura:18,stacks:0} },
+    { id:5, label:'CH 05', name:'OS DAEMON',  type:'boss',     mechanic:'battery', enemy:{name:'OS DAEMON',   hp:480,maxHp:480,aura:15,stacks:0} },
+  ],
+  speaker: [
+    { id:1, label:'CH 01', name:'ECHO GHOST', type:'normal',   mechanic:'echo',    enemy:{name:'ECHO GHOST',  hp:125,maxHp:125,aura:12,stacks:0} },
+    { id:2, label:'CH 02', name:'FEEDBACK',   type:'normal',   mechanic:'echo',    enemy:{name:'FEEDBACK',    hp:165,maxHp:165,aura:15,stacks:0} },
+    { id:3, label:'CH 03', name:'RESONANCE',  type:'normal',   mechanic:'echo',    enemy:{name:'RESONANCE',   hp:205,maxHp:205,aura:18,stacks:0} },
+    { id:4, label:'CH 04', name:'REVERB BOT', type:'miniboss', mechanic:'echo',    enemy:{name:'REVERB BOT',  hp:310,maxHp:310,aura:20,stacks:0} },
+    { id:5, label:'CH 05', name:'THE CHORUS', type:'boss',     mechanic:'echo',    enemy:{name:'THE CHORUS',  hp:460,maxHp:460,aura:16,stacks:0} },
+  ],
+  watch: [
+    { id:1, label:'CH 01', name:'TICK VIRUS', type:'normal',   mechanic:'pulse',   enemy:{name:'TICK VIRUS',  hp:115,maxHp:115,aura:12,stacks:0} },
+    { id:2, label:'CH 02', name:'PULSE BOMB', type:'normal',   mechanic:'pulse',   enemy:{name:'PULSE BOMB',  hp:155,maxHp:155,aura:15,stacks:0} },
+    { id:3, label:'CH 03', name:'CHAIN TICK', type:'normal',   mechanic:'pulse',   enemy:{name:'CHAIN TICK',  hp:195,maxHp:195,aura:18,stacks:0} },
+    { id:4, label:'CH 04', name:'OVERCLOCKER',type:'miniboss', mechanic:'pulse',   enemy:{name:'OVERCLOCKER', hp:290,maxHp:290,aura:22,stacks:0} },
+    { id:5, label:'CH 05', name:'TIMEKEEPER', type:'boss',     mechanic:'pulse',   enemy:{name:'TIMEKEEPER',  hp:440,maxHp:440,aura:18,stacks:0} },
+  ],
+};
 
 const DEFS = [
   {
@@ -45,6 +110,112 @@ const DEFS = [
     ],
   },
 ];
+
+// ── World state helper ─────────────────────────────────────
+function worldState(worldId, save) {
+  if (!save.unlockedWorlds || !save.unlockedWorlds.includes(worldId)) return 'locked';
+  const ws = save.worlds && save.worlds[worldId];
+  if (!ws || !ws.cleared) return 'available';
+  return ws.cleared.every(c => c) ? 'cleared' : 'available';
+}
+
+// ============================================================
+class OverworldMap extends Phaser.Scene {
+  constructor() { super({ key: 'OverworldMap' }); }
+
+  create() {
+    this.save = loadSave();
+    this._bg();
+    this._header();
+    this._edges();
+    this._nodes();
+    this._footer();
+  }
+
+  _bg() {
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d1a, 0.6);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+    const s = this.add.graphics();
+    s.fillStyle(0x000000, 0.15);
+    for (let y = 0; y < H; y += 4) s.fillRect(0, y, W, 2);
+  }
+
+  _header() {
+    this.add.text(W / 2, 14, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '18px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5, 0);
+    this.add.text(W / 2, 38, '⚙ ' + this.save.cycles + '  CYCLES', { fontFamily: 'monospace', fontSize: '13px', color: '#ffcc00' }).setOrigin(0.5, 0);
+    const sbg = this.add.graphics();
+    sbg.fillStyle(0x00ff88, 0.12); sbg.fillRoundedRect(W - 84, 8, 76, 34, 6);
+    sbg.lineStyle(1, 0x00ff88, 0.5); sbg.strokeRoundedRect(W - 84, 8, 76, 34, 6);
+    this.add.text(W - 46, 25, 'SHOP', { fontFamily: 'monospace', fontSize: '13px', color: '#00ff88' }).setOrigin(0.5);
+    this.add.zone(W - 84, 8, 76, 34).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('Shop'));
+  }
+
+  _edges() {
+    const g = this.add.graphics();
+    const wm = Object.fromEntries(WORLDS.map(w => [w.num, w]));
+    WORLD_EDGES.forEach(([a, b]) => {
+      const wa = wm[a], wb = wm[b];
+      const sa = worldState(wa.id, this.save), sb = worldState(wb.id, this.save);
+      const active = sa !== 'locked' || sb !== 'locked';
+      g.lineStyle(active ? 1 : 1, active ? 0x1a2a3a : 0x0d0d1a, active ? 0.9 : 0.25);
+      g.lineBetween(wa.x, wa.y, wb.x, wb.y);
+      if (active) {
+        g.lineStyle(1, sa === 'cleared' ? wa.color : 0x1a3a4a, 0.3);
+        g.lineBetween(wa.x, wa.y, wb.x, wb.y);
+      }
+    });
+  }
+
+  _nodes() {
+    const r = 20;
+    WORLDS.forEach(w => {
+      const state = worldState(w.id, this.save);
+      const col = state === 'locked' ? 0x1a1a2e : w.color;
+      const hex = '#' + col.toString(16).padStart(6, '0');
+
+      const g = this.add.graphics();
+      if (state === 'cleared') {
+        g.fillStyle(col, 0.35); g.fillCircle(w.x, w.y, r);
+        g.lineStyle(2, col, 0.9); g.strokeCircle(w.x, w.y, r);
+      } else if (state === 'available') {
+        g.fillStyle(col, 0.15); g.fillCircle(w.x, w.y, r);
+        g.lineStyle(2, col, 0.8); g.strokeCircle(w.x, w.y, r);
+        this.tweens.add({ targets: g, alpha: 0.4, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      } else {
+        g.fillStyle(0x0a0a18, 1); g.fillCircle(w.x, w.y, r);
+        g.lineStyle(1, 0x1a1a2e, 0.4); g.strokeCircle(w.x, w.y, r);
+      }
+
+      const label = state === 'cleared' ? '✓' : w.abbr;
+      this.add.text(w.x, w.y - 1, label, { fontFamily: 'monospace', fontSize: '11px', color: state === 'locked' ? '#1a1a33' : hex, fontStyle: 'bold' }).setOrigin(0.5);
+      this.add.text(w.x, w.y + r + 5, w.device, { fontFamily: 'monospace', fontSize: '8px', color: state === 'locked' ? '#111122' : hex }).setOrigin(0.5, 0);
+
+      if (state !== 'locked') {
+        this.add.zone(w.x - r, w.y - r, r * 2, r * 2).setOrigin(0).setInteractive()
+          .on('pointerdown', () => this.scene.start('ChannelSelect', { worldId: w.id }));
+      }
+    });
+  }
+
+  _footer() {
+    const g = this.add.graphics();
+    g.fillStyle(0x050510, 0.95); g.fillRect(0, H - 42, W, 42);
+    g.lineStyle(1, 0x1a1a3a, 0.5); g.lineBetween(0, H - 42, W, H - 42);
+    const acts = [
+      { l: 'ACT 1', c: '#00ff88' }, { l: 'ACT 2', c: '#ff8800' },
+      { l: 'ACT 3', c: '#ff3355' }, { l: 'ACT 4', c: '#ffcc00' },
+    ];
+    acts.forEach((a, i) => {
+      const x = 12 + i * 96;
+      const dot = this.add.graphics();
+      dot.fillStyle(parseInt(a.c.replace('#', ''), 16), 0.6);
+      dot.fillCircle(x + 5, H - 21, 4);
+      this.add.text(x + 14, H - 21, a.l, { fontFamily: 'monospace', fontSize: '10px', color: a.c }).setOrigin(0, 0.5);
+    });
+  }
+}
 
 // ── Shared sprite draw (used by Shop + Battle) ─────────────
 function _drawSprite(g, id, ox, oy) {
@@ -285,9 +456,14 @@ class Shop extends Phaser.Scene {
 class ChannelSelect extends Phaser.Scene {
   constructor() { super({ key: 'ChannelSelect' }); }
 
+  init(data) { this.worldId = (data && data.worldId) ? data.worldId : 'tv'; }
+
   create() {
-    const save = loadSave();
-    const worldSave = save.worlds.tv || { cleared: [false,false,false,false,false] };
+    const save     = loadSave();
+    const world    = WORLDS.find(w => w.id === this.worldId) || WORLDS[0];
+    const channels = WORLD_CHANNELS[this.worldId] || WORLD_CHANNELS.tv;
+    const worldSave = save.worlds[this.worldId] || { cleared: [false,false,false,false,false] };
+    const wHex = '#' + world.color.toString(16).padStart(6, '0');
 
     const g = this.add.graphics();
     g.lineStyle(1, 0x0d0d2a, 0.7);
@@ -297,30 +473,43 @@ class ChannelSelect extends Phaser.Scene {
     s.fillStyle(0x000000, 0.2);
     for (let y = 0; y < H; y += 4) s.fillRect(0, y, W, 2);
 
-    this.add.text(W / 2, 36, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '20px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5);
-    this.add.text(W / 2, 64, '⚙ ' + save.cycles + ' CYCLES', { fontFamily: 'monospace', fontSize: '14px', color: '#ffcc00' }).setOrigin(0.5);
-    this.add.text(W / 2, 84, 'SELECT CHANNEL', { fontFamily: 'monospace', fontSize: '12px', color: '#444466' }).setOrigin(0.5);
+    this.add.text(W / 2, 22, world.device, { fontFamily: 'monospace', fontSize: '20px', color: wHex, fontStyle: 'bold', letterSpacing: 3 }).setOrigin(0.5);
+    this.add.text(W / 2, 48, world.name, { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }).setOrigin(0.5);
+    this.add.text(W / 2, 66, '⚙ ' + save.cycles + ' CYCLES', { fontFamily: 'monospace', fontSize: '12px', color: '#ffcc00' }).setOrigin(0.5);
+
+    // ← MAP button
+    const mapBg = this.add.graphics();
+    mapBg.fillStyle(0x222244, 1); mapBg.fillRoundedRect(8, 10, 68, 34, 6);
+    mapBg.lineStyle(1, COLORS.dim, 0.5); mapBg.strokeRoundedRect(8, 10, 68, 34, 6);
+    this.add.text(42, 27, '← MAP', { fontFamily: 'monospace', fontSize: '12px', color: '#444466' }).setOrigin(0.5);
+    this.add.zone(8, 10, 68, 34).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('OverworldMap'));
+
+    // SHOP button
+    const shopBg = this.add.graphics();
+    shopBg.fillStyle(0x00ff88, 0.12); shopBg.fillRoundedRect(W - 82, 10, 72, 34, 6);
+    shopBg.lineStyle(1, 0x00ff88, 0.5); shopBg.strokeRoundedRect(W - 82, 10, 72, 34, 6);
+    this.add.text(W - 46, 27, 'SHOP', { fontFamily: 'monospace', fontSize: '13px', color: '#00ff88' }).setOrigin(0.5);
+    this.add.zone(W - 82, 10, 72, 34).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('Shop'));
 
     const typeColor = { normal: '#444466', miniboss: '#ff8800', boss: '#ff3355' };
     const typeLabel = { normal: 'NORMAL', miniboss: 'MINI-BOSS', boss: 'BOSS' };
 
-    CHANNELS.forEach((ch, i) => {
-      const cleared  = worldSave.cleared[i];
-      const locked   = i > 0 && !worldSave.cleared[i - 1];
-      const cy = 108 + i * 144;
-      const col = locked ? 0x222233 : ch.type === 'boss' ? 0xff3355 : ch.type === 'miniboss' ? 0xff8800 : 0x444466;
+    channels.forEach((ch, i) => {
+      const cleared = worldSave.cleared[i];
+      const locked  = i > 0 && !worldSave.cleared[i - 1];
+      const cy = 96 + i * 144;
+      const col = locked ? 0x222233 : ch.type === 'boss' ? 0xff3355 : ch.type === 'miniboss' ? 0xff8800 : world.color;
 
       const bg = this.add.graphics();
       bg.fillStyle(col, locked ? 0.04 : 0.08); bg.fillRoundedRect(20, cy, W - 40, 126, 8);
       bg.lineStyle(1, col, locked ? 0.2 : 0.4); bg.strokeRoundedRect(20, cy, W - 40, 126, 8);
 
-      const nameCol = locked ? '#333344' : '#ffffff';
       this.add.text(30, cy + 12, ch.label + (cleared ? '  ✓' : ''), { fontFamily: 'monospace', fontSize: '13px', color: locked ? '#222233' : typeColor[ch.type] });
-      this.add.text(30, cy + 30, ch.name, { fontFamily: 'monospace', fontSize: '26px', color: nameCol, fontStyle: 'bold' });
+      this.add.text(30, cy + 30, ch.name, { fontFamily: 'monospace', fontSize: '26px', color: locked ? '#333344' : '#ffffff', fontStyle: 'bold' });
       this.add.text(30, cy + 64, ch.enemy.name, { fontFamily: 'monospace', fontSize: '14px', color: locked ? '#222233' : '#888899' });
       this.add.text(30, cy + 84, locked ? '🔒 LOCKED' : `HP ${ch.enemy.hp}  ·  AURA −${ch.enemy.aura}%`, { fontFamily: 'monospace', fontSize: '12px', color: locked ? '#333344' : '#444455' });
 
-      const rewards = calcRewards(ch.type, 1, 3);
+      const rewards = calcRewards(ch.type, world.tier, 3);
       this.add.text(30, cy + 104, locked ? '' : `⚙ ${rewards.cycles}  ·  ${rewards.xp} XP`, { fontFamily: 'monospace', fontSize: '11px', color: '#333355' });
       this.add.text(W - 32, cy + 12, typeLabel[ch.type], { fontFamily: 'monospace', fontSize: '12px', color: locked ? '#222233' : typeColor[ch.type] }).setOrigin(1, 0);
 
@@ -328,18 +517,9 @@ class ChannelSelect extends Phaser.Scene {
         const zone = this.add.zone(20, cy, W - 40, 126).setOrigin(0).setInteractive();
         zone.on('pointerover', () => { bg.clear(); bg.fillStyle(col, 0.18); bg.fillRoundedRect(20, cy, W - 40, 126, 8); bg.lineStyle(2, col, 0.8); bg.strokeRoundedRect(20, cy, W - 40, 126, 8); });
         zone.on('pointerout',  () => { bg.clear(); bg.fillStyle(col, 0.08); bg.fillRoundedRect(20, cy, W - 40, 126, 8); bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(20, cy, W - 40, 126, 8); });
-        zone.on('pointerdown', () => this.scene.start('Battle', { channel: ch, channelIdx: i }));
+        zone.on('pointerdown', () => this.scene.start('Battle', { channel: ch, channelIdx: i, worldId: this.worldId }));
       }
     });
-
-    this.add.text(W / 2, H - 24, 'TAP A CHANNEL TO DEPLOY', { fontFamily: 'monospace', fontSize: '12px', color: '#222244' }).setOrigin(0.5);
-
-    // SHOP button — top right
-    const shopBg = this.add.graphics();
-    shopBg.fillStyle(0x00ff88, 0.12); shopBg.fillRoundedRect(W - 86, 10, 76, 34, 6);
-    shopBg.lineStyle(1, 0x00ff88, 0.5); shopBg.strokeRoundedRect(W - 86, 10, 76, 34, 6);
-    this.add.text(W - 48, 27, '🛒 SHOP', { fontFamily: 'monospace', fontSize: '12px', color: '#00ff88' }).setOrigin(0.5);
-    this.add.zone(W - 86, 10, 76, 34).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('Shop'));
   }
 }
 
@@ -348,9 +528,13 @@ class Battle extends Phaser.Scene {
   constructor() { super({ key: 'Battle' }); }
 
   init(data) {
-    const ch = (data && data.channel) ? data.channel : CHANNELS[0];
+    this.worldId    = (data && data.worldId) ? data.worldId : 'tv';
+    const channels  = WORLD_CHANNELS[this.worldId] || WORLD_CHANNELS.tv;
+    const ch        = (data && data.channel) ? data.channel : channels[0];
     this.channel    = ch;
     this.channelIdx = (data && data.channelIdx != null) ? data.channelIdx : 0;
+    this.mechanic   = ch.mechanic || 'signal';
+    this.autoMs     = this.mechanic === 'pulse' ? 3000 : AUTO_MS;
     this.save       = loadSave();
 
     this.agents = DEFS
@@ -390,14 +574,20 @@ class Battle extends Phaser.Scene {
     this._timerUI();
     this._cardUI();
     this._btnUI();
-    this.log('⚡ TV-01 accessed. Squad deployed.');
-    this.log('⚠️  Static Blob detected. Signal disrupted.');
+    const mechMsg = {
+      signal:  '⚠️  Static aura active. Signal disrupted.',
+      battery: '🔋 Battery draining. Energy recharge halved.',
+      echo:    '🔊 Echo chamber! Attacks may bounce to allies.',
+      pulse:   '⏱️  Pulse grid. 3s auto-act timer active.',
+    };
+    this.log(`⚡ ${this.channel.enemy.name} detected. Squad deployed.`);
+    this.log(mechMsg[this.mechanic] || '');
     this._startTurn();
   }
 
   update(t) {
     if (this.state !== STATE.PLAYER) return;
-    const ratio = Math.max(0, 1 - (t - this.tStart) / AUTO_MS);
+    const ratio = Math.max(0, 1 - (t - this.tStart) / this.autoMs);
     const bw = W - 60;
     this.timerFill.clear();
     const col = ratio > 0.5 ? COLORS.green : ratio > 0.25 ? COLORS.yellow : COLORS.red;
@@ -692,6 +882,13 @@ class Battle extends Phaser.Scene {
         this.log(`> ${ag.name}: ${id.toUpperCase()} → −${dmg}`);
         this._flashE();
         this.lastAction = { id, agentIdx: this.activeIdx };
+        if (this.mechanic === 'echo' && Math.random() < 0.3) {
+          const alive = this.agents.filter(a => a.hp > 0);
+          const tgt = alive[Math.floor(Math.random() * alive.length)];
+          const bd = Math.ceil(dmg * 0.4);
+          tgt.hp = Math.max(0, tgt.hp - bd);
+          this.log(`> ↩ ECHO BOUNCE → ${tgt.name} −${bd}`);
+        }
       }
 
     } else if (id === 'overclock') {
@@ -763,7 +960,8 @@ class Battle extends Phaser.Scene {
       this._reAll();
       if (this.agents.every(a => a.hp <= 0)) { this._end(false); return; }
       this.round++;
-      this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + 5); });
+      const enRegen = this.mechanic === 'battery' ? 2 : 5;
+      this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen); });
       this.acted = new Set();
       this.activeIdx = 0;
       while (this.agents[this.activeIdx].hp <= 0) this.activeIdx = (this.activeIdx + 1) % this.agents.length;
@@ -868,14 +1066,23 @@ class Battle extends Phaser.Scene {
     this._btns(false);
     this.timerFill.clear();
 
-    const save = this.save;
-    const ch   = this.channel;
-    const tier = 1; // TV world tier; expand when worlds are added
+    const save    = this.save;
+    const ch      = this.channel;
+    const wDef    = WORLDS.find(w => w.id === this.worldId) || WORLDS[0];
+    const tier    = wDef.tier;
 
     if (win) {
       // Mark channel cleared
-      if (!save.worlds.tv) save.worlds.tv = { cleared: [false,false,false,false,false] };
-      save.worlds.tv.cleared[this.channelIdx] = true;
+      if (!save.worlds[this.worldId]) save.worlds[this.worldId] = { cleared: [false,false,false,false,false] };
+      save.worlds[this.worldId].cleared[this.channelIdx] = true;
+      // Unlock adjacent worlds if this world is now fully cleared
+      if (save.worlds[this.worldId].cleared.every(c => c)) {
+        const unlocks = WORLD_UNLOCKS[this.worldId] || [];
+        unlocks.forEach(uid => {
+          if (!save.unlockedWorlds.includes(uid)) save.unlockedWorlds.push(uid);
+          if (!save.worlds[uid]) save.worlds[uid] = { cleared: [false,false,false,false,false] };
+        });
+      }
 
       // Award cycles
       const aliveCount = this.agents.filter(a => a.hp > 0).length;
@@ -935,8 +1142,14 @@ class Battle extends Phaser.Scene {
       this.add.text(W/2, by+26, label, { fontFamily:'monospace', fontSize:'16px', color:'#'+col.toString(16).padStart(6,'0') }).setOrigin(0.5);
       this.add.zone(W/2-110, by, 220, 52).setOrigin(0).setInteractive().on('pointerdown', cb);
     };
-    btn('NEXT CHANNEL', 0x00ff88, y,    () => this.scene.start('Battle', { channel: CHANNELS[Math.min(this.channelIdx+1, 4)], channelIdx: Math.min(this.channelIdx+1, 4) }));
-    btn('CHANNELS',     0x444466, y+62, () => this.scene.start('ChannelSelect'));
+    const channels = WORLD_CHANNELS[this.worldId] || WORLD_CHANNELS.tv;
+    const nextIdx  = Math.min(this.channelIdx + 1, channels.length - 1);
+    if (this.channelIdx < channels.length - 1) {
+      btn('NEXT CHANNEL', 0x00ff88, y, () => this.scene.start('Battle', { channel: channels[nextIdx], channelIdx: nextIdx, worldId: this.worldId }));
+      btn('← MAP', 0x444466, y + 62, () => this.scene.start('OverworldMap'));
+    } else {
+      btn('← WORLD MAP', 0x00ff88, y, () => this.scene.start('OverworldMap'));
+    }
   }
 
   _showLoseScreen(cost, save) {
@@ -971,8 +1184,8 @@ class Battle extends Phaser.Scene {
     const g2 = this.add.graphics();
     g2.fillStyle(0xff3355, 0.12); g2.fillRoundedRect(W/2-110, 428, 220, 52, 10);
     g2.lineStyle(1, 0xff3355, 0.5); g2.strokeRoundedRect(W/2-110, 428, 220, 52, 10);
-    this.add.text(W/2, 454, 'CHANNELS', { fontFamily:'monospace', fontSize:'16px', color:'#ff3355' }).setOrigin(0.5);
-    this.add.zone(W/2-110, 428, 220, 52).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('ChannelSelect'));
+    this.add.text(W/2, 454, '← MAP', { fontFamily:'monospace', fontSize:'16px', color:'#ff3355' }).setOrigin(0.5);
+    this.add.zone(W/2-110, 428, 220, 52).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('OverworldMap'));
   }
 
   // ── Agent stat panel (tap card to open) ────────────────
@@ -1134,7 +1347,7 @@ class Battle extends Phaser.Scene {
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: [ChannelSelect, Shop, Battle],
+  backgroundColor: '#050510', scene: [OverworldMap, ChannelSelect, Shop, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });
