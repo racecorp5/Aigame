@@ -46,6 +46,241 @@ const DEFS = [
   },
 ];
 
+// ── Shared sprite draw (used by Shop + Battle) ─────────────
+function _drawSprite(g, id, ox, oy) {
+  const s = 2;
+  const p = (x, y, w, h, col, a = 1) => { g.fillStyle(col, a); g.fillRect(ox + x*s, oy + y*s, w*s, h*s); };
+  if (id === 'threadling') {
+    const [c1,c2,c3]=[0x00ff88,0x003322,0x00ffcc];
+    p(10,0,1,2,c3);p(9,1,3,1,c3);p(7,2,8,6,c1);p(8,3,6,1,c2);p(8,4,6,2,c3,0.8);p(8,5,6,1,c2);
+    p(10,8,2,2,c1,0.7);p(4,9,3,2,c1,0.9);p(15,9,3,2,c1,0.9);p(7,10,8,9,c1,0.75);
+    p(9,11,4,4,c2,0.8);p(10,12,2,2,c3,0.9);p(4,10,3,7,c1,0.7);p(2,15,3,2,c1);
+    p(1,14,1,4,c3,0.5);p(15,10,3,7,c1,0.7);p(8,19,6,2,c2,0.9);
+    p(8,21,3,9,c1,0.8);p(13,21,3,9,c1,0.8);p(7,29,5,3,c1);p(13,29,5,3,c1);p(6,31,2,1,c2);p(16,31,2,1,c2);
+  } else if (id === 'patchwork') {
+    const [c1,c2,c3]=[0xaa44ff,0x4411aa,0xee88ff];
+    p(10,0,2,1,c1);p(9,1,4,1,c1);p(8,2,6,2,c1);p(7,4,8,4,c1);p(8,4,6,4,c2,0.5);
+    p(9,6,2,1,c3,0.8);p(11,6,2,1,c3,0.8);p(5,8,12,2,c1,0.85);p(6,10,10,2,c1,0.8);
+    p(5,12,12,2,c1,0.75);p(4,14,14,2,c1,0.7);p(4,16,14,2,c1,0.65);p(3,18,16,3,c1,0.6);
+    p(2,21,18,3,c2,0.65);p(1,24,20,3,c2,0.5);p(0,27,22,4,c2,0.35);
+    p(8,10,1,7,c3,0.3);p(11,11,1,6,c3,0.25);p(4,10,2,5,c1,0.7);p(16,10,2,5,c1,0.7);
+    p(3,14,3,2,c3,0.5);p(16,14,3,2,c3,0.5);p(0,11,2,1,c3,0.4);p(20,9,2,1,c3,0.4);
+  } else if (id === 'vault') {
+    const [c1,c2,c3]=[0xffcc00,0x886600,0xffee88];
+    p(6,0,10,7,c1,0.95);p(7,2,8,3,c2,0.85);p(8,3,6,2,c3,0.5);p(6,0,2,4,c2,0.5);p(14,0,2,4,c2,0.5);
+    p(8,7,6,2,c1,0.8);p(2,8,5,5,c1,0.9);p(15,8,5,5,c1,0.9);p(1,9,2,4,c2,0.75);p(19,9,2,4,c2,0.75);
+    p(5,9,12,10,c1,0.85);p(6,10,10,7,c2,0.35);p(9,11,4,3,c3,0.3);p(10,12,2,2,c3,0.9);
+    p(2,13,4,6,c1,0.8);p(16,13,4,6,c1,0.8);p(2,17,5,2,c2,0.9);p(15,17,5,2,c2,0.9);
+    p(5,19,12,2,c2,0.9);p(10,19,2,2,c3,0.8);p(5,21,5,9,c1,0.85);p(12,21,5,9,c1,0.85);
+    p(4,29,7,3,c2,0.9);p(11,29,7,3,c2,0.9);p(3,31,4,1,c1,0.5);p(15,31,4,1,c1,0.5);
+  }
+}
+
+// ============================================================
+class Shop extends Phaser.Scene {
+  constructor() { super({ key: 'Shop' }); }
+
+  create() {
+    this.save = loadSave();
+    this.tab  = 'agents';
+    this.content = null;
+    this._bg();
+    this._header();
+    this._tabs();
+    this._renderTab();
+    // back button
+    const bbg = this.add.graphics();
+    bbg.fillStyle(0x111122, 1); bbg.fillRect(0, H - 54, W, 54);
+    bbg.lineStyle(1, COLORS.dim, 0.4); bbg.lineBetween(0, H - 54, W, H - 54);
+    this.add.text(W / 2, H - 27, '← BACK TO CHANNELS', { fontFamily: 'monospace', fontSize: '14px', color: '#444466' }).setOrigin(0.5);
+    this.add.zone(0, H - 54, W, 54).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('ChannelSelect'));
+  }
+
+  _bg() {
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d2a, 0.7);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+  }
+
+  _header() {
+    this.add.text(W / 2, 18, 'SHOP', { fontFamily: 'monospace', fontSize: '22px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5, 0);
+    this.cyclesTxt = this.add.text(W / 2, 48, '', { fontFamily: 'monospace', fontSize: '15px', color: '#ffcc00' }).setOrigin(0.5, 0);
+    this._refreshCycles();
+  }
+
+  _refreshCycles() {
+    this.cyclesTxt.setText(`⚙ ${this.save.cycles} CYCLES`);
+  }
+
+  _tabs() {
+    const tabs = ['agents', 'weapons', 'armor'];
+    const labels = ['AGENTS', 'WEAPONS', 'ARMOR'];
+    this.tabBgs = {};
+    tabs.forEach((t, i) => {
+      const tx = 10 + i * ((W - 20) / 3), tw = (W - 20) / 3 - 4;
+      const bg = this.add.graphics();
+      this.tabBgs[t] = bg;
+      this._drawTab(bg, tx, 76, tw, t);
+      this.add.text(tx + tw / 2, 90, labels[i], { fontFamily: 'monospace', fontSize: '13px', color: '#aaaacc' }).setOrigin(0.5);
+      this.add.zone(tx, 76, tw, 30).setOrigin(0).setInteractive().on('pointerdown', () => {
+        this.tab = t;
+        tabs.forEach(tt => this._drawTab(this.tabBgs[tt], 10 + tabs.indexOf(tt) * ((W-20)/3), 76, (W-20)/3-4, tt));
+        this._renderTab();
+      });
+    });
+  }
+
+  _drawTab(g, x, y, w, t) {
+    const active = t === this.tab;
+    g.clear();
+    g.fillStyle(active ? 0x00ff88 : 0x111122, active ? 0.15 : 1);
+    g.fillRoundedRect(x, y, w, 28, 4);
+    g.lineStyle(1, active ? 0x00ff88 : COLORS.dim, active ? 0.7 : 0.3);
+    g.strokeRoundedRect(x, y, w, 28, 4);
+  }
+
+  _renderTab() {
+    if (this.content) { this.content.destroy(true); this.content = null; }
+    this.content = this.add.group();
+    if (this.tab === 'agents')  this._renderAgents();
+    if (this.tab === 'weapons') this._renderGear(WEAPONS, 'weapon');
+    if (this.tab === 'armor')   this._renderGear(ARMORS,  'armor');
+  }
+
+  _renderAgents() {
+    const startY = 116;
+    DEFS.forEach((def, i) => {
+      const saved = this.save.agents.find(a => a.id === def.id);
+      const owned = saved.owned;
+      const cost  = AGENT_COSTS[def.id];
+      const hex   = '#' + def.color.toString(16).padStart(6, '0');
+      const cy    = startY + i * 188;
+      const col   = owned ? def.color : 0x333344;
+
+      const bg = this.add.graphics();
+      bg.fillStyle(col, 0.08); bg.fillRoundedRect(16, cy, W - 32, 176, 8);
+      bg.lineStyle(1, col, owned ? 0.5 : 0.2); bg.strokeRoundedRect(16, cy, W - 32, 176, 8);
+      this.content.add(bg);
+
+      // sprite
+      const sp = this.add.graphics();
+      this._sprite(sp, def.id, 30, cy + 10);
+      this.content.add(sp);
+
+      // name + class + level
+      const level = saved.level;
+      this.content.add(this.add.text(108, cy + 14, def.name, { fontFamily: 'monospace', fontSize: '18px', color: owned ? hex : '#333355', fontStyle: 'bold' }));
+      this.content.add(this.add.text(108, cy + 36, def.cls, { fontFamily: 'monospace', fontSize: '12px', color: '#444466' }));
+      this.content.add(this.add.text(108, cy + 54, owned ? `Lv ${level}  ·  ${saved.xp} XP` : `Cost: ${cost} ⚙`, { fontFamily: 'monospace', fontSize: '13px', color: owned ? '#888899' : '#ffcc00' }));
+
+      const eq = this.save.gear.equipped[def.id];
+      const wName = eq.weapon ? WEAPONS.find(w => w.id === eq.weapon)?.name : 'none';
+      const aName = eq.armor  ? ARMORS.find(a => a.id === eq.armor)?.name  : 'none';
+      if (owned) {
+        this.content.add(this.add.text(108, cy + 74, `⚔ ${wName}`, { fontFamily: 'monospace', fontSize: '11px', color: '#556655' }));
+        this.content.add(this.add.text(108, cy + 90, `🛡 ${aName}`, { fontFamily: 'monospace', fontSize: '11px', color: '#556655' }));
+      }
+
+      if (!owned) {
+        this._btn(W / 2, cy + 136, 'BUY  ' + cost + ' ⚙', 0xffcc00, () => {
+          if (this.save.cycles < cost) return;
+          this.save.cycles -= cost;
+          saved.owned = true; saved.active = true;
+          const stats = statsForLevel(def.id, saved.level);
+          saved.hp = stats.maxHp;
+          writeSave(this.save);
+          this._refreshCycles(); this._renderTab();
+        });
+      } else {
+        const activeCount = this.save.agents.filter(a => a.owned && a.active).length;
+        const isActive = saved.active;
+        this._btn(W / 2 - 66, cy + 136, isActive ? 'ACTIVE ✓' : 'SET ACTIVE', isActive ? 0x00ff88 : 0x444466, () => {
+          if (isActive && activeCount <= 1) return; // keep at least 1
+          saved.active = !saved.active;
+          writeSave(this.save); this._renderTab();
+        });
+        this._btn(W / 2 + 66, cy + 136, 'HEAL  10⚙', 0x44aaff, () => {
+          const stats = effectiveStats(def.id, saved.level, this.save);
+          if (saved.hp >= stats.maxHp || this.save.cycles < 10) return;
+          this.save.cycles -= 10;
+          saved.hp = Math.min(stats.maxHp, saved.hp + 30);
+          writeSave(this.save); this._refreshCycles(); this._renderTab();
+        });
+      }
+    });
+  }
+
+  _renderGear(catalog, type) {
+    const owned  = type === 'weapon' ? this.save.gear.ownedWeapons : this.save.gear.ownedArmors;
+    const startY = 116;
+    catalog.forEach((item, i) => {
+      const isOwned = owned.includes(item.id);
+      const cy = startY + i * 156;
+      const col = isOwned ? 0x00ff88 : 0x333344;
+
+      const bg = this.add.graphics();
+      bg.fillStyle(col, 0.07); bg.fillRoundedRect(16, cy, W - 32, 144, 8);
+      bg.lineStyle(1, col, isOwned ? 0.4 : 0.2); bg.strokeRoundedRect(16, cy, W - 32, 144, 8);
+      this.content.add(bg);
+
+      this.content.add(this.add.text(28, cy + 12, item.name, { fontFamily: 'monospace', fontSize: '17px', color: isOwned ? '#00ff88' : '#888899', fontStyle: 'bold' }));
+      this.content.add(this.add.text(28, cy + 34, item.desc, { fontFamily: 'monospace', fontSize: '13px', color: '#555577' }));
+
+      if (!isOwned) {
+        this._btn(W / 2, cy + 94, `BUY  ${item.cost} ⚙`, 0xffcc00, () => {
+          if (this.save.cycles < item.cost) return;
+          this.save.cycles -= item.cost;
+          owned.push(item.id);
+          writeSave(this.save); this._refreshCycles(); this._renderTab();
+        });
+      } else {
+        // equip buttons — one per owned agent
+        const owned_agents = this.save.agents.filter(a => a.owned);
+        let bx = 28;
+        owned_agents.forEach(ag => {
+          const equipped = this.save.gear.equipped[ag.id][type];
+          const isEq = equipped === item.id;
+          const agDef = DEFS.find(d => d.id === ag.id);
+          const bcol = isEq ? agDef.color : 0x333344;
+          const gbtn = this.add.graphics();
+          gbtn.fillStyle(bcol, isEq ? 0.3 : 0.1);
+          gbtn.fillRoundedRect(bx, cy + 78, 80, 38, 6);
+          gbtn.lineStyle(1, bcol, isEq ? 0.8 : 0.3);
+          gbtn.strokeRoundedRect(bx, cy + 78, 80, 38, 6);
+          this.content.add(gbtn);
+          const short = ag.id === 'threadling' ? 'THREAD' : ag.id === 'patchwork' ? 'PATCH' : 'VAULT';
+          this.content.add(this.add.text(bx + 40, cy + 97, isEq ? short + ' ✓' : short, { fontFamily: 'monospace', fontSize: '11px', color: isEq ? '#' + agDef.color.toString(16).padStart(6,'0') : '#555566' }).setOrigin(0.5));
+          const z = this.add.zone(bx, cy + 78, 80, 38).setOrigin(0).setInteractive();
+          z.on('pointerdown', () => {
+            this.save.gear.equipped[ag.id][type] = isEq ? null : item.id;
+            writeSave(this.save); this._renderTab();
+          });
+          this.content.add(z);
+          bx += 90;
+        });
+      }
+    });
+  }
+
+  _btn(cx, cy, label, col, cb) {
+    const bw = 160, bh = 36;
+    const g = this.add.graphics();
+    g.fillStyle(col, 0.15); g.fillRoundedRect(cx - bw/2, cy - bh/2, bw, bh, 6);
+    g.lineStyle(1, col, 0.6); g.strokeRoundedRect(cx - bw/2, cy - bh/2, bw, bh, 6);
+    this.content.add(g);
+    const t = this.add.text(cx, cy, label, { fontFamily: 'monospace', fontSize: '13px', color: '#' + col.toString(16).padStart(6,'0') }).setOrigin(0.5);
+    this.content.add(t);
+    const z = this.add.zone(cx - bw/2, cy - bh/2, bw, bh).setOrigin(0).setInteractive().on('pointerdown', cb);
+    this.content.add(z);
+  }
+
+  _sprite(g, id, ox, oy) {
+    // reuse same sprite logic — delegate to a shared function
+    _drawSprite(g, id, ox, oy);
+  }
+}
+
 // ============================================================
 class ChannelSelect extends Phaser.Scene {
   constructor() { super({ key: 'ChannelSelect' }); }
@@ -98,6 +333,13 @@ class ChannelSelect extends Phaser.Scene {
     });
 
     this.add.text(W / 2, H - 24, 'TAP A CHANNEL TO DEPLOY', { fontFamily: 'monospace', fontSize: '12px', color: '#222244' }).setOrigin(0.5);
+
+    // SHOP button — top right
+    const shopBg = this.add.graphics();
+    shopBg.fillStyle(0x00ff88, 0.12); shopBg.fillRoundedRect(W - 86, 10, 76, 34, 6);
+    shopBg.lineStyle(1, 0x00ff88, 0.5); shopBg.strokeRoundedRect(W - 86, 10, 76, 34, 6);
+    this.add.text(W - 48, 27, '🛒 SHOP', { fontFamily: 'monospace', fontSize: '12px', color: '#00ff88' }).setOrigin(0.5);
+    this.add.zone(W - 86, 10, 76, 34).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('Shop'));
   }
 }
 
@@ -112,14 +354,15 @@ class Battle extends Phaser.Scene {
     this.save       = loadSave();
 
     this.agents = DEFS.map(d => {
-      const saved  = this.save.agents.find(a => a.id === d.id);
-      const level  = saved ? saved.level : 1;
-      const stats  = statsForLevel(d.id, level);
+      const saved   = this.save.agents.find(a => a.id === d.id);
+      const owned   = saved ? saved.owned : false;
+      const level   = saved ? saved.level : 1;
+      const stats   = effectiveStats(d.id, level, this.save);
       const savedHp = saved ? saved.hp : stats.maxHp;
       return {
         ...d,
         ...stats,
-        hp: Math.min(savedHp, stats.maxHp),
+        hp: owned ? Math.min(savedHp, stats.maxHp) : 0,
         en: stats.maxEn,
         level,
         xp: saved ? saved.xp : 0,
@@ -441,7 +684,7 @@ class Battle extends Phaser.Scene {
       if (!hits(sig + bonus) || phantom) {
         this.log(`> ${ag.name}: ${id.toUpperCase()} [${phantom ? 'PHANTOM' : 'MISS'}]`);
       } else {
-        const dmg = rnd(10, 18);
+        const dmg = rnd(10, 18) + (ag.dmgBonus || 0);
         this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
         this.log(`> ${ag.name}: ${id.toUpperCase()} → −${dmg}`);
         this._flashE();
@@ -455,7 +698,7 @@ class Battle extends Phaser.Scene {
         ag.hp = Math.max(0, ag.hp - 5);
         this.log(`> ${ag.name}: OVERCLOCK [MISS] bleed −5`);
       } else {
-        const dmg = rnd(26, 36);
+        const dmg = rnd(26, 36) + (ag.dmgBonus || 0);
         this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
         ag.hp = Math.max(0, ag.hp - 10);
         this.log(`> ${ag.name}: OVERCLOCK → −${dmg} · self −10`);
@@ -640,11 +883,14 @@ class Battle extends Phaser.Scene {
       const levelUps = [];
       this.agents.forEach(ag => {
         const savedAg = save.agents.find(a => a.id === ag.id);
-        if (!savedAg) return;
+        if (!savedAg || !savedAg.owned) return;
         const result = awardXp(savedAg, rewards.xp);
         if (result.leveledUp) levelUps.push({ name: ag.name, from: result.oldLevel, to: result.newLevel });
-        // Save current HP (carry damage)
+        // Save current HP (carry damage), then apply armor recovery
         savedAg.hp = ag.hp;
+        if (ag.hp > 0 && ag.recovery) {
+          savedAg.hp = Math.min(ag.maxHp, savedAg.hp + ag.recovery);
+        }
       });
 
       writeSave(save);
@@ -710,7 +956,8 @@ class Battle extends Phaser.Scene {
       this.add.zone(W/2-110, 360, 220, 52).setOrigin(0).setInteractive().on('pointerdown', () => {
         save.cycles -= cost;
         save.agents.forEach(ag => {
-          const stats = statsForLevel(ag.id, ag.level);
+          if (!ag.owned) return;
+          const stats = effectiveStats(ag.id, ag.level, save);
           ag.hp = stats.maxHp;
         });
         writeSave(save);
@@ -884,7 +1131,7 @@ class Battle extends Phaser.Scene {
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: [ChannelSelect, Battle],
+  backgroundColor: '#050510', scene: [ChannelSelect, Shop, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });
