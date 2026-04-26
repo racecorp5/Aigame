@@ -124,6 +124,72 @@ const WORLD_CHANNELS = {
     { id:4, label:'CH 04', name:'INTRUDER',   type:'miniboss', mechanic:'predict', enemy:{name:'INTRUDER',  hp:298,maxHp:298,aura:20,stacks:0} },
     { id:5, label:'CH 05', name:'THE EYE',    type:'boss',     mechanic:'predict', enemy:{name:'THE EYE',   hp:420,maxHp:420,aura:22,stacks:0} },
   ],
+  // ── Act 3 ─────────────────────────────────────────────────
+  router: [
+    { id:1, label:'CH 01', name:'WORM',       type:'normal',   mechanic:'packetloss', enemy:{name:'PACKET WORM',    hp:200,maxHp:200,aura:12,stacks:0} },
+    { id:2, label:'CH 02', name:'ERROR',      type:'normal',   mechanic:'packetloss', enemy:{name:'ROUTE ERROR',    hp:270,maxHp:270,aura:15,stacks:0} },
+    { id:3, label:'CH 03', name:'NAT OVER',   type:'normal',   mechanic:'packetloss', enemy:{name:'NAT OVERFLOW',   hp:340,maxHp:340,aura:18,stacks:0} },
+    { id:4, label:'CH 04', name:'DAEMON',     type:'miniboss', mechanic:'packetloss', enemy:{name:'GATEWAY DAEMON', hp:460,maxHp:460,aura:22,stacks:0} },
+    { id:5, label:'CH 05', name:'BACKBONE',   type:'boss',     mechanic:'packetloss', enemy:{name:'THE BACKBONE',   hp:620,maxHp:620,aura:20,stacks:0} },
+  ],
+  computer: [
+    { id:1, label:'CH 01', name:'PROCESS',    type:'normal',   mechanic:'overflow', enemy:{name:'PROC GHOST',      hp:210,maxHp:210,aura:13,stacks:0} },
+    { id:2, label:'CH 02', name:'MEM LEAK',   type:'normal',   mechanic:'overflow', enemy:{name:'MEMORY LEAK',     hp:280,maxHp:280,aura:16,stacks:0} },
+    { id:3, label:'CH 03', name:'STACK OVR',  type:'normal',   mechanic:'overflow', enemy:{name:'STACK OVERFLOW',  hp:350,maxHp:350,aura:19,stacks:0} },
+    { id:4, label:'CH 04', name:'KERNEL',     type:'miniboss', mechanic:'overflow', enemy:{name:'KERNEL PANIC',    hp:470,maxHp:470,aura:23,stacks:0} },
+    { id:5, label:'CH 05', name:'THE BIOS',   type:'boss',     mechanic:'overflow', enemy:{name:'THE BIOS',        hp:640,maxHp:640,aura:21,stacks:0} },
+  ],
+  car: [
+    { id:1, label:'CH 01', name:'SPEEDER',    type:'normal',   mechanic:'velocity', enemy:{name:'SPEED DAEMON',    hp:195,maxHp:195,aura:12,stacks:0} },
+    { id:2, label:'CH 02', name:'CRASH',      type:'normal',   mechanic:'velocity', enemy:{name:'CRASH HANDLER',   hp:265,maxHp:265,aura:15,stacks:0} },
+    { id:3, label:'CH 03', name:'TURBO',      type:'normal',   mechanic:'velocity', enemy:{name:'TURBO VIRUS',     hp:335,maxHp:335,aura:18,stacks:0} },
+    { id:4, label:'CH 04', name:'OVERRIDE',   type:'miniboss', mechanic:'velocity', enemy:{name:'OVERRIDE',        hp:450,maxHp:450,aura:22,stacks:0} },
+    { id:5, label:'CH 05', name:'AUTOPILOT',  type:'boss',     mechanic:'velocity', enemy:{name:'AUTOPILOT',       hp:610,maxHp:610,aura:20,stacks:0} },
+  ],
+  atm: [
+    { id:1, label:'CH 01', name:'SKIMMER',    type:'normal',   mechanic:'transaction', enemy:{name:'SKIMMER',       hp:205,maxHp:205,aura:13,stacks:0} },
+    { id:2, label:'CH 02', name:'FRAUD',      type:'normal',   mechanic:'transaction', enemy:{name:'FRAUD BOT',     hp:275,maxHp:275,aura:16,stacks:0} },
+    { id:3, label:'CH 03', name:'CIPHER',     type:'normal',   mechanic:'transaction', enemy:{name:'CIPHER LOCK',   hp:345,maxHp:345,aura:19,stacks:0} },
+    { id:4, label:'CH 04', name:'VLT BREAK',  type:'miniboss', mechanic:'transaction', enemy:{name:'VAULT BREAKER', hp:465,maxHp:465,aura:23,stacks:0} },
+    { id:5, label:'CH 05', name:'THE LEDGER', type:'boss',     mechanic:'transaction', enemy:{name:'THE LEDGER',    hp:630,maxHp:630,aura:21,stacks:0} },
+  ],
+  // ── Act 4 ─────────────────────────────────────────────────
+  grid: [
+    { id:1, label:'CH 01', name:'BROWNOUT',   type:'normal',   mechanic:'blackout', enemy:{name:'BROWNOUT',         hp:340,maxHp:340,aura:18,stacks:0} },
+    { id:2, label:'CH 02', name:'SURGE',      type:'normal',   mechanic:'blackout', enemy:{name:'SURGE SPIKE',      hp:420,maxHp:420,aura:20,stacks:0} },
+    { id:3, label:'CH 03', name:'BLACKWAVE',  type:'normal',   mechanic:'blackout', enemy:{name:'BLACKOUT WAVE',    hp:500,maxHp:500,aura:23,stacks:0} },
+    { id:4, label:'CH 04', name:'WRAITH',     type:'miniboss', mechanic:'blackout', enemy:{name:'GRID WRAITH',      hp:640,maxHp:640,aura:26,stacks:0} },
+    { id:5, label:'CH 05', name:'POWER CORE', type:'boss',     mechanic:'blackout', enemy:{name:'POWER CORE',       hp:820,maxHp:820,aura:24,stacks:0} },
+  ],
+  medical: [
+    { id:1, label:'CH 01', name:'PULSE VRS',  type:'normal',   mechanic:'vital', enemy:{name:'PULSE VIRUS',         hp:320,maxHp:320,aura:18,stacks:0} },
+    { id:2, label:'CH 02', name:'FLATLINE',   type:'normal',   mechanic:'vital', enemy:{name:'FLATLINE',            hp:400,maxHp:400,aura:20,stacks:0} },
+    { id:3, label:'CH 03', name:'VITALDRAIN', type:'normal',   mechanic:'vital', enemy:{name:'VITAL DRAIN',         hp:480,maxHp:480,aura:23,stacks:0} },
+    { id:4, label:'CH 04', name:'LIFE SUPP',  type:'miniboss', mechanic:'vital', enemy:{name:'LIFE SUPPORT',        hp:620,maxHp:620,aura:26,stacks:0} },
+    { id:5, label:'CH 05', name:'THE VITALS', type:'boss',     mechanic:'vital', enemy:{name:'THE VITALS',          hp:800,maxHp:800,aura:24,stacks:0} },
+  ],
+  farm: [
+    { id:1, label:'CH 01', name:'SHARD BOT',  type:'normal',   mechanic:'distributed', enemy:{name:'SHARD BOT',    hp:330,maxHp:330,aura:18,stacks:0} },
+    { id:2, label:'CH 02', name:'CLUSTER',    type:'normal',   mechanic:'distributed', enemy:{name:'CLUSTER WORM', hp:410,maxHp:410,aura:21,stacks:0} },
+    { id:3, label:'CH 03', name:'RAID GHOST', type:'normal',   mechanic:'distributed', enemy:{name:'RAID GHOST',   hp:490,maxHp:490,aura:24,stacks:0} },
+    { id:4, label:'CH 04', name:'NODE KILL',  type:'miniboss', mechanic:'distributed', enemy:{name:'NODE KILLER',  hp:630,maxHp:630,aura:27,stacks:0} },
+    { id:5, label:'CH 05', name:'THE HIVE',   type:'boss',     mechanic:'distributed', enemy:{name:'THE HIVE',     hp:810,maxHp:810,aura:25,stacks:0} },
+  ],
+  satellite: [
+    { id:1, label:'CH 01', name:'PING',       type:'normal',   mechanic:'delay', enemy:{name:'PING DAEMON',         hp:325,maxHp:325,aura:18,stacks:0} },
+    { id:2, label:'CH 02', name:'LATENCY',    type:'normal',   mechanic:'delay', enemy:{name:'LATENCY GHOST',       hp:405,maxHp:405,aura:21,stacks:0} },
+    { id:3, label:'CH 03', name:'ORBIT',      type:'normal',   mechanic:'delay', enemy:{name:'ORBIT VIRUS',         hp:485,maxHp:485,aura:24,stacks:0} },
+    { id:4, label:'CH 04', name:'SIG GHOST',  type:'miniboss', mechanic:'delay', enemy:{name:'SIGNAL GHOST',        hp:625,maxHp:625,aura:27,stacks:0} },
+    { id:5, label:'CH 05', name:'THE SAT',    type:'boss',     mechanic:'delay', enemy:{name:'THE SATELLITE',       hp:805,maxHp:805,aura:25,stacks:0} },
+  ],
+  // ── The Cloud (final) ─────────────────────────────────────
+  cloud: [
+    { id:1, label:'CH 01', name:'DATA SHARD', type:'normal',   mechanic:'upload', enemy:{name:'DATA SHARD',         hp:400,maxHp:400,aura:20,stacks:0} },
+    { id:2, label:'CH 02', name:'WRAITH',     type:'normal',   mechanic:'upload', enemy:{name:'CLOUD WRAITH',       hp:500,maxHp:500,aura:22,stacks:0} },
+    { id:3, label:'CH 03', name:'UPLOAD VRS', type:'normal',   mechanic:'upload', enemy:{name:'UPLOAD VIRUS',       hp:600,maxHp:600,aura:25,stacks:0} },
+    { id:4, label:'CH 04', name:'THE SERVER', type:'miniboss', mechanic:'upload', enemy:{name:'THE SERVER',         hp:760,maxHp:760,aura:28,stacks:0} },
+    { id:5, label:'CH 05', name:'THE CLOUD',  type:'boss',     mechanic:'upload', enemy:{name:'THE CLOUD',          hp:1000,maxHp:1000,aura:30,stacks:0} },
+  ],
 };
 
 const DEFS = [
@@ -780,7 +846,7 @@ class Battle extends Phaser.Scene {
     this.channel    = ch;
     this.channelIdx = (data && data.channelIdx != null) ? data.channelIdx : 0;
     this.mechanic   = ch.mechanic || 'signal';
-    this.autoMs     = this.mechanic === 'pulse' ? 1500 : AUTO_MS;
+    this.autoMs     = ['pulse','velocity'].includes(this.mechanic) ? 1500 : AUTO_MS;
     this.save       = loadSave();
 
     this.agents = DEFS
@@ -804,8 +870,9 @@ class Battle extends Phaser.Scene {
         };
       });
 
-    this.enemy = { ...ch.enemy, saveUsed: false };
+    this.enemy = { ...ch.enemy, saveUsed: false, charged: false };
     this.heatStacks = 0;
+    this.overflowRound = 0;
     this.state = STATE.PLAYER;
     this.activeIdx = 0;
     this.acted = new Set();
@@ -826,10 +893,25 @@ class Battle extends Phaser.Scene {
     this._cardUI();
     this._btnUI();
     const mechMsg = {
-      signal:  '⚠️  Static aura active. Signal disrupted.',
-      battery: '🔋 Battery draining. Energy recharge halved.',
-      echo:    '🔊 Echo chamber! Attacks may bounce to allies.',
-      pulse:   '⏱️  Pulse grid. 3s auto-act timer active.',
+      signal:      '⚠️  Static aura active. Signal disrupted.',
+      battery:     '🔋 Battery draining. Energy recharge halved.',
+      echo:        '🔊 Echo chamber! Attacks may bounce to allies.',
+      pulse:       '⏱️  Pulse grid. 1.5s auto-act timer.',
+      savestate:   '💾 Save State active. Enemy recovers once from death.',
+      freeze:      '❄️  Freezing sector. Attacks may freeze agents.',
+      heat:        '🔥 Heat spiral. Enemy damage escalates each round.',
+      entangle:    '🔗 Entanglement field. Random move locked each turn.',
+      summon:      '📡 Summon protocol. Enemy may call backup.',
+      predict:     '👁️  Predictive targeting. Enemy may hit twice.',
+      packetloss:  '📡 Packet loss. Random agent loses EN each round.',
+      overflow:    '⚡ Overflow. Enemy base damage grows each round.',
+      velocity:    '⚡ Velocity mode. 1.5s auto-act timer.',
+      transaction: '💸 Transaction world. Each action costs 2 cycles.',
+      blackout:    '🌑 Blackout zone. All agent signals −15.',
+      vital:       '💉 Vital regen. Enemy restores 15 HP each round.',
+      distributed: '🌐 Distributed. Enemy hits ALL agents each turn.',
+      delay:       '⏳ Signal delay. Enemy charges before heavy strikes.',
+      upload:      '☁️  Upload active. Enemy signal grows every 2 rounds.',
     };
     this.log(`⚡ ${this.channel.enemy.name} detected. Squad deployed.`);
     this.log(mechMsg[this.mechanic] || '');
@@ -1043,7 +1125,8 @@ class Battle extends Phaser.Scene {
     obj.ef.clear();
     if (!dead) { obj.ef.fillStyle(COLORS.blue, 0.85); obj.ef.fillRect(obj.cx + 9, obj.cy + 141, (bw - 2) * er, 8); }
     obj.el.setText(`EN ${ag.en}/${ag.maxEn}`);
-    const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8);
+    const blackoutPenalty = this.mechanic === 'blackout' ? 15 : 0;
+    const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     obj.sg.setText(`SIG ${sig}%`);
     obj.sg.setColor(sig < 50 ? '#ff4444' : '#ffcc00');
     const badges = [];
@@ -1122,8 +1205,14 @@ class Battle extends Phaser.Scene {
     this.state = STATE.ANIM;
     this._btns(false);
     const ag = this.agents[this.activeIdx];
-    const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8);
+    const blackoutPenalty = this.mechanic === 'blackout' ? 15 : 0;
+    const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     ag.defending = false; ag.fortified = false;
+
+    // Transaction world: each action costs 2 cycles
+    if (this.mechanic === 'transaction' && id !== 'item' && id !== 'defend') {
+      if (this.save.cycles >= 2) { this.save.cycles -= 2; writeSave(this.save); this.log('> 💸 TRANSACTION: −2 cycles'); }
+    }
 
     if (id === 'item') {
       this.log('> No items in this build.');
@@ -1401,8 +1490,29 @@ class Battle extends Phaser.Scene {
       const enRegen = this.mechanic === 'battery' ? 2 : 5;
       this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen); });
       if (this.mechanic === 'heat') {
-        this.heatStacks = (this.heatStacks || 0) + 1;
-        if (this.heatStacks > 0) this.log(`> 🔥 HEAT ${this.heatStacks}: enemy +${this.heatStacks * 2} dmg`);
+        this.heatStacks++;
+        this.log(`> 🔥 HEAT ${this.heatStacks}: enemy +${this.heatStacks * 2} dmg`);
+      }
+      if (this.mechanic === 'overflow') {
+        this.overflowRound++;
+        this.log(`> ⚡ OVERFLOW Lv${this.overflowRound}: enemy +${this.overflowRound * 3} base dmg`);
+      }
+      if (this.mechanic === 'packetloss') {
+        const plAlive = this.agents.filter(a => a.hp > 0);
+        if (plAlive.length) {
+          const plTgt = plAlive[Math.floor(Math.random() * plAlive.length)];
+          const drain = rnd(8, 12); plTgt.en = Math.max(0, plTgt.en - drain);
+          this.log(`> 📡 PACKET LOSS: ${plTgt.name} −${drain} EN`);
+        }
+      }
+      if (this.mechanic === 'vital') {
+        const heal = 15;
+        this.enemy.hp = Math.min(this.enemy.maxHp, this.enemy.hp + heal);
+        this.log(`> 💉 VITAL REGEN: enemy +${heal} HP`); this._reEnemy();
+      }
+      if (this.mechanic === 'upload' && this.round % 2 === 0) {
+        this.enemy.stacks = Math.min(5, this.enemy.stacks + 1);
+        this.log(`> ☁️  UPLOAD: signal stack ${this.enemy.stacks}`); this._reEnemy();
       }
       this.acted = new Set();
       this.activeIdx = 0;
@@ -1423,36 +1533,36 @@ class Battle extends Phaser.Scene {
     const tag = (tgt) => tgt.defending ? ' [BLOCK]' : tgt.fortified ? ' [FORT]' : tgt.shielded ? ' [SHIELD]' : '';
     const type = this.channel.type;
     const heat = this.mechanic === 'heat' ? (this.heatStacks || 0) * 2 : 0;
+    const ovfl = this.mechanic === 'overflow' ? this.overflowRound * 3 : 0;
     const roll = Math.random();
 
-    // Shared moves
+    const applyHit = (tgt, dmg) => {
+      tgt.hp = Math.max(0, tgt.hp - dmg);
+      if (tgt.subclass === 'archive') tgt.stored = (tgt.stored || 0) + Math.ceil(dmg * 0.5);
+      if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
+        tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN`);
+      }
+    };
+
     const doAttack = () => {
       const tgt = pick();
-      let raw = rnd(5, 10) + heat;
+      let raw = rnd(5, 10) + heat + ovfl;
       if (this.enemy.vulnBonus) raw = Math.ceil(raw * (1 + this.enemy.vulnBonus / 100));
-      // reroute: redirect full hit back to enemy
+      if (this.enemy.charged) { raw = Math.ceil(raw * 2.5); this.enemy.charged = false; this.log(`> ⚡ CHARGED STRIKE!`); }
       if (tgt.rerouting) {
         tgt.rerouting = false;
         this.enemy.hp = Math.max(0, this.enemy.hp - raw);
-        this.log(`> ${tgt.name}: REROUTE! Attack reflected → enemy −${raw}`);
+        this.log(`> ${tgt.name}: REROUTE! → enemy −${raw}`);
         this._flashE(); this.time.delayedCall(600, finish); return;
       }
-      // reflect: 60% of damage bounces back
       const reflectDmg = tgt.reflecting ? Math.ceil(raw * 0.6) : 0;
       if (tgt.reflecting) { tgt.reflecting = false; this.enemy.hp = Math.max(0, this.enemy.hp - reflectDmg); }
       const dmg = dmgHit(tgt, raw);
-      tgt.hp = Math.max(0, tgt.hp - dmg);
-      // archive subclass: store incoming damage
-      if (tgt.subclass === 'archive') tgt.stored = (tgt.stored || 0) + Math.ceil(dmg * 0.5);
-      this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}${reflectDmg ? ` [REFLECT −${reflectDmg}]` : ''}`);
-      // freeze chance
-      if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
-        tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN — skips next turn`);
-      }
-      // predict: 35% chance second hit
+      applyHit(tgt, dmg);
+      this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}${reflectDmg ? ` [↩−${reflectDmg}]` : ''}`);
       if (this.mechanic === 'predict' && Math.random() < 0.35) {
         const tgt2 = pick(), dmg2 = dmgHit(tgt2, rnd(4, 8));
-        tgt2.hp = Math.max(0, tgt2.hp - dmg2);
+        applyHit(tgt2, dmg2);
         this.log(`> PREDICTED → ${tgt2.name} −${dmg2}`);
       }
       this._flashP(); this.time.delayedCall(600, finish);
@@ -1463,61 +1573,76 @@ class Battle extends Phaser.Scene {
       this._reEnemy(); this.time.delayedCall(600, finish);
     };
     const doStatic = () => {
-      this.enemy.stacks = Math.min(3, this.enemy.stacks + 1);
+      this.enemy.stacks = Math.min(5, this.enemy.stacks + 1);
       this.log(`> STATIC BURST! Signal −${this.enemy.aura + this.enemy.stacks * 8}%`);
       this._reEnemy(); this.time.delayedCall(600, finish);
     };
     const doDouble = () => {
       const t1 = pick(), t2 = pick();
-      const d1 = rnd(3, 6), d2 = rnd(3, 6);
-      t1.hp = Math.max(0, t1.hp - dmgHit(t1, d1));
-      t2.hp = Math.max(0, t2.hp - dmgHit(t2, d2));
-      this.log(`> DOUBLE PULSE → ${t1.name} −${d1}, ${t2.name} −${d2}`);
+      const d1 = dmgHit(t1, rnd(3, 6) + ovfl), d2 = dmgHit(t2, rnd(3, 6) + ovfl);
+      applyHit(t1, d1); applyHit(t2, d2);
+      this.log(`> DOUBLE → ${t1.name} −${d1}, ${t2.name} −${d2}`);
       this._flashP(); this.time.delayedCall(600, finish);
     };
+    const doDistributed = () => {
+      const parts = alive.map(({ a }) => {
+        const d = dmgHit(a, rnd(4, 8) + ovfl);
+        applyHit(a, d); return `${a.name} −${d}`;
+      });
+      this.log(`> DISTRIBUTE → ${parts.join(', ')}`);
+      this._flashP(); this.time.delayedCall(600, finish);
+    };
+    const doCharge = () => {
+      this.enemy.charged = true;
+      this.log(`> ⚡ ${this.enemy.name} CHARGING — next strike ×2.5`);
+      this._reAll(); this.time.delayedCall(600, finish);
+    };
+    const doLock = () => {
+      const tgt = pick(); tgt.locked = true;
+      this.log(`> SIGNAL LOCK! ${tgt.name} locked out next turn`);
+      this._reAll(); this.time.delayedCall(600, finish);
+    };
+
+    const distrib = this.mechanic === 'distributed';
+    const delayed = this.mechanic === 'delay';
 
     if (type === 'normal') {
-      // summon mechanic gets its own move chance
       if (this.mechanic === 'summon' && roll < 0.22) doSummon();
+      else if (distrib && roll < 0.55) doDistributed();
+      else if (delayed && this.enemy.charged) doAttack();
+      else if (delayed && roll < 0.40) doCharge();
       else if (roll < 0.50) doAttack();
       else if (roll < 0.78) doStatic();
-      else                  doDouble();
+      else doDouble();
 
     } else if (type === 'miniboss') {
-      // Jammer: adds SIGNAL LOCK — disables one agent for 1 turn
-      if (roll < 0.35) doAttack();
+      if (distrib && roll < 0.45) doDistributed();
+      else if (delayed && this.enemy.charged) doAttack();
+      else if (delayed && roll < 0.35) doCharge();
+      else if (roll < 0.35) doAttack();
       else if (roll < 0.58) doStatic();
       else if (roll < 0.78) doDouble();
-      else {
-        const tgt = pick();
-        tgt.locked = true;
-        this.log(`> SIGNAL LOCK! ${tgt.name} is locked out next turn`);
-        this._reAll(); this.time.delayedCall(600, finish);
-      }
+      else doLock();
 
     } else {
-      // Boss: adds PHANTOM PULSE + BROADCAST STORM
-      // Phase 2 below 50% HP: more aggressive
       const phase2 = this.enemy.hp < this.enemy.maxHp * 0.5;
-      if (roll < (phase2 ? 0.20 : 0.30)) doAttack();
+      if (distrib && roll < (phase2 ? 0.50 : 0.35)) doDistributed();
+      else if (delayed && this.enemy.charged) doAttack();
+      else if (delayed && roll < (phase2 ? 0.50 : 0.35)) doCharge();
+      else if (roll < (phase2 ? 0.20 : 0.30)) doAttack();
       else if (roll < (phase2 ? 0.40 : 0.55)) doStatic();
       else if (roll < (phase2 ? 0.60 : 0.75)) {
-        // PHANTOM PULSE — next player attack has 50% miss chance
         this.phantomActive = true;
-        this.log(`> PHANTOM PULSE! Illusions deployed — attacks may miss`);
+        this.log(`> PHANTOM PULSE! Illusions deployed`);
         this._reEnemy(); this.time.delayedCall(600, finish);
       } else if (phase2 && roll < 0.80) {
-        // BROADCAST STORM — hits all agents
-        const dmgs = alive.map(({ a }) => {
-          const raw = rnd(8, 14), d = dmgHit(a, raw);
-          a.hp = Math.max(0, a.hp - d);
-          return `${a.name} −${d}`;
+        const parts = alive.map(({ a }) => {
+          const d = dmgHit(a, rnd(8, 14) + ovfl);
+          applyHit(a, d); return `${a.name} −${d}`;
         });
-        this.log(`> BROADCAST STORM → ${dmgs.join(', ')}`);
+        this.log(`> BROADCAST STORM → ${parts.join(', ')}`);
         this._flashP(); this.time.delayedCall(600, finish);
-      } else {
-        doDouble();
-      }
+      } else doDouble();
     }
   }
 
