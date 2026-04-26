@@ -51,7 +51,9 @@ class ChannelSelect extends Phaser.Scene {
   constructor() { super({ key: 'ChannelSelect' }); }
 
   create() {
-    // grid bg
+    const save = loadSave();
+    const worldSave = save.worlds.tv || { cleared: [false,false,false,false,false] };
+
     const g = this.add.graphics();
     g.lineStyle(1, 0x0d0d2a, 0.7);
     for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
@@ -60,34 +62,42 @@ class ChannelSelect extends Phaser.Scene {
     s.fillStyle(0x000000, 0.2);
     for (let y = 0; y < H; y += 4) s.fillRect(0, y, W, 2);
 
-    this.add.text(W / 2, 40, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '20px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5);
-    this.add.text(W / 2, 70, 'SELECT CHANNEL', { fontFamily: 'monospace', fontSize: '13px', color: '#444466' }).setOrigin(0.5);
+    this.add.text(W / 2, 36, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '20px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5);
+    this.add.text(W / 2, 64, '⚙ ' + save.cycles + ' CYCLES', { fontFamily: 'monospace', fontSize: '14px', color: '#ffcc00' }).setOrigin(0.5);
+    this.add.text(W / 2, 84, 'SELECT CHANNEL', { fontFamily: 'monospace', fontSize: '12px', color: '#444466' }).setOrigin(0.5);
 
     const typeColor = { normal: '#444466', miniboss: '#ff8800', boss: '#ff3355' };
     const typeLabel = { normal: 'NORMAL', miniboss: 'MINI-BOSS', boss: 'BOSS' };
 
     CHANNELS.forEach((ch, i) => {
-      const cy = 140 + i * 118;
-      const col = ch.type === 'boss' ? 0xff3355 : ch.type === 'miniboss' ? 0xff8800 : 0x444466;
+      const cleared  = worldSave.cleared[i];
+      const locked   = i > 0 && !worldSave.cleared[i - 1];
+      const cy = 108 + i * 144;
+      const col = locked ? 0x222233 : ch.type === 'boss' ? 0xff3355 : ch.type === 'miniboss' ? 0xff8800 : 0x444466;
 
       const bg = this.add.graphics();
-      bg.fillStyle(col, 0.08); bg.fillRoundedRect(20, cy, W - 40, 100, 8);
-      bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(20, cy, W - 40, 100, 8);
+      bg.fillStyle(col, locked ? 0.04 : 0.08); bg.fillRoundedRect(20, cy, W - 40, 126, 8);
+      bg.lineStyle(1, col, locked ? 0.2 : 0.4); bg.strokeRoundedRect(20, cy, W - 40, 126, 8);
 
-      this.add.text(30, cy + 12, ch.label, { fontFamily: 'monospace', fontSize: '13px', color: typeColor[ch.type] });
-      this.add.text(30, cy + 30, ch.name, { fontFamily: 'monospace', fontSize: '26px', color: '#ffffff', fontStyle: 'bold' });
-      this.add.text(30, cy + 62, ch.enemy.name, { fontFamily: 'monospace', fontSize: '14px', color: '#888899' });
-      this.add.text(30, cy + 80, `HP ${ch.enemy.hp}  ·  AURA −${ch.enemy.aura}%`, { fontFamily: 'monospace', fontSize: '12px', color: '#444455' });
+      const nameCol = locked ? '#333344' : '#ffffff';
+      this.add.text(30, cy + 12, ch.label + (cleared ? '  ✓' : ''), { fontFamily: 'monospace', fontSize: '13px', color: locked ? '#222233' : typeColor[ch.type] });
+      this.add.text(30, cy + 30, ch.name, { fontFamily: 'monospace', fontSize: '26px', color: nameCol, fontStyle: 'bold' });
+      this.add.text(30, cy + 64, ch.enemy.name, { fontFamily: 'monospace', fontSize: '14px', color: locked ? '#222233' : '#888899' });
+      this.add.text(30, cy + 84, locked ? '🔒 LOCKED' : `HP ${ch.enemy.hp}  ·  AURA −${ch.enemy.aura}%`, { fontFamily: 'monospace', fontSize: '12px', color: locked ? '#333344' : '#444455' });
 
-      const badge = this.add.text(W - 32, cy + 12, typeLabel[ch.type], { fontFamily: 'monospace', fontSize: '12px', color: typeColor[ch.type] }).setOrigin(1, 0);
+      const rewards = calcRewards(ch.type, 1, 3);
+      this.add.text(30, cy + 104, locked ? '' : `⚙ ${rewards.cycles}  ·  ${rewards.xp} XP`, { fontFamily: 'monospace', fontSize: '11px', color: '#333355' });
+      this.add.text(W - 32, cy + 12, typeLabel[ch.type], { fontFamily: 'monospace', fontSize: '12px', color: locked ? '#222233' : typeColor[ch.type] }).setOrigin(1, 0);
 
-      const zone = this.add.zone(20, cy, W - 40, 100).setOrigin(0).setInteractive();
-      zone.on('pointerover', () => { bg.clear(); bg.fillStyle(col, 0.18); bg.fillRoundedRect(20, cy, W - 40, 100, 8); bg.lineStyle(2, col, 0.8); bg.strokeRoundedRect(20, cy, W - 40, 100, 8); });
-      zone.on('pointerout',  () => { bg.clear(); bg.fillStyle(col, 0.08); bg.fillRoundedRect(20, cy, W - 40, 100, 8); bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(20, cy, W - 40, 100, 8); });
-      zone.on('pointerdown', () => this.scene.start('Battle', { channel: ch }));
+      if (!locked) {
+        const zone = this.add.zone(20, cy, W - 40, 126).setOrigin(0).setInteractive();
+        zone.on('pointerover', () => { bg.clear(); bg.fillStyle(col, 0.18); bg.fillRoundedRect(20, cy, W - 40, 126, 8); bg.lineStyle(2, col, 0.8); bg.strokeRoundedRect(20, cy, W - 40, 126, 8); });
+        zone.on('pointerout',  () => { bg.clear(); bg.fillStyle(col, 0.08); bg.fillRoundedRect(20, cy, W - 40, 126, 8); bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(20, cy, W - 40, 126, 8); });
+        zone.on('pointerdown', () => this.scene.start('Battle', { channel: ch, channelIdx: i }));
+      }
     });
 
-    this.add.text(W / 2, H - 30, 'TAP A CHANNEL TO DEPLOY', { fontFamily: 'monospace', fontSize: '12px', color: '#222244' }).setOrigin(0.5);
+    this.add.text(W / 2, H - 24, 'TAP A CHANNEL TO DEPLOY', { fontFamily: 'monospace', fontSize: '12px', color: '#222244' }).setOrigin(0.5);
   }
 }
 
@@ -97,11 +107,26 @@ class Battle extends Phaser.Scene {
 
   init(data) {
     const ch = (data && data.channel) ? data.channel : CHANNELS[0];
-    this.channel = ch;
-    this.agents = DEFS.map(d => ({
-      ...d, hp: d.maxHp, en: d.maxEn,
-      defending: false, fortified: false, locked: false,
-    }));
+    this.channel    = ch;
+    this.channelIdx = (data && data.channelIdx != null) ? data.channelIdx : 0;
+    this.save       = loadSave();
+
+    this.agents = DEFS.map(d => {
+      const saved  = this.save.agents.find(a => a.id === d.id);
+      const level  = saved ? saved.level : 1;
+      const stats  = statsForLevel(d.id, level);
+      const savedHp = saved ? saved.hp : stats.maxHp;
+      return {
+        ...d,
+        ...stats,
+        hp: Math.min(savedHp, stats.maxHp),
+        en: stats.maxEn,
+        level,
+        xp: saved ? saved.xp : 0,
+        defending: false, fortified: false, locked: false,
+      };
+    });
+
     this.enemy = { ...ch.enemy };
     this.state = STATE.PLAYER;
     this.activeIdx = 0;
@@ -596,30 +621,108 @@ class Battle extends Phaser.Scene {
     this.state = win ? STATE.WIN : STATE.LOSE;
     this._btns(false);
     this.timerFill.clear();
+
+    const save = this.save;
+    const ch   = this.channel;
+    const tier = 1; // TV world tier; expand when worlds are added
+
+    if (win) {
+      // Mark channel cleared
+      if (!save.worlds.tv) save.worlds.tv = { cleared: [false,false,false,false,false] };
+      save.worlds.tv.cleared[this.channelIdx] = true;
+
+      // Award cycles
+      const aliveCount = this.agents.filter(a => a.hp > 0).length;
+      const rewards = calcRewards(ch.type, tier, aliveCount);
+      save.cycles += rewards.cycles;
+
+      // Award XP + level ups per agent
+      const levelUps = [];
+      this.agents.forEach(ag => {
+        const savedAg = save.agents.find(a => a.id === ag.id);
+        if (!savedAg) return;
+        const result = awardXp(savedAg, rewards.xp);
+        if (result.leveledUp) levelUps.push({ name: ag.name, from: result.oldLevel, to: result.newLevel });
+        // Save current HP (carry damage)
+        savedAg.hp = ag.hp;
+      });
+
+      writeSave(save);
+      this._showWinScreen(rewards, levelUps);
+    } else {
+      const cost = reviveCost(tier);
+      this._showLoseScreen(cost, save);
+    }
+  }
+
+  _showWinScreen(rewards, levelUps) {
     const ch = this.channel;
     const ov = this.add.graphics();
-    ov.fillStyle(0x000000, 0.82); ov.fillRect(0, 0, W, H);
-    const icon  = win ? '✅' : '💀';
-    const title = win ? 'SYSTEM RESTORED'   : 'INTEGRITY FAILURE';
-    const body  = win
-      ? `${ch.label} · ${ch.name} cleared.\n+50 XP · +10 Autonomy`
-      : 'Squad offline.\nBreach uncontained.';
-    const col = win ? '#00ff88' : '#ff3355';
-    this.add.text(W / 2, H / 2 - 110, icon,  { fontSize: '52px' }).setOrigin(0.5);
-    this.add.text(W / 2, H / 2 - 50,  title, { fontFamily: 'monospace', fontSize: '24px', color: col, fontStyle: 'bold' }).setOrigin(0.5);
-    this.add.text(W / 2, H / 2 + 6,   body,  { fontFamily: 'monospace', fontSize: '17px', color: '#aaaacc', align: 'center' }).setOrigin(0.5);
-    // Retry button
-    const rb = this.add.graphics();
-    rb.fillStyle(COLORS.red, 0.12); rb.fillRoundedRect(W / 2 - 100, H / 2 + 80, 200, 50, 10);
-    rb.lineStyle(1, COLORS.red, 0.5); rb.strokeRoundedRect(W / 2 - 100, H / 2 + 80, 200, 50, 10);
-    this.add.text(W / 2, H / 2 + 105, 'RETRY', { fontFamily: 'monospace', fontSize: '16px', color: '#ff3355' }).setOrigin(0.5);
-    this.add.zone(W / 2 - 100, H / 2 + 80, 200, 50).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.restart());
-    // Channels button
-    const cb = this.add.graphics();
-    cb.fillStyle(COLORS.green, 0.12); cb.fillRoundedRect(W / 2 - 100, H / 2 + 140, 200, 50, 10);
-    cb.lineStyle(1, COLORS.green, 0.5); cb.strokeRoundedRect(W / 2 - 100, H / 2 + 140, 200, 50, 10);
-    this.add.text(W / 2, H / 2 + 165, 'CHANNELS', { fontFamily: 'monospace', fontSize: '16px', color: '#00ff88' }).setOrigin(0.5);
-    this.add.zone(W / 2 - 100, H / 2 + 140, 200, 50).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('ChannelSelect'));
+    ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
+
+    this.add.text(W/2, 80,  '✅',             { fontSize: '52px' }).setOrigin(0.5);
+    this.add.text(W/2, 148, 'SYSTEM RESTORED', { fontFamily:'monospace', fontSize:'22px', color:'#00ff88', fontStyle:'bold' }).setOrigin(0.5);
+    this.add.text(W/2, 178, `${ch.label} · ${ch.name}`, { fontFamily:'monospace', fontSize:'13px', color:'#444466' }).setOrigin(0.5);
+
+    this.add.text(W/2, 216, `+${rewards.cycles} ⚙  CYCLES`, { fontFamily:'monospace', fontSize:'18px', color:'#ffcc00' }).setOrigin(0.5);
+    this.add.text(W/2, 244, `+${rewards.xp} XP  per agent`, { fontFamily:'monospace', fontSize:'16px', color:'#8888bb' }).setOrigin(0.5);
+
+    let y = 288;
+    if (levelUps.length > 0) {
+      this.add.text(W/2, y, '── LEVEL UP ──', { fontFamily:'monospace', fontSize:'13px', color:'#333355' }).setOrigin(0.5);
+      y += 28;
+      levelUps.forEach(lu => {
+        this.add.text(W/2, y, `${lu.name}  Lv${lu.from} → Lv${lu.to}`, { fontFamily:'monospace', fontSize:'16px', color:'#00ff88' }).setOrigin(0.5);
+        y += 28;
+      });
+    }
+
+    // Buttons
+    y = Math.max(y + 20, 520);
+    const btn = (label, col, by, cb) => {
+      const g = this.add.graphics();
+      g.fillStyle(col, 0.12); g.fillRoundedRect(W/2-110, by, 220, 52, 10);
+      g.lineStyle(1, col, 0.5); g.strokeRoundedRect(W/2-110, by, 220, 52, 10);
+      this.add.text(W/2, by+26, label, { fontFamily:'monospace', fontSize:'16px', color:'#'+col.toString(16).padStart(6,'0') }).setOrigin(0.5);
+      this.add.zone(W/2-110, by, 220, 52).setOrigin(0).setInteractive().on('pointerdown', cb);
+    };
+    btn('NEXT CHANNEL', 0x00ff88, y,    () => this.scene.start('Battle', { channel: CHANNELS[Math.min(this.channelIdx+1, 4)], channelIdx: Math.min(this.channelIdx+1, 4) }));
+    btn('CHANNELS',     0x444466, y+62, () => this.scene.start('ChannelSelect'));
+  }
+
+  _showLoseScreen(cost, save) {
+    const ov = this.add.graphics();
+    ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
+
+    this.add.text(W/2, 100, '💀',               { fontSize: '52px' }).setOrigin(0.5);
+    this.add.text(W/2, 168, 'INTEGRITY FAILURE', { fontFamily:'monospace', fontSize:'22px', color:'#ff3355', fontStyle:'bold' }).setOrigin(0.5);
+    this.add.text(W/2, 200, 'Squad offline.\nBreach uncontained.', { fontFamily:'monospace', fontSize:'15px', color:'#aaaacc', align:'center' }).setOrigin(0.5);
+
+    const canAfford = save.cycles >= cost;
+    this.add.text(W/2, 280, `Revive cost: ${cost} ⚙`, { fontFamily:'monospace', fontSize:'16px', color: canAfford ? '#ffcc00' : '#ff3355' }).setOrigin(0.5);
+    this.add.text(W/2, 308, `Your cycles: ${save.cycles} ⚙`, { fontFamily:'monospace', fontSize:'14px', color:'#888888' }).setOrigin(0.5);
+
+    if (canAfford) {
+      const g = this.add.graphics();
+      g.fillStyle(0xffcc00, 0.12); g.fillRoundedRect(W/2-110, 360, 220, 52, 10);
+      g.lineStyle(1, 0xffcc00, 0.5); g.strokeRoundedRect(W/2-110, 360, 220, 52, 10);
+      this.add.text(W/2, 386, `REVIVE  −${cost} ⚙`, { fontFamily:'monospace', fontSize:'16px', color:'#ffcc00' }).setOrigin(0.5);
+      this.add.zone(W/2-110, 360, 220, 52).setOrigin(0).setInteractive().on('pointerdown', () => {
+        save.cycles -= cost;
+        save.agents.forEach(ag => {
+          const stats = statsForLevel(ag.id, ag.level);
+          ag.hp = stats.maxHp;
+        });
+        writeSave(save);
+        this.scene.restart();
+      });
+    }
+
+    const g2 = this.add.graphics();
+    g2.fillStyle(0xff3355, 0.12); g2.fillRoundedRect(W/2-110, 428, 220, 52, 10);
+    g2.lineStyle(1, 0xff3355, 0.5); g2.strokeRoundedRect(W/2-110, 428, 220, 52, 10);
+    this.add.text(W/2, 454, 'CHANNELS', { fontFamily:'monospace', fontSize:'16px', color:'#ff3355' }).setOrigin(0.5);
+    this.add.zone(W/2-110, 428, 220, 52).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('ChannelSelect'));
   }
 
   // ── Agent stat panel (tap card to open) ────────────────

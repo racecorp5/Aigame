@@ -86,6 +86,44 @@ Multiple valid paths to The Cloud — rush the right side or explore everything.
 
 ---
 
+## Core Loop Rules
+
+- **HP between battles**: carries over (agents don't fully heal between fights)
+- **Armor passive**: certain armor pieces restore HP after each battle
+- **Death penalty**: pay a CYCLES fee to revive squad at full HP; can't continue without paying
+- **Channel unlock**: sequential — clear CH01 to unlock CH02, etc.
+- **World unlock**: clear ALL 5 channels (including boss) to unlock the next world
+- **Team selection**: start with Threadling only; buy other agents with CYCLES; own all 7 but only 3 active at once
+
+---
+
+## Currency — CYCLES
+
+Earned after every battle. Used for: buying agents, gear, reviving squad.
+
+| Battle type | Base reward | Tier multiplier |
+|-------------|------------|-----------------|
+| Normal win  | 20 ⚙ | × tier |
+| Mini-boss win | 50 ⚙ | × tier |
+| Boss win | 120 ⚙ | × tier |
+| Per alive agent bonus | +5 ⚙ | × tier |
+
+Death revive cost: `50 × current world tier`
+
+---
+
+## Enemy Scaling — World Tiers
+
+| Tier | Worlds | HP mult | Damage mult | XP mult |
+|------|--------|---------|-------------|---------|
+| 1 | TV, Phone, Speaker | ×1.0 | ×1.0 | ×1.0 |
+| 2 | Watch, Console, Fridge, Microwave | ×1.6 | ×1.3 | ×1.8 |
+| 3 | Printer, Hub, SecCam, Router | ×2.4 | ×1.6 | ×2.8 |
+| 4 | Computer, Car, ATM, Power Grid | ×3.5 | ×2.0 | ×4.2 |
+| 5 | Medical, Server Farm, Satellite, Cloud | ×5.0 | ×2.5 | ×6.0 |
+
+---
+
 ## XP & Leveling System
 
 ### XP Per Battle
