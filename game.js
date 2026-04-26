@@ -353,22 +353,22 @@ class Battle extends Phaser.Scene {
     this.channelIdx = (data && data.channelIdx != null) ? data.channelIdx : 0;
     this.save       = loadSave();
 
-    this.agents = DEFS.map(d => {
-      const saved   = this.save.agents.find(a => a.id === d.id);
-      const owned   = saved ? saved.owned : false;
-      const level   = saved ? saved.level : 1;
-      const stats   = effectiveStats(d.id, level, this.save);
-      const savedHp = saved ? saved.hp : stats.maxHp;
-      return {
-        ...d,
-        ...stats,
-        hp: owned ? Math.min(savedHp, stats.maxHp) : 0,
-        en: stats.maxEn,
-        level,
-        xp: saved ? saved.xp : 0,
-        defending: false, fortified: false, locked: false,
-      };
-    });
+    this.agents = DEFS
+      .filter(d => { const s = this.save.agents.find(a => a.id === d.id); return s && s.owned; })
+      .map(d => {
+        const saved   = this.save.agents.find(a => a.id === d.id);
+        const level   = saved.level;
+        const stats   = effectiveStats(d.id, level, this.save);
+        return {
+          ...d,
+          ...stats,
+          hp: Math.min(saved.hp, stats.maxHp),
+          en: stats.maxEn,
+          level,
+          xp: saved.xp,
+          defending: false, fortified: false, locked: false,
+        };
+      });
 
     this.enemy = { ...ch.enemy };
     this.state = STATE.PLAYER;
@@ -484,7 +484,9 @@ class Battle extends Phaser.Scene {
 
   // ── Agent cards  y:368–548 ─────────────────────────────
   _cardUI() {
-    const cw = 118, ch = 178, gap = 6, startX = (W - (cw * 3 + gap * 2)) / 2;
+    const cw = 118, ch = 178, gap = 6;
+    const count = this.agents.length;
+    const startX = (W - (cw * count + gap * (count - 1))) / 2;
     this.cards = this.agents.map((ag, i) => {
       const cx = startX + i * (cw + gap), cy = 368;
       const bg = this.add.graphics();
@@ -639,8 +641,9 @@ class Battle extends Phaser.Scene {
       this.timerFill.clear();
       this.time.delayedCall(500, () => this._enemyTurn());
     } else {
-      let nx = (this.activeIdx + 1) % 3, tries = 0;
-      while ((this.agents[nx].hp <= 0 || this.acted.has(nx)) && tries++ < 3) nx = (nx + 1) % 3;
+      const n = this.agents.length;
+      let nx = (this.activeIdx + 1) % n, tries = 0;
+      while ((this.agents[nx].hp <= 0 || this.acted.has(nx)) && tries++ < n) nx = (nx + 1) % n;
       this.activeIdx = nx;
       this.time.delayedCall(400, () => this._startTurn());
     }
@@ -763,7 +766,7 @@ class Battle extends Phaser.Scene {
       this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + 5); });
       this.acted = new Set();
       this.activeIdx = 0;
-      while (this.agents[this.activeIdx].hp <= 0) this.activeIdx = (this.activeIdx + 1) % 3;
+      while (this.agents[this.activeIdx].hp <= 0) this.activeIdx = (this.activeIdx + 1) % this.agents.length;
       this.log(`── Round ${this.round} ──`);
       this.time.delayedCall(300, () => this._startTurn());
     };
