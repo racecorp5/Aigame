@@ -162,9 +162,9 @@ class Battle extends Phaser.Scene {
       const cx = startX + i * (cw + gap), cy = 368;
       const bg = this.add.graphics();
 
-      // sprite (drawn once, static)
+      // sprite centered in 118×90 area (sprite is 44×64px)
       const sp = this.add.graphics();
-      this._sprite(sp, ag.id, cx + 4, cy + 4);
+      this._sprite(sp, ag.id, cx + 37, cy + 13);
 
       // divider under sprite
       const sdiv = this.add.graphics();
@@ -187,6 +187,11 @@ class Battle extends Phaser.Scene {
       const el = this.add.text(cx + 8 + bw / 2, cy + 145, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
       const sg = this.add.text(cx + 8, cy + 156, '', { fontFamily: 'monospace', fontSize: '10px', color: '#ffcc00' });
       const st = this.add.text(cx + 8, cy + 168, '', { fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc' });
+
+      // tap zone on sprite area to show stats
+      const tap = this.add.zone(cx, cy, cw, 90).setOrigin(0).setInteractive();
+      tap.on('pointerdown', () => this._showStats(i));
+
       return { bg, sp, nm, cl, hf, hl, ef, el, sg, st, cx, cy, cw, ch, bw };
     });
     this.agents.forEach((_, i) => this._reCard(i));
@@ -497,6 +502,76 @@ class Battle extends Phaser.Scene {
     rb.lineStyle(2, COLORS.green, 0.8); rb.strokeRoundedRect(W / 2 - 100, H / 2 + 88, 200, 54, 10);
     this.add.text(W / 2, H / 2 + 115, 'RETRY', { fontFamily: 'monospace', fontSize: '18px', color: '#00ff88', fontStyle: 'bold' }).setOrigin(0.5);
     this.add.zone(W / 2 - 100, H / 2 + 88, 200, 54).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.restart());
+  }
+
+  // ── Agent stat panel (tap card to open) ────────────────
+  _showStats(i) {
+    if (this.statPanel) return;
+    const ag = this.agents[i];
+    const hex = '#' + ag.color.toString(16).padStart(6, '0');
+    const px = 24, py = 180, pw = W - 48, ph = 460;
+
+    const panel = this.add.container(0, 0).setDepth(10);
+    this.statPanel = panel;
+
+    const ov = this.add.graphics().setDepth(9);
+    ov.fillStyle(0x000000, 0.7); ov.fillRect(0, 0, W, H);
+    ov.setInteractive(new Phaser.Geom.Rectangle(0, 0, W, H), Phaser.Geom.Rectangle.Contains);
+    ov.on('pointerdown', () => this._closeStats(ov));
+
+    const bg = this.add.graphics();
+    bg.fillStyle(0x080818, 1); bg.fillRoundedRect(px, py, pw, ph, 10);
+    bg.lineStyle(2, ag.color, 0.7); bg.strokeRoundedRect(px, py, pw, ph, 10);
+    panel.add(bg);
+
+    // large sprite
+    const sp = this.add.graphics();
+    this._sprite(sp, ag.id, px + pw / 2 - 22, py + 12);
+    panel.add(sp);
+
+    panel.add(this.add.text(px + pw / 2, py + 90, ag.name, { fontFamily: 'monospace', fontSize: '20px', color: hex, fontStyle: 'bold' }).setOrigin(0.5, 0));
+    panel.add(this.add.text(px + pw / 2, py + 114, ag.cls, { fontFamily: 'monospace', fontSize: '13px', color: '#555577' }).setOrigin(0.5, 0));
+
+    const statRows = [
+      { label: 'INTEGRITY', val: `${ag.hp} / ${ag.maxHp}`, ratio: ag.hp / ag.maxHp, color: ag.color },
+      { label: 'ENERGY',    val: `${ag.en} / ${ag.maxEn}`, ratio: ag.en / ag.maxEn, color: COLORS.blue },
+      { label: 'SIGNAL',    val: `${ag.signal}%`,           ratio: ag.signal / 100,   color: COLORS.yellow },
+      { label: 'AUTONOMY',  val: `${ag.autonomy}`,          ratio: ag.autonomy / 100, color: COLORS.green },
+    ];
+    const bx = px + 16, bw = pw - 32;
+    statRows.forEach((row, ri) => {
+      const ry = py + 140 + ri * 44;
+      panel.add(this.add.text(bx, ry, row.label, { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
+      panel.add(this.add.text(bx + bw, ry, row.val, { fontFamily: 'monospace', fontSize: '12px', color: hex }).setOrigin(1, 0));
+      const rbg = this.add.graphics();
+      rbg.fillStyle(0x111122, 1); rbg.fillRect(bx, ry + 16, bw, 12);
+      rbg.lineStyle(1, COLORS.dim, 0.3); rbg.strokeRect(bx, ry + 16, bw, 12);
+      const rfill = this.add.graphics();
+      rfill.fillStyle(row.color, 0.8); rfill.fillRect(bx + 1, ry + 17, (bw - 2) * Math.min(1, row.ratio), 10);
+      panel.add(rbg); panel.add(rfill);
+    });
+
+    // abilities
+    panel.add(this.add.text(bx, py + 328, 'ABILITIES', { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
+    ag.moves.forEach((mv, mi) => {
+      const mvhex = '#' + mv.color.toString(16).padStart(6, '0');
+      const my = py + 346 + mi * 36;
+      const mbg = this.add.graphics();
+      mbg.fillStyle(mv.color, 0.12); mbg.fillRoundedRect(bx, my, bw, 30, 4);
+      mbg.lineStyle(1, mv.color, 0.4); mbg.strokeRoundedRect(bx, my, bw, 30, 4);
+      panel.add(mbg);
+      panel.add(this.add.text(bx + 8, my + 8, mv.label, { fontFamily: 'monospace', fontSize: '13px', color: mvhex, fontStyle: 'bold' }));
+      panel.add(this.add.text(bx + bw - 8, my + 8, mv.sub, { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }).setOrigin(1, 0));
+      if (mv.cost > 0) panel.add(this.add.text(bx + 8, my + 20, `${mv.cost}⚡`, { fontFamily: 'monospace', fontSize: '10px', color: COLORS.blue.toString(16).padStart(6,'0') }));
+    });
+
+    panel.add(this.add.text(px + pw / 2, py + ph - 18, 'TAP ANYWHERE TO CLOSE', { fontFamily: 'monospace', fontSize: '11px', color: '#333355' }).setOrigin(0.5, 0));
+    this._closeFn = () => this._closeStats(ov);
+  }
+
+  _closeStats(ov) {
+    if (this.statPanel) { this.statPanel.destroy(); this.statPanel = null; }
+    ov.destroy();
   }
 
   // ── Sprite drawing ──────────────────────────────────────
