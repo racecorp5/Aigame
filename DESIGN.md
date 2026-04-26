@@ -437,6 +437,80 @@ Full-width panel art (~540×300px each). Stylized, readable at small size.
 
 *Note: `item_energy_cell` and `armor_energy_cell` share a name in-game but should have distinct icons — the armor reads as a permanent mounted cell, the consumable as a single-use capsule.*
 
+### Achievement Icons — 20 total
+Each achievement has a 32×32px icon in two states: locked (greyed out) and unlocked (full color).
+
+| Asset ID | Achievement | Design Direction |
+|----------|-------------|-----------------|
+| `ach_first_breach` | FIRST BREACH | Broken lock / breach hole |
+| `ach_clean_sweep` | CLEAN SWEEP | All-green agent row |
+| `ach_on_the_wire` | ON THE WIRE | Flatlining HP bar, last pixel lit |
+| `ach_overclocker` | OVERCLOCKER | Triple item slots, overflowing |
+| `ach_signal_perfect` | SIGNAL PERFECT | Full signal bars, no damage sparks |
+| `ach_chain_reaction` | CHAIN REACTION | 5 linked battle nodes |
+| `ach_static_immunity` | STATIC IMMUNITY | Aura wave hitting a shield |
+| `ach_full_roster` | FULL ROSTER | 7 agent silhouettes in a row |
+| `ach_fully_operational` | FULLY OPERATIONAL | Agent with 4 gear slots filled |
+| `ach_subclass_resolved` | SUBCLASS RESOLVED | Fork/branch icon, one path chosen |
+| `ach_veteran` | VETERAN | Level 5 star badge |
+| `ach_battle_hardened` | BATTLE-HARDENED | Level 10 star badge, cracked |
+| `ach_archivist` | ARCHIVIST | 5-channel grid, all lit |
+| `ach_signal_lost` | SIGNAL LOST | Act 1 world icons going dark |
+| `ach_deep_network` | DEEP NETWORK | Network map half-cleared |
+| `ach_system_critical` | SYSTEM CRITICAL | Cracked grid/circuit |
+| `ach_singularity_denied` | SINGULARITY DENIED | Upload beam cut in half |
+| `ach_completionist` | COMPLETIONIST | Full world map, all nodes green |
+| `ach_rogue_signal` | ROGUE SIGNAL | Agent on autopilot, auto arrow |
+| `ach_ghost_protocol` | GHOST PROTOCOL | Single agent, all others ghosted |
+| `ach_bankrupt` | BANKRUPT | Empty cycles counter, zero |
+
+*Each icon needs locked (monochrome/dim) and unlocked (full color) version — 42 files total.*
+
+### Upgrade Icons — 22 total
+32×32px icons shown in the upgrades screen next to each purchasable upgrade.
+
+**Base Camp upgrades (5):**
+| Asset ID | Upgrade | Design Direction |
+|----------|---------|-----------------|
+| `upg_quick_repair` | QUICK REPAIR | Repair kit with + symbol |
+| `upg_power_surge` | POWER SURGE | Energy cell with upward arrow |
+| `upg_static_shield` | STATIC SHIELD | Shield with signal rings |
+| `upg_surplus_cache` | SURPLUS CACHE | Crate with item inside |
+| `upg_overclock` | OVERCLOCK | Clock face spinning fast |
+
+**Per-agent upgrades (7):**
+| Asset ID | Upgrade | Design Direction |
+|----------|---------|-----------------|
+| `upg_threadling` | SHARP EDGE | Threadling silhouette + blade edge |
+| `upg_patchwork` | TRIAGE | Patchwork silhouette + heal cross |
+| `upg_vault` | REINFORCED | Vault silhouette + armor plate |
+| `upg_netrunner` | DEEP PACKET | Netrunner silhouette + signal drain |
+| `upg_sentinel` | OVERWATCH | Sentinel silhouette + scan beam |
+| `upg_glitcher` | FREEFORM | Glitcher silhouette + clean glow |
+| `upg_bridgelink` | OVERCHANNEL | Bridgelink silhouette + heal arc |
+
+**Network upgrades (5):**
+| Asset ID | Upgrade | Design Direction |
+|----------|---------|-----------------|
+| `upg_signal_boost` | SIGNAL BOOST | Signal bar cluster, boosted |
+| `upg_hardened_nodes` | HARDENED NODES | HP bar with armor plating |
+| `upg_energy_reserve` | ENERGY RESERVE | EN bar overfull at start |
+| `upg_redundancy` | REDUNDANCY | Dead agent with slow-regen arrow |
+| `upg_nexus_link` | NEXUS LINK | NEXUS symbol + EN arc |
+
+**Endgame upgrades (2):**
+| Asset ID | Upgrade | Design Direction |
+|----------|---------|-----------------|
+| `upg_new_game_plus` | NEW GAME+ | NG+ badge with double shard icon |
+| `upg_agent_overclocked` | AGENT OVERCLOCKED | All 7 agents glowing brighter |
+
+### Data Shard Currency
+| Asset ID | Use | Size | Design Direction |
+|----------|-----|------|-----------------|
+| `icon_shards` | Shard counter in HUD / upgrade screen | 24×24px | Crystal shard fragment, cyan/blue glow |
+| `icon_shards_lg` | Large version for upgrade purchase buttons | 48×48px | Same, more detail |
+| `bg_upgrades` | Upgrades screen background | 960×640px | Dark server-room feel, shard particles floating |
+
 ### UI Elements
 | Asset ID | Use | Size |
 |----------|-----|------|
@@ -444,13 +518,12 @@ Full-width panel art (~540×300px each). Stylized, readable at small size.
 | `bg_title` | Title screen background | 960×640px |
 | `bg_overworld` | Overworld map base | 960×640px |
 | `icon_cycles` | Cycles currency indicator | 24×24px |
-| `icon_shards` | Data shard currency indicator | 24×24px |
 | `badge_normal` | Channel difficulty — normal | 48×20px |
 | `badge_miniboss` | Channel difficulty — miniboss | 48×20px |
 | `badge_boss` | Channel difficulty — boss | 48×20px |
 | `panel_border` | Comic panel chrome frame | tileable |
 | `panel_caption_bg` | Caption box background | tileable |
-| `achievement_icon_*` | ~20 achievement icons (locked/unlocked states) | 32×32px |
+| `bg_achievements` | Achievements screen background | 960×640px |
 
 ### Summary Count
 | Category | Count |
@@ -463,11 +536,14 @@ Full-width panel art (~540×300px each). Stylized, readable at small size.
 | Weapon icons | 4 |
 | Armor icons | 4 |
 | Consumable item icons | 4 |
+| Achievement icons (×2 states) | 42 |
+| Upgrade icons | 22 |
+| Data shard currency assets | 3 |
 | Comic panel illustrations | 22 |
 | Special portraits (NEXUS, Cloud) | 2 |
-| UI / logo / misc | ~30 |
-| **Total** | **~137 assets** |
+| UI / logo / misc | ~12 |
+| **Total** | **~186 assets** |
 
-**Highest effort:** Battle backgrounds (19) and comic panels (22) — most pixels, most creative decisions.
+**Highest effort:** Battle backgrounds (19), comic panels (22), achievement icons (42).
 **Quickest wins:** World map icons (19) and gear/item icons (12) — small, reuse thematic shapes.
 **Already in code (replace last):** 7 agent battle sprites — procedural pixel art exists as placeholder.
