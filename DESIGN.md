@@ -405,6 +405,38 @@ Full-width panel art (~540×300px each). Stylized, readable at small size.
 | `portrait_nexus` | NEXUS AI — used in all NEXUS dialog boxes |
 | `portrait_cloud` | THE CLOUD — final confrontation panels |
 
+### Weapon Icons — 4 total
+48×48px item icons, shown in shop gear tab and on equipped agent card.
+
+| Asset ID | Name | Design Direction |
+|----------|------|-----------------|
+| `weapon_bit_shard` | BIT SHARD | Jagged shard/fragment, glowing edge — basic attack tool |
+| `weapon_signal_amp` | SIGNAL AMP | Antenna dish or signal cone — accuracy-focused |
+| `weapon_overcharge_core` | OVERCHARGE CORE | Pulsing power core, unstable glow — high damage, risky |
+| `weapon_precision_bit` | PRECISION BIT | Fine needle/drill shape, clean lines — balanced dmg+accuracy |
+
+### Armor Icons — 4 total
+48×48px item icons, shown in shop gear tab and on equipped agent card.
+
+| Asset ID | Name | Design Direction |
+|----------|------|-----------------|
+| `armor_signal_mesh` | SIGNAL MESH | Woven grid pattern, faint signal lines — light, tech-look |
+| `armor_energy_cell` | ENERGY CELL | Battery/capacitor shape, energy bar visible — energy-focused |
+| `armor_repair_plating` | REPAIR PLATING | Patched metal plate with visible welds — self-repair feel |
+| `armor_fortress_shell` | FORTRESS SHELL | Heavy angular shell/carapace — max defense, imposing |
+
+### Consumable Item Icons — 4 total
+48×48px, shown in shop items tab and in-battle item popup.
+
+| Asset ID | Name | Design Direction |
+|----------|------|-----------------|
+| `item_repair_kit` | REPAIR KIT | Wrench + circuit patch — repair/restore tool |
+| `item_energy_cell` | ENERGY CELL | Lightning bolt in a capsule — energy restore |
+| `item_sig_boost` | SIG BOOST | Signal tower with upward arrow — accuracy enhancer |
+| `item_emp_charge` | EMP CHARGE | Burst/explosion ring, sparks — offensive throwable |
+
+*Note: `item_energy_cell` and `armor_energy_cell` share a name in-game but should have distinct icons — the armor reads as a permanent mounted cell, the consumable as a single-use capsule.*
+
 ### UI Elements
 | Asset ID | Use | Size |
 |----------|-----|------|
@@ -428,11 +460,14 @@ Full-width panel art (~540×300px each). Stylized, readable at small size.
 | Enemy sprites | 19 |
 | World map icons | 19 |
 | Battle backgrounds | 19 |
+| Weapon icons | 4 |
+| Armor icons | 4 |
+| Consumable item icons | 4 |
 | Comic panel illustrations | 22 |
 | Special portraits (NEXUS, Cloud) | 2 |
 | UI / logo / misc | ~30 |
-| **Total** | **~125 assets** |
+| **Total** | **~137 assets** |
 
 **Highest effort:** Battle backgrounds (19) and comic panels (22) — most pixels, most creative decisions.
-**Quickest wins:** World map icons (19) — small silhouettes, reuse enemy designs.
+**Quickest wins:** World map icons (19) and gear/item icons (12) — small, reuse thematic shapes.
 **Already in code (replace last):** 7 agent battle sprites — procedural pixel art exists as placeholder.
