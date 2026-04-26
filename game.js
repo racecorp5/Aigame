@@ -1,4 +1,4 @@
-const W = 390, H = 844, AUTO_MS = 8000;
+const W = 390, H = 844, AUTO_MS = 5000;
 
 const COLORS = {
   bg: 0x050510, grid: 0x0d0d2a, green: 0x00ff88, red: 0xff3355,
