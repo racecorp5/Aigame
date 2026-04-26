@@ -976,6 +976,7 @@ class Battle extends Phaser.Scene {
 
   create() {
     this._grid();
+    this._spawnParticles();
     this._enemyUI();
     this._logUI();
     this._timerUI();
@@ -1030,6 +1031,63 @@ class Battle extends Phaser.Scene {
     this.add.text(W / 2, 8, 'SYSTEM BREACH', {
       fontFamily: 'monospace', fontSize: '16px', color: '#00ff88', letterSpacing: 4,
     }).setOrigin(0.5, 0);
+  }
+
+  // ── Per-mechanic ambient particles ──────────────────────
+  _spawnParticles() {
+    // Generate base textures once — reused across scene restarts
+    if (!this.textures.exists('ptx_dot')) {
+      const g = this.make.graphics({ add: false });
+      g.fillStyle(0xffffff, 1); g.fillCircle(4, 4, 3);
+      g.generateTexture('ptx_dot', 8, 8); g.destroy();
+    }
+    if (!this.textures.exists('ptx_sq')) {
+      const g = this.make.graphics({ add: false });
+      g.fillStyle(0xffffff, 1); g.fillRect(1, 1, 6, 6);
+      g.generateTexture('ptx_sq', 8, 8); g.destroy();
+    }
+    if (!this.textures.exists('ptx_bar')) {
+      const g = this.make.graphics({ add: false });
+      g.fillStyle(0xffffff, 1); g.fillRect(0, 3, 8, 2);
+      g.generateTexture('ptx_bar', 8, 8); g.destroy();
+    }
+
+    const full  = { x: { min: 0, max: W }, y: { min: 0, max: H } };
+    const top   = { x: { min: 0, max: W }, y: { min: 0,      max: 200 } };
+    const floor = { x: { min: 0, max: W }, y: { min: H - 180, max: H } };
+
+    // tex, tint[], speed, lifespan, alpha, scale, angle, gravityY, freq(ms), qty, spawn zone
+    const cfgs = {
+      signal:      ['ptx_sq',  [0xffffff,0x888888,0xcccccc,0x444444], {min:2,max:15},   {min:200,max:800},   {start:0.8,end:0}, {start:0.3,end:0.1}, {min:0,max:360},   0,   55,  1, full  ],
+      battery:     ['ptx_dot', [0xffff00,0x00ff88,0xffaa00],           {min:20,max:50},  {min:500,max:1200},  {start:0.9,end:0}, {start:0.5,end:0.0}, {min:80,max:100},  40,  90,  1, top   ],
+      echo:        ['ptx_dot', [0x4466ff,0x8888ff,0xaaaaff],           {min:5,max:30},   {min:800,max:2500},  {start:0.5,end:0}, {start:1.2,end:0.0}, {min:0,max:360},   0,   140, 2, full  ],
+      pulse:       ['ptx_dot', [0x00ffff,0xffffff,0x44ffff],           {min:40,max:100}, {min:200,max:500},   {start:1.0,end:0}, {start:0.5,end:0},   {min:0,max:360},   0,   38,  2, full  ],
+      savestate:   ['ptx_sq',  [0xff00ff,0x00ffff,0xffff00,0xff4444,0x44ff44], {min:3,max:20}, {min:1500,max:4000}, {start:0.8,end:0}, {start:0.5,end:0.2}, {min:0,max:360}, 0, 110, 1, full ],
+      freeze:      ['ptx_dot', [0xaaddff,0xffffff,0xddeeff],           {min:5,max:15},   {min:2000,max:5000}, {start:0.7,end:0}, {start:0.4,end:0.1}, {min:80,max:100},  10,  75,  1, top   ],
+      heat:        ['ptx_dot', [0xff4400,0xff8800,0xffcc00],           {min:25,max:70},  {min:400,max:1000},  {start:0.9,end:0}, {start:0.5,end:0.0}, {min:260,max:280}, -60, 45,  2, floor ],
+      entangle:    ['ptx_bar', [0xffffff,0xdddddd,0x888888],           {min:3,max:12},   {min:2000,max:5000}, {start:0.4,end:0}, {start:0.4,end:0.8}, {min:0,max:360},   5,   190, 1, full  ],
+      summon:      ['ptx_dot', [0x00ff88,0x00cc66,0x88ffcc],           {min:10,max:35},  {min:600,max:1800},  {start:0.9,end:0}, {start:0.2,end:0.6}, {min:0,max:360},   0,   110, 1, full  ],
+      predict:     ['ptx_bar', [0xff4488,0xff88aa,0xffaac0],           {min:30,max:80},  {min:300,max:800},   {start:0.7,end:0}, {start:1.5,end:0.3}, {min:175,max:185}, 0,   75,  1, full  ],
+      packetloss:  ['ptx_sq',  [0x4488ff,0x0066cc,0x0033aa],           {min:20,max:60},  {min:300,max:800},   {start:1.0,end:0}, {start:0.5,end:0.0}, {min:0,max:360},   0,   65,  1, full  ],
+      overflow:    ['ptx_sq',  [0x00ff88,0x0088ff,0x88ff00],           {min:5,max:20},   {min:1200,max:3000}, {start:0.8,end:0}, {start:0.3,end:0.1}, {min:260,max:280}, -20, 85,  2, floor ],
+      velocity:    ['ptx_bar', [0x6666ff,0x9999ff,0xffffff],           {min:80,max:200}, {min:150,max:400},   {start:0.8,end:0}, {start:1.2,end:0.2}, {min:175,max:185}, 0,   30,  2, full  ],
+      transaction: ['ptx_dot', [0xffcc00,0xffaa00,0xffdd44],           {min:8,max:25},   {min:800,max:2000},  {start:0.8,end:0}, {start:0.4,end:0.1}, {min:0,max:360},   15,  120, 1, top   ],
+      blackout:    ['ptx_dot', [0xffffff,0xffffaa,0xffff55],           {min:60,max:150}, {min:80,max:200},    {start:1.0,end:0}, {start:0.4,end:0},   {min:0,max:360},   0,   550, 5, full  ],
+      vital:       ['ptx_dot', [0xff3355,0x00ff88],                    {min:5,max:25},   {min:600,max:1800},  {start:0.8,end:0}, {start:0.4,end:0.1}, {min:0,max:360},   0,   140, 1, full  ],
+      distributed: ['ptx_dot', [0x44ff88,0x22cc66,0x88ffaa],           {min:3,max:20},   {min:1200,max:3500}, {start:0.6,end:0}, {start:0.2,end:0.4}, {min:0,max:360},   0,   95,  1, full  ],
+      delay:       ['ptx_dot', [0x8888ff,0x4444cc,0xbbbbff],           {min:2,max:8},    {min:3000,max:6000}, {start:0.5,end:0}, {start:0.3,end:0.1}, {min:0,max:360},   0,   230, 1, full  ],
+      upload:      ['ptx_dot', [0xaaddff,0xffffff,0x88ccff],           {min:30,max:80},  {min:500,max:1200},  {start:0.8,end:0}, {start:0.3,end:0.0}, {min:260,max:280}, -50, 50,  2, floor ],
+    };
+
+    const c = cfgs[this.mechanic];
+    if (!c) return;
+    const [tex, tint, speed, lifespan, alpha, scale, angle, gravityY, freq, qty, pos] = c;
+
+    this.add.particles(0, 0, tex, {
+      x: pos.x, y: pos.y,
+      speed, lifespan, alpha, scale, angle, gravityY,
+      frequency: freq, quantity: qty, tint,
+    }).setDepth(-1);
   }
 
   // ── Enemy UI  y:32–210 ──────────────────────────────────
