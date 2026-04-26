@@ -9,7 +9,7 @@ const AGENT_BASES = {
   vault:      { maxHp: 140, maxEn: 40, signal: 70, autonomy: 8  },
 };
 
-const AGENT_COSTS = { threadling: 0, patchwork: 150, vault: 200 };
+const AGENT_COSTS = { threadling: 0, patchwork: 80, vault: 160 };
 
 // ── Gear catalogs ─────────────────────────────────────────
 
@@ -30,7 +30,7 @@ const ARMORS = [
 // ── Default save ──────────────────────────────────────────
 
 const DEFAULT_SAVE = {
-  cycles: 0,
+  cycles: 50,
   agents: [
     { id: 'threadling', owned: true,  active: true,  hp: 100, xp: 0, level: 1 },
     { id: 'patchwork',  owned: false, active: false, hp: 80,  xp: 0, level: 1 },

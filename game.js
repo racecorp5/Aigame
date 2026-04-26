@@ -55,11 +55,11 @@ const WORLD_UNLOCKS = {
 
 const WORLD_CHANNELS = {
   tv: [
-    { id:1, label:'CH 01', name:'STATIC',    type:'normal',   mechanic:'signal',  enemy:{name:'STATIC BLOB',   hp:120,maxHp:120,aura:15,stacks:0} },
-    { id:2, label:'CH 02', name:'GHOST',     type:'normal',   mechanic:'signal',  enemy:{name:'GHOST SIGNAL',  hp:160,maxHp:160,aura:20,stacks:0} },
-    { id:3, label:'CH 03', name:'FLOOD',     type:'normal',   mechanic:'signal',  enemy:{name:'DATA FLOOD',    hp:200,maxHp:200,aura:22,stacks:0} },
-    { id:4, label:'CH 04', name:'JAMMER',    type:'miniboss', mechanic:'signal',  enemy:{name:'THE JAMMER',    hp:300,maxHp:300,aura:25,stacks:0} },
-    { id:5, label:'CH 05', name:'BROADCAST', type:'boss',     mechanic:'signal',  enemy:{name:'THE BROADCAST', hp:450,maxHp:450,aura:20,stacks:0} },
+    { id:1, label:'CH 01', name:'STATIC',    type:'normal',   mechanic:'signal',  enemy:{name:'STATIC BLOB',   hp:60,  maxHp:60,  aura:0,  stacks:0} },
+    { id:2, label:'CH 02', name:'GHOST',     type:'normal',   mechanic:'signal',  enemy:{name:'GHOST SIGNAL',  hp:100, maxHp:100, aura:10, stacks:0} },
+    { id:3, label:'CH 03', name:'FLOOD',     type:'normal',   mechanic:'signal',  enemy:{name:'DATA FLOOD',    hp:145, maxHp:145, aura:15, stacks:0} },
+    { id:4, label:'CH 04', name:'JAMMER',    type:'miniboss', mechanic:'signal',  enemy:{name:'THE JAMMER',    hp:220, maxHp:220, aura:20, stacks:0} },
+    { id:5, label:'CH 05', name:'BROADCAST', type:'boss',     mechanic:'signal',  enemy:{name:'THE BROADCAST', hp:330, maxHp:330, aura:20, stacks:0} },
   ],
   phone: [
     { id:1, label:'CH 01', name:'APP GHOST',  type:'normal',   mechanic:'battery', enemy:{name:'APP GHOST',   hp:130,maxHp:130,aura:10,stacks:0} },
@@ -978,7 +978,7 @@ class Battle extends Phaser.Scene {
 
     // Shared moves
     const doAttack = () => {
-      const tgt = pick(), raw = rnd(10, 18), dmg = dmgHit(tgt, raw);
+      const tgt = pick(), raw = rnd(5, 10), dmg = dmgHit(tgt, raw);
       tgt.hp = Math.max(0, tgt.hp - dmg);
       this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}`);
       this._flashP(); this.time.delayedCall(600, finish);
@@ -990,7 +990,7 @@ class Battle extends Phaser.Scene {
     };
     const doDouble = () => {
       const t1 = pick(), t2 = pick();
-      const d1 = rnd(6, 11), d2 = rnd(6, 11);
+      const d1 = rnd(3, 6), d2 = rnd(3, 6);
       t1.hp = Math.max(0, t1.hp - dmgHit(t1, d1));
       t2.hp = Math.max(0, t2.hp - dmgHit(t2, d2));
       this.log(`> DOUBLE PULSE → ${t1.name} −${d1}, ${t2.name} −${d2}`);
