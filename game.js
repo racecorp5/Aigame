@@ -1,4 +1,4 @@
-const W = 390, H = 844, AUTO_MS = 5000;
+const W = 390, H = 844, AUTO_MS = 2000;
 
 const COLORS = {
   bg: 0x050510, grid: 0x0d0d2a, green: 0x00ff88, red: 0xff3355,
@@ -780,7 +780,7 @@ class Battle extends Phaser.Scene {
     this.channel    = ch;
     this.channelIdx = (data && data.channelIdx != null) ? data.channelIdx : 0;
     this.mechanic   = ch.mechanic || 'signal';
-    this.autoMs     = this.mechanic === 'pulse' ? 3000 : AUTO_MS;
+    this.autoMs     = this.mechanic === 'pulse' ? 1500 : AUTO_MS;
     this.save       = loadSave();
 
     this.agents = DEFS
