@@ -1885,7 +1885,11 @@ class Battle extends Phaser.Scene {
     this.phantomActive = false;
   }
 
-  preload() {}
+  preload() {
+    ['threadling','patchwork','vault','netrunner','sentinel','glitcher','bridgelink'].forEach(id => {
+      this.load.image(`ag_${id}`, `assets/system_breach_full_asset_pack/agents/sprites/sprite_${id}.png`);
+    });
+  }
 
   create() {
     getMusicEng(this)?.play(this.mechanic);
@@ -2014,6 +2018,7 @@ class Battle extends Phaser.Scene {
     this.blob = this.add.graphics();
     this._blob();
     this.tweens.add({ targets: this.blob, scaleX: 1.06, scaleY: 0.95, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this._blobBaseY = this.blob.y;
 
     const bw = W - 60;
     const hbg = this.add.graphics();
@@ -2075,9 +2080,13 @@ class Battle extends Phaser.Scene {
       const cx = startX + i * (cw + gap), cy = 368;
       const bg = this.add.graphics();
 
-      // sprite centered in 118×90 area (sprite is 44×64px)
-      const sp = this.add.graphics();
-      this._sprite(sp, ag.id, cx + 37, cy + 13);
+      // sprite centered in 118×90 area (sprite is 44×66px)
+      const sp = this._makeSpriteNode(ag, cx + 37, cy + 13);
+      const _baseSpY = sp.y, _baseSpX = sp.x;
+      const _idleTween = this.tweens.add({
+        targets: sp, y: _baseSpY + 3,
+        duration: 1300 + i * 180, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
 
       // divider under sprite
       const sdiv = this.add.graphics();
@@ -2105,7 +2114,7 @@ class Battle extends Phaser.Scene {
       const tap = this.add.zone(cx, cy, cw, 90).setOrigin(0).setInteractive();
       tap.on('pointerdown', () => this._showStats(i));
 
-      return { bg, sp, nm, cl, hf, hl, ef, el, sg, st, cx, cy, cw, ch, bw };
+      return { bg, sp, nm, cl, hf, hl, ef, el, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
     });
     this.agents.forEach((_, i) => this._reCard(i));
     this._div(554);
@@ -2302,6 +2311,26 @@ class Battle extends Phaser.Scene {
     const blackoutPenalty = this.mechanic === 'blackout' ? 15 : 0;
     const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     ag.defending = false; ag.fortified = false;
+
+    // Attack lunge animation for active agent sprite
+    if (id !== 'item' && id !== 'defend') {
+      const card = this.cards[this.activeIdx];
+      if (card?.sp) {
+        this.tweens.killTweensOf(card.sp);
+        const baseY = card._baseSpY || 0;
+        this.tweens.add({
+          targets: card.sp, y: baseY - 14,
+          duration: 110, yoyo: true, ease: 'Power2.easeOut',
+          onComplete: () => {
+            card.sp.y = baseY;
+            card._idleTween = this.tweens.add({
+              targets: card.sp, y: baseY + 3,
+              duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+            });
+          },
+        });
+      }
+    }
 
     // Transaction world: each action costs 2 cycles
     if (this.mechanic === 'transaction' && id !== 'item' && id !== 'defend') {
@@ -2689,6 +2718,7 @@ class Battle extends Phaser.Scene {
     };
 
     const doAttack = () => {
+      this.tweens.add({ targets: this.blob, y: (this._blobBaseY || 0) + 20, duration: 120, yoyo: true, ease: 'Power2.easeOut' });
       const tgt = pick();
       let raw = rnd(5, 10) + heat + ovfl;
       if (this.enemy.vulnBonus) raw = Math.ceil(raw * (1 + this.enemy.vulnBonus / 100));
@@ -2823,6 +2853,14 @@ class Battle extends Phaser.Scene {
         this.cameras.main.flash(80, 255, 50, 50, false);
         this._burstAt(tx, ty, [0xff3355, 0xff8844, 0xffffff], 12, 'ptx_dot', 350);
         getSoundMgr(this)?.play('enemy_hit');
+        if (card) {
+          const sp = card.sp, baseX = card._baseSpX || 0;
+          this.tweens.add({
+            targets: sp, x: baseX + 7,
+            duration: 45, yoyo: true, repeat: 3, ease: 'Linear',
+            onComplete: () => { sp.x = baseX; },
+          });
+        }
       },
     });
   }
@@ -3230,6 +3268,26 @@ class Battle extends Phaser.Scene {
       const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
       if (sc) { g.fillStyle(sc.color, 0.22); g.fillRect(ox, oy, 44, 66); }
     }
+  }
+
+  // Returns an Image (if texture loaded) or Graphics (pixel art fallback)
+  _makeSpriteNode(ag, x, y) {
+    const key = `ag_${ag.id}`;
+    if (this.textures.exists(key)) {
+      const img = this.add.image(x + 22, y + 33, key).setOrigin(0.5);
+      if (ag.subclass) {
+        const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
+        if (sc) img.setTint(sc.color);
+      }
+      return img;
+    }
+    const g = this.add.graphics();
+    _drawSprite(g, ag.id, x, y);
+    if (ag.subclass) {
+      const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
+      if (sc) { g.fillStyle(sc.color, 0.22); g.fillRect(x, y, 44, 66); }
+    }
+    return g;
   }
 }
 
