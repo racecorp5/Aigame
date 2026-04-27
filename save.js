@@ -95,6 +95,12 @@ function loadSave() {
     DEFAULT_SAVE.agents.forEach(da => {
       if (!s.gear.equipped[da.id]) s.gear.equipped[da.id] = { weapon: null, armor: null };
     });
+    // migrate: ensure active field exists and at least one owned agent is active
+    s.agents.forEach(a => { if (typeof a.active !== 'boolean') a.active = a.owned; });
+    if (!s.agents.some(a => a.owned && a.active)) {
+      const first = s.agents.find(a => a.owned);
+      if (first) first.active = true;
+    }
     // migrate: add items if missing
     if (!s.items) s.items = _clone(DEFAULT_SAVE.items);
     // migrate: new progression fields
@@ -111,8 +117,8 @@ function loadSave() {
 // ── Shard rewards ─────────────────────────────────────────
 
 const SHARD_AWARDS = { normal: 0, miniboss: 3, boss: 8 };
-function awardShards(save, channelType) {
-  const n = SHARD_AWARDS[channelType] || 0;
+function awardShards(save, channelType, mult = 1) {
+  const n = Math.round((SHARD_AWARDS[channelType] || 0) * mult);
   save.shards = (save.shards || 0) + n;
   return n;
 }

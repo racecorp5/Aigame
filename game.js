@@ -374,7 +374,284 @@ const UPGRADES_CATALOG = [
   { id:'energy_reserve', cat:'NETWORK',   name:'ENERGY RESERVE',          cost:6,  desc:'All agents start at +10 EN' },
   { id:'redundancy',     cat:'NETWORK',   name:'REDUNDANCY',              cost:10, desc:'Dead agents regain 5 HP per battle' },
   { id:'nexus_link',     cat:'NETWORK',   name:'NEXUS LINK',              cost:15, desc:"Bridgelink Sync restores 10 EN too" },
+  { id:'ng_plus',        cat:'ENDGAME',   name:'NEW GAME+',               cost:20, desc:'Enemy HP ×1.5. Shard rewards ×2' },
 ];
+
+// ── Per-world music profiles ───────────────────────────────
+// root=MIDI, scale=intervals, bpm, wave, filt=lpf Hz
+// mel=16 scale-degree indices (-1=rest), bass=8 semitone offsets from root (-1=rest)
+const MUSIC_PROFILES = {
+  signal:      { root:62, scale:[0,2,3,5,7,8,10],    bpm:90,  wave:'square',    filt:900,
+    mel:[-1,2,-1,0,  -1,3,-1,2,  -1,0,-1,2,  -1,3,-1,-1], bass:[0,-1,7,-1, 0,-1,5,-1] },
+  battery:     { root:60, scale:[0,2,4,5,7,9,11],    bpm:108, wave:'sawtooth',  filt:1400,
+    mel:[0,2,4,2,  0,4,5,4,  2,4,5,4,  2,5,4,2],    bass:[0,-1,5,-1, 0,-1,4,-1] },
+  echo:        { root:57, scale:[0,2,3,5,7,8,10],    bpm:70,  wave:'sine',      filt:600,
+    mel:[0,-1,-1,2, 3,-1,-1,2, 0,-1,-1,3, 2,-1,-1,-1], bass:[0,-1,-1,-1, 5,-1,-1,-1] },
+  pulse:       { root:64, scale:[0,2,4,7,9],          bpm:128, wave:'square',    filt:1800,
+    mel:[0,2,0,4,  2,0,4,2,  0,4,2,0,  4,2,0,-1],   bass:[0,-1,7,-1, 0,-1,5,-1] },
+  savestate:   { root:60, scale:[0,2,4,5,7,9,11],    bpm:80,  wave:'square',    filt:800,
+    mel:[0,-1,4,-1, 2,-1,4,-1, 5,-1,4,-1, 2,-1,0,-1], bass:[0,-1,-1,7, 5,-1,-1,4] },
+  freeze:      { root:58, scale:[0,2,4,6,8,10],      bpm:60,  wave:'sine',      filt:500,
+    mel:[0,-1,-1,-1, 2,-1,-1,-1, 4,-1,-1,-1, 2,-1,-1,-1], bass:[0,-1,-1,-1, 6,-1,-1,-1] },
+  heat:        { root:63, scale:[0,1,3,5,7,8,10],    bpm:110, wave:'sawtooth',  filt:1600,
+    mel:[0,1,3,1,  0,3,5,3,  1,3,5,3,  1,5,3,1],    bass:[0,-1,5,-1, 0,-1,7,-1] },
+  entangle:    { root:56, scale:[0,1,3,4,6,7,9,10],  bpm:75,  wave:'triangle',  filt:700,
+    mel:[0,-1,3,-1, 1,-1,4,-1, 0,-1,6,-1, 3,-1,1,-1], bass:[0,-1,6,-1, 3,-1,9,-1] },
+  summon:      { root:61, scale:[0,2,3,5,7,8,11],    bpm:95,  wave:'sawtooth',  filt:1200,
+    mel:[0,2,-1,3,  0,5,-1,3,  0,2,-1,5,  3,-1,2,-1], bass:[0,-1,5,-1, 0,-1,7,-1] },
+  predict:     { root:59, scale:[0,2,3,5,7,8,10],    bpm:80,  wave:'triangle',  filt:700,
+    mel:[-1,0,-1,3, -1,2,-1,5, -1,0,-1,3, -1,5,-1,2], bass:[0,-1,-1,7, 3,-1,-1,5] },
+  packetloss:  { root:62, scale:[0,2,4,5,7,9,11],    bpm:120, wave:'square',    filt:2000,
+    mel:[0,-1,2,0,  3,-1,0,2,  0,4,-1,2,  3,0,-1,4],  bass:[0,-1,7,-1, 0,-1,5,-1] },
+  overflow:    { root:60, scale:[0,1,3,5,7,8,10],    bpm:115, wave:'sawtooth',  filt:1800,
+    mel:[0,3,1,3,  0,5,3,5,  1,3,5,3,  5,3,1,0],    bass:[0,-1,5,-1, 0,-1,8,-1] },
+  velocity:    { root:64, scale:[0,2,4,7,9],          bpm:150, wave:'sawtooth',  filt:2500,
+    mel:[0,4,2,4,  0,2,4,2,  4,2,0,4,  2,4,0,-1],   bass:[0,-1,7,-1, 0,-1,5,-1] },
+  transaction: { root:60, scale:[0,2,4,5,7,9,10],    bpm:85,  wave:'triangle',  filt:900,
+    mel:[0,-1,2,-1, 5,-1,2,-1, 0,-1,4,-1, 2,-1,0,-1], bass:[0,-1,7,-1, 5,-1,0,-1] },
+  blackout:    { root:56, scale:[0,1,3,5,6,8,10],    bpm:65,  wave:'sine',      filt:400,
+    mel:[0,-1,-1,-1, 3,-1,-1,-1, 1,-1,-1,-1, 5,-1,-1,-1], bass:[0,-1,-1,-1, 6,-1,-1,-1] },
+  vital:       { root:62, scale:[0,2,3,5,7,9,10],    bpm:90,  wave:'sine',      filt:800,
+    mel:[0,2,3,2,  0,3,5,3,  2,3,5,3,  2,5,3,2],    bass:[0,-1,5,-1, 0,-1,7,-1] },
+  distributed: { root:61, scale:[0,2,4,6,8,10],      bpm:100, wave:'square',    filt:1200,
+    mel:[0,2,-1,4,  2,-1,0,4,  0,-1,2,6,  4,-1,2,0],  bass:[0,-1,6,-1, 0,-1,4,-1] },
+  delay:       { root:59, scale:[0,2,3,5,7,8,10],    bpm:72,  wave:'sine',      filt:600,
+    mel:[0,-1,-1,2, -1,-1,3,-1, -1,2,-1,-1, 0,-1,-1,-1], bass:[0,-1,-1,-1, 5,-1,-1,-1] },
+  upload:      { root:62, scale:[0,2,3,5,7,8,11],    bpm:105, wave:'sawtooth',  filt:1400,
+    mel:[0,2,3,2,  0,3,5,3,  2,5,3,5,  3,6,5,-1],   bass:[0,-1,5,-1, 0,-1,7,-1] },
+  map:         { root:60, scale:[0,2,4,7,9],          bpm:72,  wave:'sine',      filt:600,
+    mel:[-1,0,-1,2, -1,3,-1,0, -1,2,-1,4, -1,2,-1,-1], bass:[0,-1,-1,-1, 5,-1,-1,-1] },
+};
+
+// ── Audio engine ───────────────────────────────────────────
+let _audioCtx = null;
+let _soundMgr  = null;
+let _musicEng  = null;
+
+function _getAudioCtx(scene) {
+  if (_audioCtx) return _audioCtx;
+  try {
+    _audioCtx = scene?.sound?.context
+             || new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) {}
+  return _audioCtx;
+}
+
+class SoundManager {
+  constructor(ctx) {
+    this.ctx = ctx;
+    const comp = ctx.createDynamicsCompressor();
+    comp.connect(ctx.destination);
+    this.out = comp;
+  }
+
+  _osc(freq, type, t, dur, vol) {
+    try {
+      const ctx = this.ctx;
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(g); g.connect(this.out);
+      osc.start(t); osc.stop(t + dur + 0.01);
+    } catch (e) {}
+  }
+
+  _noise(t, dur, vol, cutoff = 2000) {
+    try {
+      const ctx = this.ctx;
+      const n   = Math.ceil(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+      const d   = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      const src  = ctx.createBufferSource();
+      const filt = ctx.createBiquadFilter();
+      const g    = ctx.createGain();
+      src.buffer = buf;
+      filt.type = 'bandpass'; filt.frequency.value = cutoff; filt.Q.value = 0.5;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(filt); filt.connect(g); g.connect(this.out);
+      src.start(t); src.stop(t + dur + 0.01);
+    } catch (e) {}
+  }
+
+  play(type) {
+    try {
+      const ctx = this.ctx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime + 0.01;
+      switch (type) {
+        case 'hit':
+          this._osc(220, 'square',   t,       0.08, 0.25);
+          this._osc(180, 'sawtooth', t + 0.04, 0.10, 0.18);
+          this._noise(t, 0.05, 0.12, 1500);
+          break;
+        case 'hit_hard':
+          this._osc(150, 'sawtooth', t, 0.14, 0.35);
+          this._osc(75,  'square',   t, 0.18, 0.25);
+          this._noise(t, 0.09, 0.22, 800);
+          break;
+        case 'miss':
+          this._osc(440, 'sine', t,       0.05, 0.12);
+          this._osc(330, 'sine', t + 0.04, 0.06, 0.08);
+          break;
+        case 'heal':
+          this._osc(523, 'sine', t,       0.10, 0.18);
+          this._osc(659, 'sine', t + 0.07, 0.12, 0.20);
+          this._osc(784, 'sine', t + 0.14, 0.14, 0.22);
+          break;
+        case 'defend':
+          this._osc(260, 'triangle', t, 0.14, 0.22);
+          this._osc(300, 'triangle', t, 0.14, 0.18);
+          break;
+        case 'enemy_hit':
+          this._osc(110, 'sawtooth', t, 0.12, 0.30);
+          this._noise(t, 0.08, 0.18, 600);
+          break;
+        case 'levelup':
+          [523, 659, 784, 1047].forEach((f, i) => this._osc(f, 'triangle', t + i * 0.09, 0.20, 0.28));
+          break;
+        case 'win':
+          [523, 659, 784].forEach((f, i) => this._osc(f, 'triangle', t + i * 0.12, 0.35, 0.22));
+          this._osc(1047, 'triangle', t + 0.36, 0.55, 0.28);
+          break;
+        case 'lose':
+          [330, 294, 247, 220].forEach((f, i) => this._osc(f, 'square', t + i * 0.14, 0.18, 0.18));
+          break;
+        case 'click':
+          this._osc(880, 'square', t, 0.03, 0.10);
+          break;
+        case 'item':
+          this._osc(660, 'sine', t,       0.08, 0.18);
+          this._osc(880, 'sine', t + 0.06, 0.10, 0.20);
+          break;
+        case 'unlock':
+          [440, 554, 659, 880].forEach((f, i) => this._osc(f, 'sine', t + i * 0.09, 0.22, 0.20));
+          break;
+        case 'charge': {
+          const osc = ctx.createOscillator();
+          const g   = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(80,  t);
+          osc.frequency.linearRampToValueAtTime(400, t + 0.50);
+          g.gain.setValueAtTime(0.28, t);
+          g.gain.linearRampToValueAtTime(0.0001, t + 0.50);
+          osc.connect(g); g.connect(this.out);
+          osc.start(t); osc.stop(t + 0.52);
+          break;
+        }
+        case 'freeze':
+          this._noise(t, 0.20, 0.14, 3000);
+          this._osc(2000, 'sine', t,       0.18, 0.08);
+          this._osc(3200, 'sine', t + 0.06, 0.14, 0.06);
+          break;
+        case 'scan':
+          this._osc(660, 'triangle', t,       0.08, 0.15);
+          this._osc(880, 'triangle', t + 0.08, 0.10, 0.12);
+          break;
+        case 'boost':
+          this._osc(440, 'triangle', t,       0.10, 0.16);
+          this._osc(550, 'triangle', t + 0.05, 0.12, 0.18);
+          break;
+      }
+    } catch (e) {}
+  }
+}
+
+class MusicEngine {
+  constructor(ctx) {
+    this.ctx      = ctx;
+    this._running = false;
+    this._step    = 0;
+    this._nextT   = 0;
+    this._prof    = null;
+    const comp    = ctx.createDynamicsCompressor();
+    comp.connect(ctx.destination);
+    this.out = ctx.createGain();
+    this.out.gain.value = 0.16;
+    this.out.connect(comp);
+  }
+
+  play(mechanic) {
+    this._running = false;
+    this._prof  = MUSIC_PROFILES[mechanic] || MUSIC_PROFILES.signal;
+    this._step  = 0;
+    this._nextT = 0;
+    this._running = true;
+    if (this.ctx.state === 'suspended') this.ctx.resume().then(() => this._tick());
+    else this._tick();
+  }
+
+  stop() { this._running = false; }
+
+  _midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+
+  _note(hz, type, filt, t, dur, vol) {
+    try {
+      const ctx  = this.ctx;
+      const osc  = ctx.createOscillator();
+      const lpf  = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = hz;
+      lpf.type = 'lowpass'; lpf.frequency.value = filt;
+      gain.gain.setValueAtTime(vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(lpf); lpf.connect(gain); gain.connect(this.out);
+      osc.start(t); osc.stop(t + dur + 0.01);
+    } catch (e) {}
+  }
+
+  _tick() {
+    if (!this._running) return;
+    const ctx = this.ctx;
+    const p   = this._prof;
+    const sd  = 60 / p.bpm / 4;   // 16th-note duration
+    const la  = 0.15;              // lookahead window
+    if (this._nextT === 0) this._nextT = ctx.currentTime;
+    while (this._nextT < ctx.currentTime + la) {
+      const step = this._step;
+      const t    = this._nextT;
+      // Melody
+      const mi = p.mel[step % 16];
+      if (mi >= 0) {
+        const semi = p.scale[mi % p.scale.length];
+        this._note(this._midi(p.root + semi + 12), p.wave, p.filt, t, sd * 0.82, 0.13);
+      }
+      // Bass (8-step cycle)
+      const bi = p.bass[step % 8];
+      if (bi >= 0) this._note(this._midi(p.root + bi), 'triangle', 500, t, sd * 1.7, 0.10);
+      // Atmospheric pad chord on step 0 of every bar
+      if (step % 16 === 0) {
+        [0, 2, 4].map(di => p.scale[di % p.scale.length]).forEach(semi => {
+          this._note(this._midi(p.root + semi + 24), 'sine', 2000, t, sd * 14, 0.035);
+        });
+      }
+      this._step  = (this._step + 1) % 16;
+      this._nextT += sd;
+    }
+    setTimeout(() => { if (this._running) this._tick(); }, 50);
+  }
+}
+
+function getSoundMgr(scene) {
+  try {
+    const ctx = _getAudioCtx(scene);
+    if (ctx && !_soundMgr) _soundMgr = new SoundManager(ctx);
+    return _soundMgr;
+  } catch (e) { return null; }
+}
+
+function getMusicEng(scene) {
+  try {
+    const ctx = _getAudioCtx(scene);
+    if (ctx && !_musicEng) _musicEng = new MusicEngine(ctx);
+    return _musicEng;
+  } catch (e) { return null; }
+}
 
 // ── World state helper ─────────────────────────────────────
 function worldState(worldId, save) {
@@ -382,6 +659,68 @@ function worldState(worldId, save) {
   const ws = save.worlds && save.worlds[worldId];
   if (!ws || !ws.cleared) return 'available';
   return ws.cleared.every(c => c) ? 'cleared' : 'available';
+}
+
+// ============================================================
+class TitleScreen extends Phaser.Scene {
+  constructor() { super({ key: 'TitleScreen' }); }
+
+  create() {
+    // Grid bg
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d2a, 0.7);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+    const s = this.add.graphics();
+    s.fillStyle(0, 0.15); for (let y = 0; y < H; y += 4) s.fillRect(0, y, W, 2);
+
+    // Animated signal rings
+    this._rings = [];
+    for (let i = 0; i < 4; i++) {
+      const rg = this.add.graphics();
+      this._rings.push({ g: rg, phase: i / 4 });
+    }
+
+    // Game title
+    const title = this.add.text(W / 2, H * 0.30, 'SYSTEM\nBREACH', {
+      fontFamily: 'monospace', fontSize: '54px', color: '#00ff88',
+      fontStyle: 'bold', letterSpacing: 6, align: 'center', lineSpacing: 8,
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: title, scaleX: 1.015, scaleY: 1.015, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    this.add.text(W / 2, H * 0.52, 'The network is infected.\nTerminate the upload.', {
+      fontFamily: 'monospace', fontSize: '14px', color: '#444466',
+      align: 'center', lineSpacing: 7,
+    }).setOrigin(0.5);
+
+    const tap = this.add.text(W / 2, H * 0.70, '◉  INITIALIZE BREACH', {
+      fontFamily: 'monospace', fontSize: '16px', color: '#00ff88', letterSpacing: 2,
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: tap, alpha: 0.1, duration: 1000, yoyo: true, repeat: -1 });
+
+    this.add.text(W / 2, H - 28, 'SYSTEM BREACH  v1.0', {
+      fontFamily: 'monospace', fontSize: '10px', color: '#1a1a33',
+    }).setOrigin(0.5);
+
+    this.input.once('pointerdown', () => {
+      try { _getAudioCtx(this)?.resume(); } catch (e) {}
+      getSoundMgr(this)?.play('click');
+      getMusicEng(this)?.play('map');
+      this.cameras.main.fadeOut(400, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('OverworldMap'));
+    });
+  }
+
+  update() {
+    const t = this.time.now / 1000;
+    this._rings.forEach((r, i) => {
+      r.g.clear();
+      const radius = ((t * 0.28 + r.phase) % 1) * W * 0.72;
+      const alpha  = Math.max(0, 0.28 - radius / W);
+      r.g.lineStyle(1, 0x00ff88, alpha);
+      r.g.strokeCircle(W / 2, H * 0.30, radius);
+    });
+  }
 }
 
 // ============================================================
@@ -729,6 +1068,81 @@ class Upgrades extends Phaser.Scene {
 }
 
 // ============================================================
+class SquadSelect extends Phaser.Scene {
+  constructor() { super({ key: 'SquadSelect' }); }
+
+  create() {
+    this.save = loadSave();
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d1a, 0.5);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+    this._render();
+  }
+
+  _render() {
+    if (this._cont) this._cont.destroy(true);
+    const cont = this.add.container(0, 0);
+    this._cont = cont;
+
+    cont.add(this.add.text(W / 2, 20, 'SQUAD SELECT', { fontFamily:'monospace', fontSize:'18px', color:'#00ff88', letterSpacing:3 }).setOrigin(0.5, 0));
+    const activeCount = this.save.agents.filter(a => a.owned && a.active).length;
+    cont.add(this.add.text(W / 2, 46, `${activeCount} / 3 ACTIVE  ·  Max 3 deploy to battle`, { fontFamily:'monospace', fontSize:'11px', color: activeCount >= 3 ? '#00ff88' : '#ffcc00' }).setOrigin(0.5, 0));
+
+    const owned = this.save.agents.filter(a => a.owned);
+    owned.forEach((ag, i) => {
+      const def = DEFS.find(d => d.id === ag.id);
+      if (!def) return;
+      const cy  = 76 + i * 94;
+      const isActive = !!ag.active;
+      const col = isActive ? def.color : 0x333344;
+      const hex = '#' + col.toString(16).padStart(6, '0');
+      const st  = effectiveStats(ag.id, ag.level, this.save);
+
+      const bg = this.add.graphics();
+      bg.fillStyle(col, isActive ? 0.14 : 0.04);
+      bg.fillRoundedRect(12, cy, W - 24, 82, 8);
+      bg.lineStyle(2, col, isActive ? 0.8 : 0.2);
+      bg.strokeRoundedRect(12, cy, W - 24, 82, 8);
+      cont.add(bg);
+
+      const sp = this.add.graphics();
+      _drawSprite(sp, ag.id, 22, cy + 8);
+      cont.add(sp);
+
+      cont.add(this.add.text(88, cy + 10, def.name,         { fontFamily:'monospace', fontSize:'16px', color: isActive ? hex : '#333355', fontStyle:'bold' }));
+      cont.add(this.add.text(88, cy + 30, `${def.cls}  Lv ${ag.level}`, { fontFamily:'monospace', fontSize:'11px', color:'#333355' }));
+      cont.add(this.add.text(88, cy + 48, `HP ${ag.hp} / ${st.maxHp}`, { fontFamily:'monospace', fontSize:'11px', color: isActive ? '#888899' : '#222233' }));
+
+      const btnCol = isActive ? 0x00ff88 : 0x444466;
+      const bbg = this.add.graphics();
+      bbg.fillStyle(btnCol, 0.14); bbg.fillRoundedRect(W - 118, cy + 24, 98, 34, 6);
+      bbg.lineStyle(1, btnCol, 0.7); bbg.strokeRoundedRect(W - 118, cy + 24, 98, 34, 6);
+      cont.add(bbg);
+      cont.add(this.add.text(W - 69, cy + 41, isActive ? 'ACTIVE  ✓' : 'INACTIVE', { fontFamily:'monospace', fontSize:'11px', color:'#'+btnCol.toString(16).padStart(6,'0') }).setOrigin(0.5));
+
+      const z = this.add.zone(12, cy, W - 24, 82).setOrigin(0).setInteractive();
+      z.on('pointerdown', () => {
+        const ac = this.save.agents.filter(a => a.owned && a.active).length;
+        if (isActive  && ac <= 1) return;
+        if (!isActive && ac >= 3) return;
+        ag.active = !isActive;
+        writeSave(this.save); this._render();
+      });
+      cont.add(z);
+    });
+
+    // Back button
+    const bbg = this.add.graphics();
+    bbg.fillStyle(0x00ff88, 0.10); bbg.fillRoundedRect(W/2-90, H-62, 180, 44, 8);
+    bbg.lineStyle(1, 0x00ff88, 0.5); bbg.strokeRoundedRect(W/2-90, H-62, 180, 44, 8);
+    cont.add(bbg);
+    cont.add(this.add.text(W/2, H-40, '← BACK', { fontFamily:'monospace', fontSize:'14px', color:'#00ff88' }).setOrigin(0.5));
+    cont.add(this.add.zone(W/2-90, H-62, 180, 44).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('OverworldMap')));
+  }
+}
+
+// ============================================================
 class SubclassChoice extends Phaser.Scene {
   constructor() { super({ key: 'SubclassChoice' }); }
 
@@ -816,6 +1230,7 @@ class OverworldMap extends Phaser.Scene {
     if (!this.save.seenCutscenes.includes('prologue')) {
       this.scene.start('Cutscene', { id: 'prologue', returnTo: 'OverworldMap' }); return;
     }
+    getMusicEng(this)?.play('map');
     this._bg();
     this._header();
     this._edges();
@@ -920,8 +1335,9 @@ class OverworldMap extends Phaser.Scene {
       this.add.text(bx + 42, H - 16, label, { fontFamily:'monospace', fontSize:'9px', color:'#'+col.toString(16).padStart(6,'0') }).setOrigin(0.5);
       this.add.zone(bx, H - 26, 84, 20).setOrigin(0).setInteractive().on('pointerdown', cb);
     };
-    btn('ACHIEVEMENTS', 0x44aaff,  8,       () => this.scene.start('Achievements'));
-    btn('UPGRADES',     0xffcc00,  102,     () => this.scene.start('Upgrades'));
+    btn('ACHIEVEMENTS', 0x44aaff,  8,        () => this.scene.start('Achievements'));
+    btn('UPGRADES',     0xffcc00,  100,      () => this.scene.start('Upgrades'));
+    btn('SQUAD',        0x00ff88,  192,      () => this.scene.start('SquadSelect'));
   }
 
   _animateEdges() {
@@ -1410,7 +1826,7 @@ class Battle extends Phaser.Scene {
     this.autoMs     = (upgs.overclock || ['pulse','velocity'].includes(this.mechanic)) ? 1500 : AUTO_MS;
 
     this.agents = DEFS
-      .filter(d => { const s = this.save.agents.find(a => a.id === d.id); return s && s.owned; })
+      .filter(d => { const s = this.save.agents.find(a => a.id === d.id); return s && s.owned && s.active; })
       .map(d => {
         const saved   = this.save.agents.find(a => a.id === d.id);
         const level   = saved.level;
@@ -1452,6 +1868,11 @@ class Battle extends Phaser.Scene {
     }
 
     this.enemy = { ...ch.enemy, saveUsed: false, charged: false };
+    // NG+ scales enemy HP
+    if (upgs.ng_plus) {
+      this.enemy.hp = Math.ceil(this.enemy.hp * 1.5);
+      this.enemy.maxHp = this.enemy.hp;
+    }
     this.heatStacks = 0;
     this.overflowRound = 0;
     this.state = STATE.PLAYER;
@@ -1467,6 +1888,7 @@ class Battle extends Phaser.Scene {
   preload() {}
 
   create() {
+    getMusicEng(this)?.play(this.mechanic);
     this._grid();
     this._spawnParticles();
     this._enemyUI();
@@ -1897,12 +2319,18 @@ class Battle extends Phaser.Scene {
       this.phantomActive = false;
       if (!hits(sig + bonus) || phantom) {
         this.log(`> ${ag.name}: ${id.toUpperCase()} [${phantom ? 'PHANTOM' : 'MISS'}]`);
+        getSoundMgr(this)?.play('miss');
       } else {
         const dmg = rnd(10, 18) + (ag.dmgBonus || 0);
         this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
         this.log(`> ${ag.name}: ${id.toUpperCase()} → −${dmg}`);
         this._flashE();
         this.lastAction = { id, agentIdx: this.activeIdx };
+        // Bash upgrade: 15% chance to stun (reduce enemy aura)
+        if (id === 'bash' && ag._bashBonus && Math.random() < ag._bashBonus) {
+          this.enemy.aura = Math.max(0, this.enemy.aura - 10);
+          this.log(`> VAULT: BASH STUN — enemy aura −10`);
+        }
         if (this.mechanic === 'echo' && Math.random() < 0.3) {
           const alive = this.agents.filter(a => a.hp > 0);
           const tgt = alive[Math.floor(Math.random() * alive.length)];
@@ -1918,6 +2346,7 @@ class Battle extends Phaser.Scene {
       if (!hits(sig)) {
         ag.hp = Math.max(0, ag.hp - 5);
         this.log(`> ${ag.name}: OVERCLOCK [MISS] bleed −5`);
+        getSoundMgr(this)?.play('miss');
       } else {
         const dmg = rnd(26, 36) + (ag.dmgBonus || 0);
         this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
@@ -1932,9 +2361,10 @@ class Battle extends Phaser.Scene {
       ag.en -= 15;
       const alive = this.agents.filter(a => a.hp > 0);
       const tgt = alive.reduce((a, b) => (a.hp / a.maxHp) < (b.hp / b.maxHp) ? a : b);
-      const heal = rnd(20, 30);
+      const heal = rnd(20, 30) + (ag._patchBonus || 0);
       tgt.hp = Math.min(tgt.maxHp, tgt.hp + heal);
       this.log(`> PATCHWORK: PATCH → ${tgt.name} +${heal} HP`);
+      getSoundMgr(this)?.play('heal');
       this.lastAction = { id: 'patch' };
 
     } else if (id === 'replay') {
@@ -1957,6 +2387,7 @@ class Battle extends Phaser.Scene {
 
     } else if (id === 'defend') {
       ag.defending = true; this.log(`> ${ag.name}: DEFEND`);
+      getSoundMgr(this)?.play('defend');
 
     } else if (id === 'fortify') {
       ag.fortified = true; this.log(`> ${ag.name}: FORTIFY — 60% dmg reduction`);
@@ -1964,11 +2395,12 @@ class Battle extends Phaser.Scene {
     // ── New agent base moves ───────────────────────────────
     } else if (id === 'packet') {
       if (!hits(sig + 10)) {
-        this.log(`> ${ag.name}: PACKET [MISS]`);
+        this.log(`> ${ag.name}: PACKET [MISS]`); getSoundMgr(this)?.play('miss');
       } else {
         const dmg = rnd(10, 16) + (ag.dmgBonus || 0);
         this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
-        this.log(`> ${ag.name}: PACKET → −${dmg}`);
+        if (ag._packetAura) this.enemy.aura = Math.max(0, this.enemy.aura - ag._packetAura);
+        this.log(`> ${ag.name}: PACKET → −${dmg}${ag._packetAura ? ` · aura −${ag._packetAura}` : ''}`);
         this._flashE();
         this.lastAction = { id: 'packet', agentIdx: this.activeIdx };
       }
@@ -1982,8 +2414,10 @@ class Battle extends Phaser.Scene {
     } else if (id === 'scan') {
       if (ag.en < 10) { this.log('> Need 10 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
       ag.en -= 10;
-      this.enemy.aura = Math.max(0, this.enemy.aura - 15);
-      this.log(`> ${ag.name}: SCAN — enemy aura −15`); this._reEnemy();
+      const drainAmt = 15 + (ag._scanBonus || 0);
+      this.enemy.aura = Math.max(0, this.enemy.aura - drainAmt);
+      this.log(`> ${ag.name}: SCAN — enemy aura −${drainAmt}`); this._reEnemy();
+      getSoundMgr(this)?.play('scan');
 
     } else if (id === 'firewall') {
       if (ag.en < 15) { this.log('> Need 15 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
@@ -2028,14 +2462,17 @@ class Battle extends Phaser.Scene {
       ag.en -= 10;
       this.agents.filter(a => a.hp > 0).forEach(a => { a.en = Math.min(a.maxEn, a.en + 10); });
       this.log(`> ${ag.name}: BOOST — all allies +10 EN`);
+      getSoundMgr(this)?.play('boost');
 
     } else if (id === 'sync') {
       if (ag.en < 20) { this.log('> Need 20 EN'); this.state = STATE.PLAYER; this._btns(true); return; }
       ag.en -= 20;
+      const syncBonus = ag._syncBonus || 0;
       const heals = this.agents.filter(a => a.hp > 0).map(a => {
-        const h = rnd(10, 16); a.hp = Math.min(a.maxHp, a.hp + h); return h;
+        const h = rnd(10, 16) + syncBonus; a.hp = Math.min(a.maxHp, a.hp + h); return h;
       });
       this.log(`> ${ag.name}: SYNC — all allies +${Math.min(...heals)}–${Math.max(...heals)} HP`);
+      getSoundMgr(this)?.play('heal');
 
     // ── Subclass moves ────────────────────────────────────
     } else if (id === 'overload') {
@@ -2068,6 +2505,7 @@ class Battle extends Phaser.Scene {
       ag.en -= 30;
       dead.hp = Math.ceil(dead.maxHp * 0.3);
       this.log(`> ${ag.name}: RESTORE → ${dead.name} revived at ${dead.hp} HP`);
+      getSoundMgr(this)?.play('heal');
 
     } else if (id === 'release') {
       const stored = ag.stored || 0;
@@ -2139,22 +2577,26 @@ class Battle extends Phaser.Scene {
       const heal = (this.save.upgrades?.quick_repair) ? 60 : 40;
       ag.hp = Math.min(ag.maxHp, ag.hp + heal);
       this.log(`> 🔧 REPAIR KIT: ${ag.name} +${heal} HP`);
+      getSoundMgr(this)?.play('heal');
 
     } else if (id === 'use_energy_cell') {
       this.save.items.energy_cell--; writeSave(this.save);
       const en = (this.save.upgrades?.power_surge) ? 50 : 30;
       this.agents.filter(a => a.hp > 0).forEach(a => { a.en = Math.min(a.maxEn, a.en + en); });
       this.log(`> ⚡ ENERGY CELL: all allies +${en} EN`);
+      getSoundMgr(this)?.play('item');
 
     } else if (id === 'use_sig_boost') {
       this.save.items.sig_boost--; writeSave(this.save);
       this.enemy.aura = Math.max(0, this.enemy.aura - 20);
       this.log(`> 📡 SIG BOOST: enemy aura −20`);
+      getSoundMgr(this)?.play('item');
 
     } else if (id === 'use_emp_charge') {
       this.save.items.emp_charge--; writeSave(this.save);
       const dmg = 50; this.enemy.hp = Math.max(0, this.enemy.hp - dmg);
       this.log(`> 💥 EMP CHARGE: enemy −${dmg}`); this._flashE();
+      getSoundMgr(this)?.play('item');
     }
 
     this._reEnemy(); this._reAll();
@@ -2267,7 +2709,7 @@ class Battle extends Phaser.Scene {
         applyHit(tgt2, dmg2);
         this.log(`> PREDICTED → ${tgt2.name} −${dmg2}`);
       }
-      this._flashP(); this.time.delayedCall(600, finish);
+      this._flashP(tgt); this.time.delayedCall(600, finish);
     };
     const doSummon = () => {
       const bonus = 45; this.enemy.hp += bonus; this.enemy.maxHp += bonus;
@@ -2284,7 +2726,7 @@ class Battle extends Phaser.Scene {
       const d1 = dmgHit(t1, rnd(3, 6) + ovfl), d2 = dmgHit(t2, rnd(3, 6) + ovfl);
       applyHit(t1, d1); applyHit(t2, d2);
       this.log(`> DOUBLE → ${t1.name} −${d1}, ${t2.name} −${d2}`);
-      this._flashP(); this.time.delayedCall(600, finish);
+      this._flashP(t1); this.time.delayedCall(600, finish);
     };
     const doDistributed = () => {
       const parts = alive.map(({ a }) => {
@@ -2292,11 +2734,12 @@ class Battle extends Phaser.Scene {
         applyHit(a, d); return `${a.name} −${d}`;
       });
       this.log(`> DISTRIBUTE → ${parts.join(', ')}`);
-      this._flashP(); this.time.delayedCall(600, finish);
+      this._flashP(); this.time.delayedCall(600, finish);  // multi-target: just flash
     };
     const doCharge = () => {
       this.enemy.charged = true;
       this.log(`> ⚡ ${this.enemy.name} CHARGING — next strike ×2.5`);
+      getSoundMgr(this)?.play('charge');
       this._reAll(); this.time.delayedCall(600, finish);
     };
     const doLock = () => {
@@ -2358,8 +2801,31 @@ class Battle extends Phaser.Scene {
     this.tweens.add({ targets: this.blob, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 });
     const ag = this.agents[this.activeIdx];
     if (ag) this._weaponBurst(ag);
+    getSoundMgr(this)?.play('hit');
   }
-  _flashP() { this.cameras.main.flash(100, 255, 50, 50, false); }
+
+  _flashP(tgt) {
+    const tgtIdx = tgt ? this.agents.indexOf(tgt) : -1;
+    const card   = tgtIdx >= 0 ? this.cards?.[tgtIdx] : null;
+    const ex = W / 2, ey = 112;
+    const tx = card ? card.cx + card.cw / 2 : W / 2;
+    const ty = card ? card.cy + 45 : 500;
+
+    const proj = this.add.graphics().setDepth(5);
+    proj.fillStyle(0xff3355, 0.95); proj.fillCircle(0, 0, 6);
+    proj.setPosition(ex, ey);
+
+    this.tweens.add({
+      targets: proj, x: tx, y: ty,
+      duration: 200, ease: 'Linear',
+      onComplete: () => {
+        proj.destroy();
+        this.cameras.main.flash(80, 255, 50, 50, false);
+        this._burstAt(tx, ty, [0xff3355, 0xff8844, 0xffffff], 12, 'ptx_dot', 350);
+        getSoundMgr(this)?.play('enemy_hit');
+      },
+    });
+  }
 
   // ── One-shot particle burst ────────────────────────────
   _burstAt(x, y, tints, count = 14, tex = 'ptx_dot', lifespan = 500) {
@@ -2438,6 +2904,7 @@ class Battle extends Phaser.Scene {
     this.state = win ? STATE.WIN : STATE.LOSE;
     this._btns(false);
     this.timerFill.clear();
+    getMusicEng(this)?.stop();
 
     const save    = this.save;
     const ch      = this.channel;
@@ -2462,7 +2929,7 @@ class Battle extends Phaser.Scene {
       const aliveCount = this.agents.filter(a => a.hp > 0).length;
       const rewards = calcRewards(ch.type, tier, aliveCount);
       save.cycles += rewards.cycles;
-      const shardsEarned = awardShards(save, ch.type);
+      const shardsEarned = awardShards(save, ch.type, save.upgrades?.ng_plus ? 2 : 1);
 
       // Redundancy upgrade: dead agents regain 5 HP
       if (save.upgrades?.redundancy) {
@@ -2487,10 +2954,11 @@ class Battle extends Phaser.Scene {
         }
       });
 
-      // Level-up flash
+      // Level-up flash + sound
       if (levelUps.length > 0) {
         levelUps.forEach(lu => this.log(`⬆ ${lu.name} → Lv ${lu.to}!`));
         this.cameras.main.flash(300, 255, 220, 50, false);
+        getSoundMgr(this)?.play('levelup');
       }
 
       // Check achievements
@@ -2511,6 +2979,7 @@ class Battle extends Phaser.Scene {
   }
 
   _showWinScreen(rewards, shardsEarned, levelUps, newAchs, pendingSubclasses = [], worldJustCleared = false) {
+    getSoundMgr(this)?.play('win');
     const ch = this.channel;
     const ov = this.add.graphics();
     ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
@@ -2533,6 +3002,7 @@ class Battle extends Phaser.Scene {
       levelUps.forEach(lu => { this.add.text(W/2, y, `${lu.name}  Lv${lu.from} → Lv${lu.to}`, { fontFamily:'monospace', fontSize:'14px', color:'#00ff88' }).setOrigin(0.5); y += 24; });
     }
     if (newAchs.length > 0) {
+      getSoundMgr(this)?.play('unlock');
       this.add.text(W/2, y, '── ACHIEVEMENT ──', { fontFamily:'monospace', fontSize:'11px', color:'#333355' }).setOrigin(0.5); y += 22;
       newAchs.forEach(ach => { this.add.text(W/2, y, ach.name, { fontFamily:'monospace', fontSize:'13px', color:'#'+ach.color.toString(16).padStart(6,'0'), fontStyle:'bold' }).setOrigin(0.5); y += 22; });
     }
@@ -2605,6 +3075,7 @@ class Battle extends Phaser.Scene {
   }
 
   _showLoseScreen(cost, save) {
+    getSoundMgr(this)?.play('lose');
     const ov = this.add.graphics();
     ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
 
@@ -2752,12 +3223,19 @@ class Battle extends Phaser.Scene {
   }
 
   // ── Sprite drawing ──────────────────────────────────────
-  _sprite(g, id, ox, oy) { _drawSprite(g, id, ox, oy); }
+  _sprite(g, id, ox, oy) {
+    _drawSprite(g, id, ox, oy);
+    const ag = this.agents?.find(a => a.id === id);
+    if (ag?.subclass) {
+      const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
+      if (sc) { g.fillStyle(sc.color, 0.22); g.fillRect(ox, oy, 44, 66); }
+    }
+  }
 }
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: [OverworldMap, Cutscene, Achievements, Upgrades, SubclassChoice, ChannelSelect, Shop, Battle],
+  backgroundColor: '#050510', scene: [TitleScreen, OverworldMap, Cutscene, Achievements, Upgrades, SquadSelect, SubclassChoice, ChannelSelect, Shop, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });
