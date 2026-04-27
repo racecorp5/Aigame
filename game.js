@@ -945,6 +945,7 @@ class Battle extends Phaser.Scene {
         const level   = saved.level;
         const stats   = effectiveStats(d.id, level, this.save);
         const subMoves = (saved.subclass && SUBCLASS_MOVES[saved.subclass]) ? [SUBCLASS_MOVES[saved.subclass]] : [];
+        const equipped = this.save.gear?.equipped?.[d.id] || {};
         return {
           ...d,
           ...stats,
@@ -954,6 +955,8 @@ class Battle extends Phaser.Scene {
           level,
           xp: saved.xp,
           subclass: saved.subclass || null,
+          weapon: equipped.weapon || null,
+          armor:  equipped.armor  || null,
           stored: 0,
           defending: false, fortified: false, locked: false, frozen: false, shielded: false,
         };
@@ -1743,6 +1746,13 @@ class Battle extends Phaser.Scene {
       if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
         tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN`);
       }
+      // Armor hit-reaction particles
+      const agIdx = this.agents.indexOf(tgt);
+      if (agIdx !== -1 && tgt.armor) {
+        if (tgt.armor === 'fortress_shell' || tgt.armor === 'signal_mesh') {
+          this._armorBurst(agIdx, tgt.armor);
+        }
+      }
     };
 
     const doAttack = () => {
@@ -1853,8 +1863,73 @@ class Battle extends Phaser.Scene {
     this.btnCon.setAlpha(on ? 1 : 0.35);
   }
 
-  _flashE() { this.tweens.add({ targets: this.blob, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 }); }
+  _flashE() {
+    this.tweens.add({ targets: this.blob, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 });
+    const ag = this.agents[this.activeIdx];
+    if (ag) this._weaponBurst(ag);
+  }
   _flashP() { this.cameras.main.flash(100, 255, 50, 50, false); }
+
+  // ── One-shot particle burst ────────────────────────────
+  _burstAt(x, y, tints, count = 14, tex = 'ptx_dot', lifespan = 500) {
+    const emitter = this.add.particles(x, y, tex, {
+      speed: { min: 60, max: 200 },
+      lifespan,
+      alpha: { start: 1, end: 0 },
+      scale: { start: 0.7, end: 0 },
+      tint: Array.isArray(tints) ? tints : [tints],
+      angle: { min: 0, max: 360 },
+      frequency: -1,
+    });
+    emitter.explode(count);
+    this.time.delayedCall(lifespan + 200, () => { try { emitter.destroy(); } catch (_) {} });
+  }
+
+  // Weapon-specific burst at enemy blob (W/2, 112)
+  _weaponBurst(ag) {
+    const weapon = ag.weapon || null;  // weapon id string or null
+    const ex = W / 2, ey = 112;
+    switch (weapon) {
+      case 'bit_shard':
+        this._burstAt(ex, ey, [0xffffff, 0xaaaaaa, 0x888888], 16, 'ptx_sq', 450);
+        break;
+      case 'signal_amp':
+        this._burstAt(ex, ey, [0x00ffff, 0x44ffff, 0xaaffff], 14, 'ptx_dot', 600);
+        break;
+      case 'overcharge_core':
+        this._burstAt(ex, ey, [0xff4400, 0xff8800, 0xffcc00], 22, 'ptx_dot', 550);
+        this._burstAt(ex, ey, [0xffffff], 8, 'ptx_sq', 300);
+        break;
+      case 'precision_bit':
+        // Tight cone of teal needle-like particles (bars), small count, faster
+        this._burstAt(ex, ey, [0x00ffcc, 0x88ffee, 0xffffff], 10, 'ptx_bar', 400);
+        break;
+      default:
+        // No weapon — plain white impact sparks
+        this._burstAt(ex, ey, [0xffffff, 0xcccccc], 10, 'ptx_dot', 350);
+    }
+  }
+
+  // Armor-specific burst at agent card position
+  _armorBurst(agIdx, armorId) {
+    const card = this.cards?.[agIdx];
+    if (!card) return;
+    const ax = card.cx + card.cw / 2, ay = card.cy + 45;
+    switch (armorId) {
+      case 'signal_mesh':
+        this._burstAt(ax, ay, [0x00ffff, 0x4488ff, 0x88aaff], 12, 'ptx_dot', 500);
+        break;
+      case 'repair_plating':
+        this._burstAt(ax, ay, [0x00ff88, 0x44ffaa, 0xaaffcc], 16, 'ptx_dot', 700);
+        break;
+      case 'fortress_shell':
+        this._burstAt(ax, ay, [0xffdd44, 0xffbb00, 0xffffff], 18, 'ptx_sq', 600);
+        break;
+      case 'energy_cell':
+        this._burstAt(ax, ay, [0xffff00, 0x00ff88, 0x88ffee], 12, 'ptx_dot', 450);
+        break;
+    }
+  }
 
   _div(y) {
     const g = this.add.graphics();
@@ -1907,6 +1982,8 @@ class Battle extends Phaser.Scene {
         savedAg.hp = ag.hp;
         if (ag.hp > 0 && ag.recovery) {
           savedAg.hp = Math.min(ag.maxHp, savedAg.hp + ag.recovery);
+          const agIdx = this.agents.indexOf(ag);
+          if (agIdx !== -1) this._armorBurst(agIdx, 'repair_plating');
         }
       });
 
