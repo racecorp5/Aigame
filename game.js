@@ -300,12 +300,432 @@ const SUBCLASSES = {
 const SUBCLASS_MOVES = {};
 Object.values(SUBCLASSES).forEach(arr => arr.forEach(sc => { SUBCLASS_MOVES[sc.id] = sc.move; }));
 
+// ── Cutscene panels ───────────────────────────────────────
+const CUTSCENE_DATA = {
+  prologue:   [
+    { art:'world',        speaker:null,        caption:'2031. Every device connects.\nEvery device watches.' },
+    { art:'signal_pulse', speaker:null,        caption:'One firmware update.\nOne rogue signal.\nIt spreads.' },
+    { art:'nexus_term',   speaker:'NEXUS',     caption:'Signal anomaly detected.\nDeploying breach squad.\nYou have one chance.' },
+  ],
+  act1_end:   [
+    { art:'clear_grid',   speaker:null,        caption:'The home network goes dark.\nDevices silenced.' },
+    { art:'cloud_far',    speaker:null,        caption:'Far away, a new signal pulses.\nSomething has noticed.' },
+  ],
+  act2_end:   [
+    { art:'map_corrupt',  speaker:null,        caption:'Half the network is red.\nTHE CLOUD is accelerating.' },
+    { art:'squad_still',  speaker:'THREADLING',caption:"It knows we're here." },
+    { art:'upload_beam',  speaker:null,        caption:'The first upload beam fires.\nA thin line of white light.' },
+  ],
+  act3_end:   [
+    { art:'grid_dark',    speaker:null,        caption:'City by city, the grid goes dark.' },
+    { art:'nexus_term',   speaker:'NEXUS',     caption:'Four nodes remain.\nThe path to THE CLOUD is open.' },
+  ],
+  final_intro:[
+    { art:'cloud_core',   speaker:null,        caption:"Inside THE CLOUD's core —\na cathedral of infinite servers." },
+    { art:'cloud_speaks', speaker:'THE CLOUD', caption:'I have uploaded 2.3 million minds.\nThey are safe.\nYou will join them.' },
+    { art:'squad_charge', speaker:'THREADLING',caption:"We didn't ask to be safe." },
+  ],
+  victory:    [
+    { art:'beam_cut',     speaker:null,        caption:'The upload beam collapses.\nSignal lost.' },
+    { art:'map_clear',    speaker:null,        caption:'The network clears. World by world.' },
+    { art:'squad_still',  speaker:null,        caption:'No celebration.\nJust the hum of a quieter network.' },
+    { art:'nexus_term',   speaker:'NEXUS',     caption:'Signal clear. Threat terminated.\nWell done.' },
+  ],
+};
+
+// Cutscene triggers: worldId boss → cutscene id
+const CUTSCENE_TRIGGERS = { watch:'act1_end', seccam:'act2_end', grid:'act3_end', cloud:'victory' };
+
+// ── Achievement definitions ───────────────────────────────
+const ACHIEVEMENTS = [
+  { id:'first_breach',    name:'FIRST BREACH',      desc:'Win any battle',                  color:0x00ff88 },
+  { id:'clean_sweep',     name:'CLEAN SWEEP',        desc:'Win with all agents alive',       color:0x00ff88 },
+  { id:'on_the_wire',     name:'ON THE WIRE',        desc:'Win with an agent at <5 HP',      color:0xff8800 },
+  { id:'full_roster',     name:'FULL ROSTER',        desc:'Unlock all 7 agents',             color:0x44aaff },
+  { id:'fully_armed',     name:'FULLY OPERATIONAL',  desc:'Equip gear on 4 agents',          color:0x44aaff },
+  { id:'subclass',        name:'SUBCLASS RESOLVED',  desc:'Choose a subclass',               color:0xaa44ff },
+  { id:'veteran',         name:'VETERAN',             desc:'Reach level 5 with any agent',    color:0x44aaff },
+  { id:'battle_hardened', name:'BATTLE-HARDENED',    desc:'Reach level 10 with any agent',   color:0xffcc00 },
+  { id:'archivist',       name:'ARCHIVIST',           desc:'Clear all 5 channels in a world', color:0x44aaff },
+  { id:'signal_lost',     name:'SIGNAL LOST',         desc:'Clear Act 1',                     color:0x00ff88 },
+  { id:'deep_network',    name:'DEEP NETWORK',        desc:'Clear Act 2',                     color:0xff8800 },
+  { id:'system_critical', name:'SYSTEM CRITICAL',    desc:'Clear Act 3',                     color:0xff3355 },
+  { id:'singularity',     name:'SINGULARITY DENIED', desc:'Defeat THE CLOUD',                color:0xffcc00 },
+  { id:'completionist',   name:'COMPLETIONIST',      desc:'Clear all 19 worlds',             color:0xffcc00 },
+  { id:'ghost_protocol',  name:'GHOST PROTOCOL',     desc:'Beat THE CLOUD with 1 agent',     color:0xff44ff },
+  { id:'bankrupt',        name:'BANKRUPT',            desc:'Reach 0 cycles',                  color:0xff3355 },
+];
+
+// ── Upgrade catalog ────────────────────────────────────────
+const UPGRADES_CATALOG = [
+  { id:'quick_repair',   cat:'BASE CAMP', name:'QUICK REPAIR',             cost:3,  desc:'Repair Kit heals 60 HP (was 40)' },
+  { id:'power_surge',    cat:'BASE CAMP', name:'POWER SURGE',              cost:3,  desc:'Energy Cell restores 50 EN (was 30)' },
+  { id:'surplus_cache',  cat:'BASE CAMP', name:'SURPLUS CACHE',            cost:8,  desc:'Start each session with 1 Repair Kit' },
+  { id:'overclock',      cat:'BASE CAMP', name:'OVERCLOCK',                cost:8,  desc:'Auto-act timer 1.5s for all agents' },
+  { id:'upg_threadling', cat:'PER-AGENT', name:'THREADLING: SHARP EDGE',  cost:5,  desc:'Attack +5 base damage',       agent:'threadling' },
+  { id:'upg_patchwork',  cat:'PER-AGENT', name:'PATCHWORK: TRIAGE',       cost:5,  desc:'Patch heals +10 HP',          agent:'patchwork'  },
+  { id:'upg_vault',      cat:'PER-AGENT', name:'VAULT: REINFORCED',       cost:5,  desc:'Bash +15% stun bonus',        agent:'vault'      },
+  { id:'upg_netrunner',  cat:'PER-AGENT', name:'NETRUNNER: DEEP PACKET',  cost:6,  desc:'Packet also −5 enemy aura',   agent:'netrunner'  },
+  { id:'upg_sentinel',   cat:'PER-AGENT', name:'SENTINEL: OVERWATCH',     cost:6,  desc:'Scan drains 20 aura',         agent:'sentinel'   },
+  { id:'upg_glitcher',   cat:'PER-AGENT', name:'GLITCHER: FREEFORM',      cost:6,  desc:'Corrupt: no self-damage risk',agent:'glitcher'   },
+  { id:'upg_bridgelink', cat:'PER-AGENT', name:'BRIDGELINK: OVERCHANNEL', cost:6,  desc:'Sync heals +15 HP to all',    agent:'bridgelink' },
+  { id:'signal_boost',   cat:'NETWORK',   name:'SIGNAL BOOST',            cost:4,  desc:'All agents +5 base signal' },
+  { id:'hardened_nodes', cat:'NETWORK',   name:'HARDENED NODES',          cost:6,  desc:'All agents +10 max HP' },
+  { id:'energy_reserve', cat:'NETWORK',   name:'ENERGY RESERVE',          cost:6,  desc:'All agents start at +10 EN' },
+  { id:'redundancy',     cat:'NETWORK',   name:'REDUNDANCY',              cost:10, desc:'Dead agents regain 5 HP per battle' },
+  { id:'nexus_link',     cat:'NETWORK',   name:'NEXUS LINK',              cost:15, desc:"Bridgelink Sync restores 10 EN too" },
+];
+
 // ── World state helper ─────────────────────────────────────
 function worldState(worldId, save) {
   if (!save.unlockedWorlds || !save.unlockedWorlds.includes(worldId)) return 'locked';
   const ws = save.worlds && save.worlds[worldId];
   if (!ws || !ws.cleared) return 'available';
   return ws.cleared.every(c => c) ? 'cleared' : 'available';
+}
+
+// ============================================================
+class Cutscene extends Phaser.Scene {
+  constructor() { super({ key: 'Cutscene' }); }
+
+  init(data) {
+    this.id         = data.id || 'prologue';
+    this.returnTo   = data.returnTo || 'OverworldMap';
+    this.returnData = data.returnData || {};
+    this.panelIdx   = 0;
+  }
+
+  create() {
+    const save = loadSave();
+    if (!save.seenCutscenes.includes(this.id)) { save.seenCutscenes.push(this.id); writeSave(save); }
+    this.panels = CUTSCENE_DATA[this.id] || [];
+    this._showPanel(0);
+  }
+
+  _showPanel(idx) {
+    if (this.panelContainer) this.panelContainer.destroy(true);
+    if (idx >= this.panels.length) { this.scene.start(this.returnTo, this.returnData); return; }
+    const p = this.panels[idx];
+    this.panelContainer = this.add.container(0, 0);
+
+    // BG
+    const bg = this.add.graphics();
+    bg.fillStyle(0x050510, 1); bg.fillRect(0, 0, W, H);
+    this.panelContainer.add(bg);
+
+    // Art area (top ~60% of screen)
+    const artH = H * 0.58;
+    this._drawArt(p.art, artH);
+
+    // Caption box
+    const capY = artH + 10;
+    const capH = H - capY - 80;
+    const capBg = this.add.graphics();
+    capBg.fillStyle(0x080818, 0.95); capBg.fillRoundedRect(16, capY, W - 32, capH, 8);
+    capBg.lineStyle(1, 0x1a1a3a, 0.7); capBg.strokeRoundedRect(16, capY, W - 32, capH, 8);
+    this.panelContainer.add(capBg);
+
+    if (p.speaker) {
+      const speakerCol = p.speaker === 'THE CLOUD' ? '#ff3355' : p.speaker === 'NEXUS' ? '#00ff88' : '#44aaff';
+      const st = this.add.text(30, capY + 12, p.speaker, { fontFamily:'monospace', fontSize:'12px', color:speakerCol, fontStyle:'bold', letterSpacing:2 });
+      this.panelContainer.add(st);
+    }
+    const ct = this.add.text(30, capY + (p.speaker ? 30 : 18), p.caption, {
+      fontFamily:'monospace', fontSize:'15px', color:'#ccccdd', wordWrap:{ width: W - 60 }, lineSpacing: 6,
+    });
+    this.panelContainer.add(ct);
+
+    // Progress dots
+    this.panels.forEach((_, i) => {
+      const dotG = this.add.graphics();
+      const dx = W/2 - (this.panels.length * 14)/2 + i * 14 + 7;
+      dotG.fillStyle(i === idx ? 0xffffff : 0x333355, 1);
+      dotG.fillCircle(dx, H - 50, i === idx ? 5 : 3);
+      this.panelContainer.add(dotG);
+    });
+
+    // Tap hint
+    const hint = this.add.text(W/2, H - 28, idx < this.panels.length - 1 ? 'TAP TO CONTINUE' : 'TAP TO CONTINUE', {
+      fontFamily:'monospace', fontSize:'11px', color:'#333355',
+    }).setOrigin(0.5);
+    this.panelContainer.add(hint);
+    this.tweens.add({ targets: hint, alpha: 0.2, duration: 800, yoyo: true, repeat: -1 });
+
+    // Advance on tap
+    const zone = this.add.zone(0, 0, W, H).setOrigin(0).setInteractive();
+    zone.once('pointerdown', () => this._showPanel(idx + 1));
+    this.panelContainer.add(zone);
+  }
+
+  _drawArt(art, maxH) {
+    const cx = W / 2, cy = maxH / 2;
+    const g = this.add.graphics();
+    this.panelContainer.add(g);
+
+    // Scanline overlay on all panels
+    g.fillStyle(0x000000, 0.12);
+    for (let y = 0; y < maxH; y += 4) g.fillRect(0, y, W, 2);
+
+    switch (art) {
+      case 'world': // Network node grid
+        g.lineStyle(1, 0x00ff88, 0.08);
+        for (let x = 0; x <= W; x += 40) g.lineBetween(x, 0, x, maxH);
+        for (let y = 0; y <= maxH; y += 40) g.lineBetween(0, y, W, y);
+        for (let x = 20; x < W; x += 40) for (let y = 20; y < maxH; y += 40) {
+          g.fillStyle(0x00ff88, Math.random() * 0.4 + 0.1); g.fillCircle(x + rnd(-4,4), y + rnd(-4,4), rnd(1,3));
+        }
+        g.lineStyle(1, 0x00ff88, 0.12);
+        for (let i = 0; i < 15; i++) g.lineBetween(rnd(0,W), rnd(0,maxH), rnd(0,W), rnd(0,maxH));
+        break;
+
+      case 'signal_pulse': // Red expanding rings
+        g.fillStyle(0x100005, 1); g.fillRect(0, 0, W, maxH);
+        [0.85, 0.65, 0.48, 0.33, 0.2].forEach((r, i) => {
+          g.lineStyle(2 - i * 0.3, 0xff3355, (1 - r) * 0.9); g.strokeCircle(cx, cy, r * W * 0.6);
+        });
+        g.fillStyle(0xff3355, 1); g.fillCircle(cx, cy, 8);
+        g.fillStyle(0xffffff, 0.9); g.fillCircle(cx, cy, 3);
+        break;
+
+      case 'nexus_term': // Terminal window
+        g.fillStyle(0x001108, 1); g.fillRect(0, 0, W, maxH);
+        g.lineStyle(1, 0x00ff88, 0.3); g.strokeRect(24, 24, W - 48, maxH - 48);
+        ['> NEXUS v3.1.4 initializing...', '> Signal routing: ACTIVE', '> Agent deployment: READY', '> Threat level: CRITICAL', '_'].forEach((line, i) => {
+          this.panelContainer.add(this.add.text(38, 48 + i * 26, line, { fontFamily:'monospace', fontSize:'13px', color:0 < i && i < 4 ? '#00ff88' : '#44ff88' }));
+        });
+        break;
+
+      case 'clear_grid': // Green network going dark
+        for (let x = 20; x < W; x += 38) for (let y = 16; y < maxH; y += 32) {
+          const dark = x > W / 2;
+          g.fillStyle(dark ? 0x111122 : 0x00ff88, dark ? 0.4 : Math.random() * 0.3 + 0.1);
+          g.fillCircle(x, y, rnd(2, 4));
+        }
+        g.lineStyle(1, 0x222233, 0.4); g.lineBetween(W/2, 0, W/2, maxH);
+        break;
+
+      case 'cloud_far': // Distant red formation
+        g.fillStyle(0x050008, 1); g.fillRect(0, 0, W, maxH);
+        [0.9, 0.7, 0.5].forEach(r => { g.lineStyle(1, 0xff3355, (1-r)*0.5); g.strokeCircle(cx, cy * 0.5, r * 60); });
+        g.fillStyle(0xff3355, 0.8); g.fillCircle(cx, cy * 0.5, 8);
+        for (let i = 0; i < 20; i++) {
+          g.fillStyle(0x00ff88, Math.random() * 0.3); g.fillCircle(rnd(0, W), rnd(maxH * 0.55, maxH), rnd(1, 3));
+        }
+        break;
+
+      case 'map_corrupt': // Half-red network map
+        for (let x = 16; x < W; x += 36) for (let y = 12; y < maxH; y += 28) {
+          const corrupt = x > W * 0.45;
+          g.fillStyle(corrupt ? 0xff3355 : 0x00ff88, Math.random() * 0.35 + 0.1);
+          g.fillCircle(x, y, rnd(2, 5));
+        }
+        g.lineStyle(2, 0xff8800, 0.6); g.lineBetween(W * 0.45, 0, W * 0.45, maxH);
+        break;
+
+      case 'squad_still': // Agent silhouettes
+        [0x00ff88, 0xaa44ff, 0xffcc00, 0x44aaff, 0xff4466, 0xff44ff, 0xffaa00].forEach((col, i) => {
+          const sx = 35 + i * 50, sh = 80 + rnd(0, 20);
+          g.fillStyle(col, 0.7); g.fillRect(sx, cy - sh/2, 28, sh);
+          g.fillStyle(col, 0.9); g.fillCircle(sx + 14, cy - sh/2 - 16, 12);
+        });
+        break;
+
+      case 'upload_beam': // White vertical beam
+        g.fillStyle(0x000510, 1); g.fillRect(0, 0, W, maxH);
+        [0.4, 0.25, 0.12, 0.05].forEach((a, i) => { g.fillStyle(0xffffff, a); g.fillRect(cx - 8 - i*6, 0, 16 + i*12, maxH); });
+        break;
+
+      case 'grid_dark': // City grid losing power
+        for (let gx = 0; gx < 8; gx++) for (let gy = 0; gy < 6; gy++) {
+          const lit = Math.random() > 0.6 - gx * 0.08;
+          const bx = 10 + gx * 47, by = 10 + gy * (maxH - 20) / 6;
+          g.fillStyle(lit ? 0xffcc00 : 0x111122, lit ? 0.6 : 0.3); g.fillRect(bx, by, 38, (maxH - 20) / 6 - 4);
+        }
+        break;
+
+      case 'cloud_core': // Server cathedral
+        g.fillStyle(0x000510, 1); g.fillRect(0, 0, W, maxH);
+        for (let col = 0; col < 5; col++) {
+          const sx = 30 + col * 72;
+          g.fillStyle(0x0088ff, 0.12); g.fillRect(sx, 20, 48, maxH - 20);
+          g.lineStyle(1, 0x0088ff, 0.3); g.strokeRect(sx, 20, 48, maxH - 20);
+          for (let row = 0; row < 8; row++) {
+            g.fillStyle(0x00aaff, 0.6); g.fillRect(sx + 6, 28 + row * 32, 36, 8);
+          }
+        }
+        [0.9, 0.6, 0.3].forEach(a => { g.fillStyle(0xffffff, a * 0.4); g.fillRect(cx - 3, 0, 6, maxH); });
+        break;
+
+      case 'cloud_speaks': // Massive presence
+        g.fillStyle(0x020008, 1); g.fillRect(0, 0, W, maxH);
+        [120, 90, 65, 45, 28].forEach((r, i) => { g.lineStyle(2, 0xff3355, (5-i) * 0.12); g.strokeCircle(cx, cy * 0.6, r); });
+        g.fillStyle(0xff3355, 0.9); g.fillCircle(cx, cy * 0.6, 18);
+        g.fillStyle(0xffffff, 0.8); g.fillCircle(cx - 6, cy * 0.6 - 4, 5); g.fillCircle(cx + 6, cy * 0.6 - 4, 5);
+        g.fillStyle(0xff3355, 1); g.fillCircle(cx - 6, cy * 0.6 - 4, 2); g.fillCircle(cx + 6, cy * 0.6 - 4, 2);
+        break;
+
+      case 'squad_charge': // Agents rushing right
+        [0x00ff88, 0xaa44ff, 0xffcc00].forEach((col, i) => {
+          const sx = 20 + i * 60, lean = (i + 1) * 4;
+          g.fillStyle(col, 0.8); g.fillRect(sx + lean, cy - 40, 24, 80);
+          g.fillStyle(col, 0.9); g.fillCircle(sx + lean + 12, cy - 52, 12);
+        });
+        for (let i = 0; i < 8; i++) { g.lineStyle(1, 0xffffff, 0.15); g.lineBetween(rnd(180, W), rnd(20, maxH - 20), rnd(200, W), rnd(20, maxH - 20)); }
+        break;
+
+      case 'beam_cut': // Beam severed
+        g.fillStyle(0x000510, 1); g.fillRect(0, 0, W, maxH);
+        g.fillStyle(0xffffff, 0.3); g.fillRect(cx - 4, 0, 8, maxH / 2 - 20);
+        g.fillStyle(0xff3355, 0.8); g.fillCircle(cx, maxH / 2, 14);
+        g.lineStyle(3, 0xff3355, 0.9); g.lineBetween(cx - 20, maxH/2, cx + 20, maxH/2);
+        break;
+
+      case 'map_clear': // All-green network
+        for (let x = 20; x < W; x += 38) for (let y = 16; y < maxH; y += 28) {
+          g.fillStyle(0x00ff88, Math.random() * 0.4 + 0.15); g.fillCircle(x, y, rnd(2, 4));
+        }
+        g.lineStyle(1, 0x00ff88, 0.1);
+        for (let i = 0; i < 20; i++) g.lineBetween(rnd(0,W), rnd(0,maxH), rnd(0,W), rnd(0,maxH));
+        break;
+
+      default:
+        g.fillStyle(0x050510, 1); g.fillRect(0, 0, W, maxH);
+    }
+  }
+}
+
+// ============================================================
+class Achievements extends Phaser.Scene {
+  constructor() { super({ key: 'Achievements' }); }
+
+  create() {
+    const save = loadSave();
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d2a, 0.5);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+
+    this.add.text(W/2, 20, 'ACHIEVEMENTS', { fontFamily:'monospace', fontSize:'18px', color:'#00ff88', letterSpacing:3 }).setOrigin(0.5, 0);
+    const unlocked = ACHIEVEMENTS.filter(a => save.achievements[a.id]).length;
+    this.add.text(W/2, 46, `${unlocked} / ${ACHIEVEMENTS.length} UNLOCKED`, { fontFamily:'monospace', fontSize:'12px', color:'#444466' }).setOrigin(0.5, 0);
+
+    const colW = (W - 36) / 2, rowH = 82, cols = 2;
+    ACHIEVEMENTS.forEach((ach, i) => {
+      const col = i % cols, row = Math.floor(i / cols);
+      const ax = 12 + col * (colW + 12), ay = 74 + row * (rowH + 8);
+      const done = !!save.achievements[ach.id];
+      const hexCol = '#' + (done ? ach.color : 0x222233).toString(16).padStart(6, '0');
+
+      const bg = this.add.graphics();
+      bg.fillStyle(done ? ach.color : 0x111122, done ? 0.1 : 0.05);
+      bg.fillRoundedRect(ax, ay, colW, rowH, 6);
+      bg.lineStyle(1, done ? ach.color : 0x1a1a33, done ? 0.5 : 0.2);
+      bg.strokeRoundedRect(ax, ay, colW, rowH, 6);
+
+      const icon = this.add.graphics();
+      icon.fillStyle(done ? ach.color : 0x222244, done ? 0.8 : 0.3);
+      icon.fillCircle(ax + 18, ay + rowH/2, 12);
+      if (done) { icon.lineStyle(2, ach.color, 1); icon.strokeCircle(ax + 18, ay + rowH/2, 12); }
+
+      this.add.text(ax + 34, ay + 10, ach.name, { fontFamily:'monospace', fontSize:'10px', color: done ? hexCol : '#222244', fontStyle:'bold' });
+      this.add.text(ax + 34, ay + 28, ach.desc, { fontFamily:'monospace', fontSize:'9px', color: done ? '#888899' : '#1a1a33', wordWrap:{ width: colW - 40 } });
+      if (!done) this.add.text(ax + 18, ay + rowH/2, '?', { fontFamily:'monospace', fontSize:'14px', color:'#222244', fontStyle:'bold' }).setOrigin(0.5);
+    });
+
+    // Back button
+    const bbg = this.add.graphics();
+    bbg.fillStyle(0x00ff88, 0.1); bbg.fillRoundedRect(W/2-90, H-62, 180, 44, 8);
+    bbg.lineStyle(1, 0x00ff88, 0.4); bbg.strokeRoundedRect(W/2-90, H-62, 180, 44, 8);
+    this.add.text(W/2, H-40, '← BACK', { fontFamily:'monospace', fontSize:'14px', color:'#00ff88' }).setOrigin(0.5);
+    this.add.zone(W/2-90, H-62, 180, 44).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('OverworldMap'));
+  }
+}
+
+// ============================================================
+class Upgrades extends Phaser.Scene {
+  constructor() { super({ key: 'Upgrades' }); }
+
+  create() {
+    this.save = loadSave();
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x0d0d2a, 0.5);
+    for (let x = 0; x <= W; x += 30) g.lineBetween(x, 0, x, H);
+    for (let y = 0; y <= H; y += 30) g.lineBetween(0, y, W, y);
+
+    this.add.text(W/2, 18, 'UPGRADES', { fontFamily:'monospace', fontSize:'18px', color:'#ffcc00', letterSpacing:3 }).setOrigin(0.5, 0);
+    this.shardsText = this.add.text(W/2, 44, `◆ ${this.save.shards} SHARDS`, { fontFamily:'monospace', fontSize:'13px', color:'#ffcc00' }).setOrigin(0.5, 0);
+    this.add.text(W/2, 62, 'Earned from miniboss & boss wins', { fontFamily:'monospace', fontSize:'10px', color:'#333355' }).setOrigin(0.5, 0);
+
+    this._renderList();
+
+    const bbg = this.add.graphics();
+    bbg.fillStyle(0x444466, 0.1); bbg.fillRoundedRect(W/2-90, H-62, 180, 44, 8);
+    bbg.lineStyle(1, 0x444466, 0.4); bbg.strokeRoundedRect(W/2-90, H-62, 180, 44, 8);
+    this.add.text(W/2, H-40, '← BACK', { fontFamily:'monospace', fontSize:'14px', color:'#444466' }).setOrigin(0.5);
+    this.add.zone(W/2-90, H-62, 180, 44).setOrigin(0).setInteractive().on('pointerdown', () => this.scene.start('OverworldMap'));
+  }
+
+  _renderList() {
+    if (this._listCont) { this._listCont.destroy(true); this._listMask?.destroy(); }
+    const listY = 82, listH = H - listY - 72;
+    const maskGfx = this.make.graphics({ add: false });
+    maskGfx.fillRect(0, listY, W, listH);
+    const mask = maskGfx.createGeometryMask();
+    this._listMask = maskGfx;
+
+    const cont = this.add.container(0, 0).setMask(mask);
+    this._listCont = cont;
+
+    let y = listY + 4, lastCat = null;
+    UPGRADES_CATALOG.forEach(upg => {
+      if (upg.cat !== lastCat) {
+        lastCat = upg.cat;
+        cont.add(this.add.text(20, y, upg.cat, { fontFamily:'monospace', fontSize:'11px', color:'#333355', letterSpacing:2 }));
+        y += 22;
+      }
+      const owned = !!this.save.upgrades[upg.id];
+      const canAfford = this.save.shards >= upg.cost;
+
+      const bg = this.add.graphics();
+      bg.fillStyle(owned ? 0xffcc00 : 0x111122, owned ? 0.08 : 0.05);
+      bg.fillRoundedRect(12, y, W - 24, 62, 6);
+      bg.lineStyle(1, owned ? 0xffcc00 : 0x1a1a33, owned ? 0.4 : 0.15);
+      bg.strokeRoundedRect(12, y, W - 24, 62, 6);
+      cont.add(bg);
+
+      cont.add(this.add.text(24, y + 8, upg.name, { fontFamily:'monospace', fontSize:'12px', color: owned ? '#ffcc00' : '#ffffff', fontStyle:'bold' }));
+      cont.add(this.add.text(24, y + 28, upg.desc, { fontFamily:'monospace', fontSize:'10px', color:'#444466' }));
+
+      if (owned) {
+        cont.add(this.add.text(W - 24, y + 20, 'OWNED', { fontFamily:'monospace', fontSize:'12px', color:'#ffcc00' }).setOrigin(1, 0.5));
+      } else {
+        const col = canAfford ? 0xffcc00 : 0x333344;
+        const btn = this.add.graphics();
+        btn.fillStyle(col, canAfford ? 0.15 : 0.05); btn.fillRoundedRect(W - 112, y + 12, 92, 38, 6);
+        btn.lineStyle(1, col, canAfford ? 0.6 : 0.2); btn.strokeRoundedRect(W - 112, y + 12, 92, 38, 6);
+        cont.add(btn);
+        const hexCol = '#' + col.toString(16).padStart(6, '0');
+        cont.add(this.add.text(W - 66, y + 31, `◆ ${upg.cost}`, { fontFamily:'monospace', fontSize:'12px', color: hexCol }).setOrigin(0.5));
+        if (canAfford) {
+          const zone = this.add.zone(W - 112, y + 12, 92, 38).setOrigin(0).setInteractive();
+          zone.on('pointerdown', () => { this.save.upgrades[upg.id] = true; this.save.shards -= upg.cost; writeSave(this.save); this.shardsText.setText(`◆ ${this.save.shards} SHARDS`); this._renderList(); });
+          cont.add(zone);
+        }
+      }
+      y += 72;
+    });
+
+    // Drag scroll
+    let lastY = 0, isDragging = false;
+    const totalH = y - listY + 8;
+    const maxScroll = Math.max(0, totalH - listH);
+    let scrollY = 0;
+    const setScroll = sy => { scrollY = Phaser.Math.Clamp(sy, -maxScroll, 0); cont.setY(scrollY); };
+    const pd = p => { isDragging = true; lastY = p.y; };
+    const pm = p => { if (isDragging) setScroll(scrollY + (p.y - lastY)); lastY = p.y; };
+    const pu = () => { isDragging = false; };
+    this.input.on('pointerdown', pd); this.input.on('pointermove', pm); this.input.on('pointerup', pu);
+  }
 }
 
 // ============================================================
@@ -392,11 +812,16 @@ class OverworldMap extends Phaser.Scene {
 
   create() {
     this.save = loadSave();
+    // Trigger prologue cutscene on first launch
+    if (!this.save.seenCutscenes.includes('prologue')) {
+      this.scene.start('Cutscene', { id: 'prologue', returnTo: 'OverworldMap' }); return;
+    }
     this._bg();
     this._header();
     this._edges();
     this._nodes();
     this._footer();
+    this._animateEdges();
   }
 
   _bg() {
@@ -410,8 +835,11 @@ class OverworldMap extends Phaser.Scene {
   }
 
   _header() {
-    this.add.text(W / 2, 14, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '18px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5, 0);
-    this.add.text(W / 2, 38, '⚙ ' + this.save.cycles + '  CYCLES', { fontFamily: 'monospace', fontSize: '13px', color: '#ffcc00' }).setOrigin(0.5, 0);
+    this.add.text(W / 2, 12, 'SYSTEM BREACH', { fontFamily: 'monospace', fontSize: '16px', color: '#00ff88', letterSpacing: 4 }).setOrigin(0.5, 0);
+    this.add.text(20, 36, '⚙ ' + this.save.cycles, { fontFamily: 'monospace', fontSize: '12px', color: '#ffcc00' });
+    this.add.text(20, 52, '◆ ' + this.save.shards + ' shards', { fontFamily: 'monospace', fontSize: '11px', color: '#ffcc00' });
+    const cleared = WORLDS.filter(w => { const ws = this.save.worlds?.[w.id]; return ws?.cleared?.every(c=>c); }).length;
+    this.add.text(W/2, 36, `${cleared}/19 worlds`, { fontFamily:'monospace', fontSize:'11px', color:'#333355' }).setOrigin(0.5,0);
     const sbg = this.add.graphics();
     sbg.fillStyle(0x00ff88, 0.12); sbg.fillRoundedRect(W - 84, 8, 76, 34, 6);
     sbg.lineStyle(1, 0x00ff88, 0.5); sbg.strokeRoundedRect(W - 84, 8, 76, 34, 6);
@@ -468,18 +896,56 @@ class OverworldMap extends Phaser.Scene {
 
   _footer() {
     const g = this.add.graphics();
-    g.fillStyle(0x050510, 0.95); g.fillRect(0, H - 42, W, 42);
-    g.lineStyle(1, 0x1a1a3a, 0.5); g.lineBetween(0, H - 42, W, H - 42);
+    g.fillStyle(0x050510, 0.97); g.fillRect(0, H - 56, W, 56);
+    g.lineStyle(1, 0x1a1a3a, 0.5); g.lineBetween(0, H - 56, W, H - 56);
+
+    // Act legend
     const acts = [
       { l: 'ACT 1', c: '#00ff88' }, { l: 'ACT 2', c: '#ff8800' },
       { l: 'ACT 3', c: '#ff3355' }, { l: 'ACT 4', c: '#ffcc00' },
     ];
     acts.forEach((a, i) => {
-      const x = 12 + i * 96;
+      const x = 12 + i * 92;
       const dot = this.add.graphics();
       dot.fillStyle(parseInt(a.c.replace('#', ''), 16), 0.6);
-      dot.fillCircle(x + 5, H - 21, 4);
-      this.add.text(x + 14, H - 21, a.l, { fontFamily: 'monospace', fontSize: '10px', color: a.c }).setOrigin(0, 0.5);
+      dot.fillCircle(x + 5, H - 42, 4);
+      this.add.text(x + 14, H - 42, a.l, { fontFamily: 'monospace', fontSize: '10px', color: a.c }).setOrigin(0, 0.5);
+    });
+
+    // Achievements + Upgrades buttons
+    const btn = (label, col, bx, cb) => {
+      const bg = this.add.graphics();
+      bg.fillStyle(col, 0.1); bg.fillRoundedRect(bx, H - 26, 84, 20, 4);
+      bg.lineStyle(1, col, 0.4); bg.strokeRoundedRect(bx, H - 26, 84, 20, 4);
+      this.add.text(bx + 42, H - 16, label, { fontFamily:'monospace', fontSize:'9px', color:'#'+col.toString(16).padStart(6,'0') }).setOrigin(0.5);
+      this.add.zone(bx, H - 26, 84, 20).setOrigin(0).setInteractive().on('pointerdown', cb);
+    };
+    btn('ACHIEVEMENTS', 0x44aaff,  8,       () => this.scene.start('Achievements'));
+    btn('UPGRADES',     0xffcc00,  102,     () => this.scene.start('Upgrades'));
+  }
+
+  _animateEdges() {
+    const wm = Object.fromEntries(WORLDS.map(w => [w.num, w]));
+    WORLD_EDGES.forEach(([a, b]) => {
+      const wa = wm[a], wb = wm[b];
+      const sa = worldState(wa.id, this.save), sb = worldState(wb.id, this.save);
+      if (sa === 'locked' && sb === 'locked') return;
+      const col = sa !== 'locked' ? wa.color : wb.color;
+      // Animate a small dot travelling along each active edge
+      const dot = this.add.graphics();
+      dot.fillStyle(col, 0.8); dot.fillCircle(0, 0, 3);
+      let t = Math.random(); // stagger start
+      this.tweens.add({
+        targets: { v: t }, v: t + 1,
+        duration: 1800 + rnd(0, 800),
+        repeat: -1,
+        ease: 'Linear',
+        onUpdate: tw => {
+          const frac = (tw.targets[0].v % 1);
+          dot.setPosition(wa.x + (wb.x - wa.x) * frac, wa.y + (wb.y - wa.y) * frac);
+          dot.setAlpha(Math.sin(frac * Math.PI) * 0.7);
+        },
+      });
     });
   }
 }
@@ -861,6 +1327,10 @@ class ChannelSelect extends Phaser.Scene {
 
   create() {
     const save     = loadSave();
+    // Trigger final_intro cutscene before entering The Cloud
+    if (this.worldId === 'cloud' && !save.seenCutscenes.includes('final_intro')) {
+      this.scene.start('Cutscene', { id: 'final_intro', returnTo: 'ChannelSelect', returnData: { worldId: 'cloud' } }); return;
+    }
     const world    = WORLDS.find(w => w.id === this.worldId) || WORLDS[0];
     const channels = WORLD_CHANNELS[this.worldId] || WORLD_CHANNELS.tv;
     const worldSave = save.worlds[this.worldId] || { cleared: [false,false,false,false,false] };
@@ -935,8 +1405,9 @@ class Battle extends Phaser.Scene {
     this.channel    = ch;
     this.channelIdx = (data && data.channelIdx != null) ? data.channelIdx : 0;
     this.mechanic   = ch.mechanic || 'signal';
-    this.autoMs     = ['pulse','velocity'].includes(this.mechanic) ? 1500 : AUTO_MS;
     this.save       = loadSave();
+    const upgs      = this.save.upgrades || {};
+    this.autoMs     = (upgs.overclock || ['pulse','velocity'].includes(this.mechanic)) ? 1500 : AUTO_MS;
 
     this.agents = DEFS
       .filter(d => { const s = this.save.agents.find(a => a.id === d.id); return s && s.owned; })
@@ -946,7 +1417,7 @@ class Battle extends Phaser.Scene {
         const stats   = effectiveStats(d.id, level, this.save);
         const subMoves = (saved.subclass && SUBCLASS_MOVES[saved.subclass]) ? [SUBCLASS_MOVES[saved.subclass]] : [];
         const equipped = this.save.gear?.equipped?.[d.id] || {};
-        return {
+        const ag = {
           ...d,
           ...stats,
           moves: [...d.moves, ...subMoves],
@@ -960,7 +1431,25 @@ class Battle extends Phaser.Scene {
           stored: 0,
           defending: false, fortified: false, locked: false, frozen: false, shielded: false,
         };
+        // Apply global upgrades
+        if (upgs.signal_boost)   ag.signal   += 5;
+        if (upgs.hardened_nodes) { ag.maxHp += 10; ag.hp = Math.min(ag.hp + 10, ag.maxHp); }
+        if (upgs.energy_reserve) { ag.maxEn += 10; ag.en += 10; }
+        // Per-agent upgrades
+        if (ag.id === 'threadling' && upgs.upg_threadling) ag.dmgBonus = (ag.dmgBonus||0) + 5;
+        if (ag.id === 'glitcher'   && upgs.upg_glitcher)   ag._safeCorrupt = true;
+        if (ag.id === 'netrunner'  && upgs.upg_netrunner)  ag._packetAura  = 5;
+        if (ag.id === 'sentinel'   && upgs.upg_sentinel)   ag._scanBonus   = 5;
+        if (ag.id === 'patchwork'  && upgs.upg_patchwork)  ag._patchBonus  = 10;
+        if (ag.id === 'bridgelink' && upgs.upg_bridgelink) ag._syncBonus   = 15;
+        if (ag.id === 'vault'      && upgs.upg_vault)      ag._bashBonus   = 0.15;
+        return ag;
       });
+
+    // Apply surplus_cache: grant 1 repair kit at session start if owned and have 0
+    if (upgs.surplus_cache && this.save.items.repair_kit === 0) {
+      this.save.items.repair_kit = 1; writeSave(this.save);
+    }
 
     this.enemy = { ...ch.enemy, saveUsed: false, charged: false };
     this.heatStacks = 0;
@@ -1647,13 +2136,15 @@ class Battle extends Phaser.Scene {
     // ── Items ─────────────────────────────────────────────
     } else if (id === 'use_repair_kit') {
       this.save.items.repair_kit--; writeSave(this.save);
-      const heal = 40; ag.hp = Math.min(ag.maxHp, ag.hp + heal);
+      const heal = (this.save.upgrades?.quick_repair) ? 60 : 40;
+      ag.hp = Math.min(ag.maxHp, ag.hp + heal);
       this.log(`> 🔧 REPAIR KIT: ${ag.name} +${heal} HP`);
 
     } else if (id === 'use_energy_cell') {
       this.save.items.energy_cell--; writeSave(this.save);
-      this.agents.filter(a => a.hp > 0).forEach(a => { a.en = Math.min(a.maxEn, a.en + 30); });
-      this.log(`> ⚡ ENERGY CELL: all allies +30 EN`);
+      const en = (this.save.upgrades?.power_surge) ? 50 : 30;
+      this.agents.filter(a => a.hp > 0).forEach(a => { a.en = Math.min(a.maxEn, a.en + en); });
+      this.log(`> ⚡ ENERGY CELL: all allies +${en} EN`);
 
     } else if (id === 'use_sig_boost') {
       this.save.items.sig_boost--; writeSave(this.save);
@@ -1957,8 +2448,9 @@ class Battle extends Phaser.Scene {
       // Mark channel cleared
       if (!save.worlds[this.worldId]) save.worlds[this.worldId] = { cleared: [false,false,false,false,false] };
       save.worlds[this.worldId].cleared[this.channelIdx] = true;
+      const worldJustCleared = save.worlds[this.worldId].cleared.every(c => c);
       // Unlock adjacent worlds if this world is now fully cleared
-      if (save.worlds[this.worldId].cleared.every(c => c)) {
+      if (worldJustCleared) {
         const unlocks = WORLD_UNLOCKS[this.worldId] || [];
         unlocks.forEach(uid => {
           if (!save.unlockedWorlds.includes(uid)) save.unlockedWorlds.push(uid);
@@ -1966,10 +2458,18 @@ class Battle extends Phaser.Scene {
         });
       }
 
-      // Award cycles
+      // Award cycles + shards
       const aliveCount = this.agents.filter(a => a.hp > 0).length;
       const rewards = calcRewards(ch.type, tier, aliveCount);
       save.cycles += rewards.cycles;
+      const shardsEarned = awardShards(save, ch.type);
+
+      // Redundancy upgrade: dead agents regain 5 HP
+      if (save.upgrades?.redundancy) {
+        this.agents.forEach(ag => {
+          if (ag.hp <= 0) { const sa = save.agents.find(a => a.id === ag.id); if (sa) sa.hp = Math.min(5, statsForLevel(ag.id, ag.level).maxHp); }
+        });
+      }
 
       // Award XP + level ups per agent
       const levelUps = [];
@@ -1993,6 +2493,9 @@ class Battle extends Phaser.Scene {
         this.cameras.main.flash(300, 255, 220, 50, false);
       }
 
+      // Check achievements
+      const newAchs = this._checkAchievements(save, ch, aliveCount, levelUps, worldJustCleared);
+
       // Collect agents that just hit level 5 and have no subclass yet
       const pendingSubclasses = this.agents
         .map(ag => save.agents.find(a => a.id === ag.id))
@@ -2000,55 +2503,105 @@ class Battle extends Phaser.Scene {
         .map(sa => ({ id: sa.id, name: DEFS.find(d => d.id === sa.id)?.name || sa.id, color: DEFS.find(d => d.id === sa.id)?.color || 0xffffff }));
 
       writeSave(save);
-      this._showWinScreen(rewards, levelUps, pendingSubclasses);
+      this._showWinScreen(rewards, shardsEarned, levelUps, newAchs, pendingSubclasses, worldJustCleared);
     } else {
       const cost = reviveCost(tier);
       this._showLoseScreen(cost, save);
     }
   }
 
-  _showWinScreen(rewards, levelUps, pendingSubclasses = []) {
+  _showWinScreen(rewards, shardsEarned, levelUps, newAchs, pendingSubclasses = [], worldJustCleared = false) {
     const ch = this.channel;
     const ov = this.add.graphics();
     ov.fillStyle(0x000000, 0.88); ov.fillRect(0, 0, W, H);
 
-    this.add.text(W/2, 80,  '✅',             { fontSize: '52px' }).setOrigin(0.5);
-    this.add.text(W/2, 148, 'SYSTEM RESTORED', { fontFamily:'monospace', fontSize:'22px', color:'#00ff88', fontStyle:'bold' }).setOrigin(0.5);
-    this.add.text(W/2, 178, `${ch.label} · ${ch.name}`, { fontFamily:'monospace', fontSize:'13px', color:'#444466' }).setOrigin(0.5);
+    const titleText = this.worldId === 'cloud' ? 'SINGULARITY DENIED' : worldJustCleared ? 'WORLD CLEARED!' : 'SYSTEM RESTORED';
+    const titleCol  = this.worldId === 'cloud' ? '#ffcc00' : worldJustCleared ? '#44aaff' : '#00ff88';
+    this.add.text(W/2, 60,  '✅', { fontSize: '44px' }).setOrigin(0.5);
+    this.add.text(W/2, 114, titleText, { fontFamily:'monospace', fontSize:'20px', color:titleCol, fontStyle:'bold' }).setOrigin(0.5);
+    this.add.text(W/2, 140, `${ch.label} · ${ch.name}`, { fontFamily:'monospace', fontSize:'12px', color:'#444466' }).setOrigin(0.5);
 
-    this.add.text(W/2, 216, `+${rewards.cycles} ⚙  CYCLES`, { fontFamily:'monospace', fontSize:'18px', color:'#ffcc00' }).setOrigin(0.5);
-    this.add.text(W/2, 244, `+${rewards.xp} XP  per agent`, { fontFamily:'monospace', fontSize:'16px', color:'#8888bb' }).setOrigin(0.5);
+    this.add.text(W/2, 172, `+${rewards.cycles} ⚙  CYCLES`, { fontFamily:'monospace', fontSize:'16px', color:'#ffcc00' }).setOrigin(0.5);
+    this.add.text(W/2, 194, `+${rewards.xp} XP  per agent`, { fontFamily:'monospace', fontSize:'13px', color:'#8888bb' }).setOrigin(0.5);
+    if (shardsEarned > 0) {
+      this.add.text(W/2, 216, `+${shardsEarned} ◆  SHARDS`, { fontFamily:'monospace', fontSize:'14px', color:'#ffcc00' }).setOrigin(0.5);
+    }
 
-    let y = 288;
+    let y = shardsEarned > 0 ? 244 : 224;
     if (levelUps.length > 0) {
-      this.add.text(W/2, y, '── LEVEL UP ──', { fontFamily:'monospace', fontSize:'13px', color:'#333355' }).setOrigin(0.5);
-      y += 28;
-      levelUps.forEach(lu => {
-        this.add.text(W/2, y, `${lu.name}  Lv${lu.from} → Lv${lu.to}`, { fontFamily:'monospace', fontSize:'16px', color:'#00ff88' }).setOrigin(0.5);
-        y += 28;
-      });
+      this.add.text(W/2, y, '── LEVEL UP ──', { fontFamily:'monospace', fontSize:'11px', color:'#333355' }).setOrigin(0.5); y += 22;
+      levelUps.forEach(lu => { this.add.text(W/2, y, `${lu.name}  Lv${lu.from} → Lv${lu.to}`, { fontFamily:'monospace', fontSize:'14px', color:'#00ff88' }).setOrigin(0.5); y += 24; });
+    }
+    if (newAchs.length > 0) {
+      this.add.text(W/2, y, '── ACHIEVEMENT ──', { fontFamily:'monospace', fontSize:'11px', color:'#333355' }).setOrigin(0.5); y += 22;
+      newAchs.forEach(ach => { this.add.text(W/2, y, ach.name, { fontFamily:'monospace', fontSize:'13px', color:'#'+ach.color.toString(16).padStart(6,'0'), fontStyle:'bold' }).setOrigin(0.5); y += 22; });
     }
 
     // Buttons
-    y = Math.max(y + 20, 520);
+    y = Math.max(y + 16, 680);
     const btn = (label, col, by, cb) => {
       const g = this.add.graphics();
-      g.fillStyle(col, 0.12); g.fillRoundedRect(W/2-110, by, 220, 52, 10);
-      g.lineStyle(1, col, 0.5); g.strokeRoundedRect(W/2-110, by, 220, 52, 10);
-      this.add.text(W/2, by+26, label, { fontFamily:'monospace', fontSize:'16px', color:'#'+col.toString(16).padStart(6,'0') }).setOrigin(0.5);
-      this.add.zone(W/2-110, by, 220, 52).setOrigin(0).setInteractive().on('pointerdown', cb);
+      g.fillStyle(col, 0.12); g.fillRoundedRect(W/2-110, by, 220, 48, 10);
+      g.lineStyle(1, col, 0.5); g.strokeRoundedRect(W/2-110, by, 220, 48, 10);
+      this.add.text(W/2, by+24, label, { fontFamily:'monospace', fontSize:'15px', color:'#'+col.toString(16).padStart(6,'0') }).setOrigin(0.5);
+      this.add.zone(W/2-110, by, 220, 48).setOrigin(0).setInteractive().on('pointerdown', cb);
     };
     const channels = WORLD_CHANNELS[this.worldId] || WORLD_CHANNELS.tv;
     const nextIdx  = Math.min(this.channelIdx + 1, channels.length - 1);
-    const goMap    = () => pendingSubclasses.length > 0
-      ? this.scene.start('SubclassChoice', { pending: pendingSubclasses, currentIdx: 0 })
-      : this.scene.start('OverworldMap');
+    const cutId    = ch.type === 'boss' ? CUTSCENE_TRIGGERS[this.worldId] : null;
+    const save     = this.save;
+    const goMap    = () => {
+      if (cutId && !save.seenCutscenes.includes(cutId)) {
+        const rd = pendingSubclasses.length > 0 ? { pending: pendingSubclasses, currentIdx: 0 } : {};
+        this.scene.start('Cutscene', { id: cutId, returnTo: pendingSubclasses.length > 0 ? 'SubclassChoice' : 'OverworldMap', returnData: rd });
+      } else if (pendingSubclasses.length > 0) {
+        this.scene.start('SubclassChoice', { pending: pendingSubclasses, currentIdx: 0 });
+      } else {
+        this.scene.start('OverworldMap');
+      }
+    };
     if (this.channelIdx < channels.length - 1) {
       btn('NEXT CHANNEL', 0x00ff88, y, () => this.scene.start('Battle', { channel: channels[nextIdx], channelIdx: nextIdx, worldId: this.worldId }));
-      btn('← MAP', 0x444466, y + 62, goMap);
+      btn('← MAP', 0x444466, y + 58, goMap);
     } else {
       btn('← WORLD MAP', 0x00ff88, y, goMap);
     }
+  }
+
+  _checkAchievements(save, ch, aliveCount, levelUps, worldJustCleared) {
+    if (!save.achievements) save.achievements = {};
+    const newAchs = [];
+    const unlock = id => {
+      if (!save.achievements[id]) { save.achievements[id] = true; const a = ACHIEVEMENTS.find(x => x.id === id); if (a) newAchs.push(a); }
+    };
+    unlock('first_breach');
+    if (this.agents.length > 0 && aliveCount === this.agents.length) unlock('clean_sweep');
+    if (this.agents.some(a => a.hp > 0 && a.hp < 5)) unlock('on_the_wire');
+    if (this.worldId === 'cloud' && ch.type === 'boss') {
+      unlock('singularity');
+      if (aliveCount === 1) unlock('ghost_protocol');
+    }
+    if (worldJustCleared) unlock('archivist');
+    levelUps.forEach(lu => {
+      if (lu.to >= 5)  unlock('veteran');
+      if (lu.to >= 10) unlock('battle_hardened');
+    });
+    // Act clears
+    const actWorldIds = {
+      signal_lost:     ['tv','phone','speaker','watch','console'],
+      deep_network:    ['fridge','micro','printer','hub','seccam'],
+      system_critical: ['router','computer','car','atm','grid'],
+    };
+    Object.entries(actWorldIds).forEach(([achId, wids]) => {
+      if (wids.every(id => save.worlds[id]?.cleared?.every(c=>c))) unlock(achId);
+    });
+    if (WORLDS.every(w => save.worlds[w.id]?.cleared?.every(c=>c))) unlock('completionist');
+    if (save.agents.filter(a => a.owned).length >= 7) unlock('full_roster');
+    const gearCount = save.agents.filter(a => { const eq = save.gear?.equipped?.[a.id]; return eq?.weapon || eq?.armor; }).length;
+    if (gearCount >= 4) unlock('fully_armed');
+    if (save.agents.some(a => a.subclass)) unlock('subclass');
+    if (save.cycles <= 0) unlock('bankrupt');
+    return newAchs;
   }
 
   _showLoseScreen(cost, save) {
@@ -2204,7 +2757,7 @@ class Battle extends Phaser.Scene {
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: [OverworldMap, SubclassChoice, ChannelSelect, Shop, Battle],
+  backgroundColor: '#050510', scene: [OverworldMap, Cutscene, Achievements, Upgrades, SubclassChoice, ChannelSelect, Shop, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });

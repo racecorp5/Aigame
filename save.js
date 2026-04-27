@@ -69,6 +69,10 @@ const DEFAULT_SAVE = {
     tv: { cleared: [false, false, false, false, false] },
   },
   unlockedWorlds: ['tv'],
+  shards: 0,
+  achievements: {},
+  upgrades: {},
+  seenCutscenes: [],
 };
 
 // ── Save helpers ──────────────────────────────────────────
@@ -93,8 +97,24 @@ function loadSave() {
     });
     // migrate: add items if missing
     if (!s.items) s.items = _clone(DEFAULT_SAVE.items);
+    // migrate: new progression fields
+    if (typeof s.shards !== 'number') s.shards = 0;
+    if (!s.achievements) s.achievements = {};
+    if (!s.upgrades) s.upgrades = {};
+    if (!s.seenCutscenes) s.seenCutscenes = [];
+    if (!s.unlockedWorlds) s.unlockedWorlds = _clone(DEFAULT_SAVE.unlockedWorlds);
+    if (!s.worlds) s.worlds = _clone(DEFAULT_SAVE.worlds);
     return s;
   } catch { return _clone(DEFAULT_SAVE); }
+}
+
+// ── Shard rewards ─────────────────────────────────────────
+
+const SHARD_AWARDS = { normal: 0, miniboss: 3, boss: 8 };
+function awardShards(save, channelType) {
+  const n = SHARD_AWARDS[channelType] || 0;
+  save.shards = (save.shards || 0) + n;
+  return n;
 }
 
 function writeSave(data) {
