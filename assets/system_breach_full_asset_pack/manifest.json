@@ -1,0 +1,1490 @@
+[
+  {
+    "id": "portrait_bridgelink",
+    "path": "agents/portraits/portrait_bridgelink.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_glitcher",
+    "path": "agents/portraits/portrait_glitcher.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_netrunner",
+    "path": "agents/portraits/portrait_netrunner.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_patchwork",
+    "path": "agents/portraits/portrait_patchwork.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_sentinel",
+    "path": "agents/portraits/portrait_sentinel.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_threadling",
+    "path": "agents/portraits/portrait_threadling.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_vault",
+    "path": "agents/portraits/portrait_vault.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_bridgelink",
+    "path": "agents/sprites/sprite_bridgelink.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_glitcher",
+    "path": "agents/sprites/sprite_glitcher.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_netrunner",
+    "path": "agents/sprites/sprite_netrunner.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_patchwork",
+    "path": "agents/sprites/sprite_patchwork.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_sentinel",
+    "path": "agents/sprites/sprite_sentinel.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_threadling",
+    "path": "agents/sprites/sprite_threadling.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "sprite_vault",
+    "path": "agents/sprites/sprite_vault.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_atm",
+    "path": "backgrounds/bg_atm.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_car",
+    "path": "backgrounds/bg_car.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_cloud",
+    "path": "backgrounds/bg_cloud.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_computer",
+    "path": "backgrounds/bg_computer.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_console",
+    "path": "backgrounds/bg_console.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_farm",
+    "path": "backgrounds/bg_farm.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_fridge",
+    "path": "backgrounds/bg_fridge.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_grid",
+    "path": "backgrounds/bg_grid.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_hub",
+    "path": "backgrounds/bg_hub.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_medical",
+    "path": "backgrounds/bg_medical.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_micro",
+    "path": "backgrounds/bg_micro.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_phone",
+    "path": "backgrounds/bg_phone.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_printer",
+    "path": "backgrounds/bg_printer.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_router",
+    "path": "backgrounds/bg_router.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_satellite",
+    "path": "backgrounds/bg_satellite.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_seccam",
+    "path": "backgrounds/bg_seccam.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_speaker",
+    "path": "backgrounds/bg_speaker.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_tv",
+    "path": "backgrounds/bg_tv.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_watch",
+    "path": "backgrounds/bg_watch.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_01",
+    "path": "comic_panels/panel_01.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_02",
+    "path": "comic_panels/panel_02.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_03",
+    "path": "comic_panels/panel_03.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_04",
+    "path": "comic_panels/panel_04.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_05",
+    "path": "comic_panels/panel_05.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_06",
+    "path": "comic_panels/panel_06.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_07",
+    "path": "comic_panels/panel_07.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_08",
+    "path": "comic_panels/panel_08.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_09",
+    "path": "comic_panels/panel_09.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_10",
+    "path": "comic_panels/panel_10.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_11",
+    "path": "comic_panels/panel_11.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_12",
+    "path": "comic_panels/panel_12.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_13",
+    "path": "comic_panels/panel_13.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_14",
+    "path": "comic_panels/panel_14.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_15",
+    "path": "comic_panels/panel_15.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_16",
+    "path": "comic_panels/panel_16.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_17",
+    "path": "comic_panels/panel_17.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_18",
+    "path": "comic_panels/panel_18.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_19",
+    "path": "comic_panels/panel_19.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_20",
+    "path": "comic_panels/panel_20.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_21",
+    "path": "comic_panels/panel_21.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_22",
+    "path": "comic_panels/panel_22.png",
+    "width": 540,
+    "height": 300,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_upgrades",
+    "path": "currency/bg_upgrades.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_shards",
+    "path": "currency/icon_shards.png",
+    "width": 24,
+    "height": 24,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_shards_lg",
+    "path": "currency/icon_shards_lg.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_atm",
+    "path": "enemies/enemy_atm.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_car",
+    "path": "enemies/enemy_car.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_cloud",
+    "path": "enemies/enemy_cloud.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_computer",
+    "path": "enemies/enemy_computer.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_console",
+    "path": "enemies/enemy_console.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_farm",
+    "path": "enemies/enemy_farm.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_fridge",
+    "path": "enemies/enemy_fridge.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_grid",
+    "path": "enemies/enemy_grid.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_hub",
+    "path": "enemies/enemy_hub.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_medical",
+    "path": "enemies/enemy_medical.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_micro",
+    "path": "enemies/enemy_micro.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_phone",
+    "path": "enemies/enemy_phone.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_printer",
+    "path": "enemies/enemy_printer.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_router",
+    "path": "enemies/enemy_router.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_satellite",
+    "path": "enemies/enemy_satellite.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_seccam",
+    "path": "enemies/enemy_seccam.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_speaker",
+    "path": "enemies/enemy_speaker.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_tv",
+    "path": "enemies/enemy_tv.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "enemy_watch",
+    "path": "enemies/enemy_watch.png",
+    "width": 44,
+    "height": 66,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_archivist_locked",
+    "path": "icons/achievements/locked/ach_archivist_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_bankrupt_locked",
+    "path": "icons/achievements/locked/ach_bankrupt_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_battle_hardened_locked",
+    "path": "icons/achievements/locked/ach_battle_hardened_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_chain_reaction_locked",
+    "path": "icons/achievements/locked/ach_chain_reaction_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_clean_sweep_locked",
+    "path": "icons/achievements/locked/ach_clean_sweep_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_completionist_locked",
+    "path": "icons/achievements/locked/ach_completionist_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_deep_network_locked",
+    "path": "icons/achievements/locked/ach_deep_network_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_first_breach_locked",
+    "path": "icons/achievements/locked/ach_first_breach_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_full_roster_locked",
+    "path": "icons/achievements/locked/ach_full_roster_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_fully_operational_locked",
+    "path": "icons/achievements/locked/ach_fully_operational_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_ghost_protocol_locked",
+    "path": "icons/achievements/locked/ach_ghost_protocol_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_on_the_wire_locked",
+    "path": "icons/achievements/locked/ach_on_the_wire_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_overclocker_locked",
+    "path": "icons/achievements/locked/ach_overclocker_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_rogue_signal_locked",
+    "path": "icons/achievements/locked/ach_rogue_signal_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_signal_lost_locked",
+    "path": "icons/achievements/locked/ach_signal_lost_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_signal_perfect_locked",
+    "path": "icons/achievements/locked/ach_signal_perfect_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_singularity_denied_locked",
+    "path": "icons/achievements/locked/ach_singularity_denied_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_static_immunity_locked",
+    "path": "icons/achievements/locked/ach_static_immunity_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_subclass_resolved_locked",
+    "path": "icons/achievements/locked/ach_subclass_resolved_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_system_critical_locked",
+    "path": "icons/achievements/locked/ach_system_critical_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_veteran_locked",
+    "path": "icons/achievements/locked/ach_veteran_locked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_archivist_unlocked",
+    "path": "icons/achievements/unlocked/ach_archivist_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_bankrupt_unlocked",
+    "path": "icons/achievements/unlocked/ach_bankrupt_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_battle_hardened_unlocked",
+    "path": "icons/achievements/unlocked/ach_battle_hardened_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_chain_reaction_unlocked",
+    "path": "icons/achievements/unlocked/ach_chain_reaction_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_clean_sweep_unlocked",
+    "path": "icons/achievements/unlocked/ach_clean_sweep_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_completionist_unlocked",
+    "path": "icons/achievements/unlocked/ach_completionist_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_deep_network_unlocked",
+    "path": "icons/achievements/unlocked/ach_deep_network_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_first_breach_unlocked",
+    "path": "icons/achievements/unlocked/ach_first_breach_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_full_roster_unlocked",
+    "path": "icons/achievements/unlocked/ach_full_roster_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_fully_operational_unlocked",
+    "path": "icons/achievements/unlocked/ach_fully_operational_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_ghost_protocol_unlocked",
+    "path": "icons/achievements/unlocked/ach_ghost_protocol_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_on_the_wire_unlocked",
+    "path": "icons/achievements/unlocked/ach_on_the_wire_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_overclocker_unlocked",
+    "path": "icons/achievements/unlocked/ach_overclocker_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_rogue_signal_unlocked",
+    "path": "icons/achievements/unlocked/ach_rogue_signal_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_signal_lost_unlocked",
+    "path": "icons/achievements/unlocked/ach_signal_lost_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_signal_perfect_unlocked",
+    "path": "icons/achievements/unlocked/ach_signal_perfect_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_singularity_denied_unlocked",
+    "path": "icons/achievements/unlocked/ach_singularity_denied_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_static_immunity_unlocked",
+    "path": "icons/achievements/unlocked/ach_static_immunity_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_subclass_resolved_unlocked",
+    "path": "icons/achievements/unlocked/ach_subclass_resolved_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_system_critical_unlocked",
+    "path": "icons/achievements/unlocked/ach_system_critical_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "ach_veteran_unlocked",
+    "path": "icons/achievements/unlocked/ach_veteran_unlocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "armor_energy_cell",
+    "path": "icons/armor/armor_energy_cell.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "armor_fortress_shell",
+    "path": "icons/armor/armor_fortress_shell.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "armor_repair_plating",
+    "path": "icons/armor/armor_repair_plating.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "armor_signal_mesh",
+    "path": "icons/armor/armor_signal_mesh.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "item_emp_charge",
+    "path": "icons/items/item_emp_charge.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "item_energy_cell",
+    "path": "icons/items/item_energy_cell.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "item_repair_kit",
+    "path": "icons/items/item_repair_kit.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "item_sig_boost",
+    "path": "icons/items/item_sig_boost.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_agent_overclocked",
+    "path": "icons/upgrades/upg_agent_overclocked.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_bridgelink",
+    "path": "icons/upgrades/upg_bridgelink.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_cloudbreaker",
+    "path": "icons/upgrades/upg_cloudbreaker.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_data_compression",
+    "path": "icons/upgrades/upg_data_compression.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_energy_reserve",
+    "path": "icons/upgrades/upg_energy_reserve.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_glitcher",
+    "path": "icons/upgrades/upg_glitcher.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_hardened_nodes",
+    "path": "icons/upgrades/upg_hardened_nodes.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_netrunner",
+    "path": "icons/upgrades/upg_netrunner.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_new_game_plus",
+    "path": "icons/upgrades/upg_new_game_plus.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_nexus_link",
+    "path": "icons/upgrades/upg_nexus_link.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_overclock",
+    "path": "icons/upgrades/upg_overclock.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_packet_cache",
+    "path": "icons/upgrades/upg_packet_cache.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_patchwork",
+    "path": "icons/upgrades/upg_patchwork.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_power_surge",
+    "path": "icons/upgrades/upg_power_surge.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_quick_repair",
+    "path": "icons/upgrades/upg_quick_repair.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_redundancy",
+    "path": "icons/upgrades/upg_redundancy.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_sentinel",
+    "path": "icons/upgrades/upg_sentinel.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_signal_boost",
+    "path": "icons/upgrades/upg_signal_boost.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_static_shield",
+    "path": "icons/upgrades/upg_static_shield.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_surplus_cache",
+    "path": "icons/upgrades/upg_surplus_cache.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_threadling",
+    "path": "icons/upgrades/upg_threadling.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "upg_vault",
+    "path": "icons/upgrades/upg_vault.png",
+    "width": 32,
+    "height": 32,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "weapon_bit_shard",
+    "path": "icons/weapons/weapon_bit_shard.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "weapon_overcharge_core",
+    "path": "icons/weapons/weapon_overcharge_core.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "weapon_precision_bit",
+    "path": "icons/weapons/weapon_precision_bit.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "weapon_signal_amp",
+    "path": "icons/weapons/weapon_signal_amp.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_cloud",
+    "path": "special_portraits/portrait_cloud.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "portrait_nexus",
+    "path": "special_portraits/portrait_nexus.png",
+    "width": 200,
+    "height": 200,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "badge_boss",
+    "path": "ui/badge_boss.png",
+    "width": 48,
+    "height": 20,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "badge_miniboss",
+    "path": "ui/badge_miniboss.png",
+    "width": 48,
+    "height": 20,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "badge_normal",
+    "path": "ui/badge_normal.png",
+    "width": 48,
+    "height": 20,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_achievements",
+    "path": "ui/bg_achievements.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_overworld",
+    "path": "ui/bg_overworld.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "bg_title",
+    "path": "ui/bg_title.png",
+    "width": 960,
+    "height": 640,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "button_primary",
+    "path": "ui/button_primary.png",
+    "width": 192,
+    "height": 64,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "hud_panel",
+    "path": "ui/hud_panel.png",
+    "width": 320,
+    "height": 120,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_cycles",
+    "path": "ui/icon_cycles.png",
+    "width": 24,
+    "height": 24,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "logo_systembreach",
+    "path": "ui/logo_systembreach.png",
+    "width": 400,
+    "height": 80,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_border",
+    "path": "ui/panel_border.png",
+    "width": 128,
+    "height": 128,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "panel_caption_bg",
+    "path": "ui/panel_caption_bg.png",
+    "width": 256,
+    "height": 64,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_atm",
+    "path": "world_icons/icon_atm.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_car",
+    "path": "world_icons/icon_car.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_cloud",
+    "path": "world_icons/icon_cloud.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_computer",
+    "path": "world_icons/icon_computer.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_console",
+    "path": "world_icons/icon_console.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_farm",
+    "path": "world_icons/icon_farm.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_fridge",
+    "path": "world_icons/icon_fridge.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_grid",
+    "path": "world_icons/icon_grid.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_hub",
+    "path": "world_icons/icon_hub.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_medical",
+    "path": "world_icons/icon_medical.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_micro",
+    "path": "world_icons/icon_micro.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_phone",
+    "path": "world_icons/icon_phone.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_printer",
+    "path": "world_icons/icon_printer.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_router",
+    "path": "world_icons/icon_router.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_satellite",
+    "path": "world_icons/icon_satellite.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_seccam",
+    "path": "world_icons/icon_seccam.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_speaker",
+    "path": "world_icons/icon_speaker.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_tv",
+    "path": "world_icons/icon_tv.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  },
+  {
+    "id": "icon_watch",
+    "path": "world_icons/icon_watch.png",
+    "width": 48,
+    "height": 48,
+    "style": "Clean Neon Systems",
+    "status": "first_pass"
+  }
+]
