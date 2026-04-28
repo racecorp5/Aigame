@@ -43,8 +43,31 @@ reference (16/32/48/64 px)."*
 The chunk file lists every output filename and path. Save to those exact
 paths under `assets/` — the engine loads by path.
 
-After Chunk 01 finishes:
+### About the JSON manifests
 
+**Image generators output PNGs but cannot write JSON files.** The chunk
+prompt asks for JSON for completeness, but in practice your generator
+will return only the PNGs. That's expected.
+
+After saving the PNGs, run the manifest generator to produce the JSON:
+
+```sh
+node tools/gen-manifests.js
+```
+
+That walks the `assets/` tree and writes a matching `.json` next to every
+`.png` based on the file's directory (agent vs portrait vs enemy vs bg).
+The JSON is fully deterministic from the schema — no manual editing
+needed unless you customize a sheet, in which case drop a sibling
+`<name>.override.json` next to the PNG and the script will deep-merge it.
+
+Run with `--dry` to preview without writing, `--force` to overwrite
+existing JSONs.
+
+### Validation checklist (after Chunk 01)
+
+- [ ] All PNGs saved to the exact paths listed in the chunk file
+- [ ] `node tools/gen-manifests.js` ran clean and produced matching JSONs
 - [ ] Threadling sprite sheet renders correctly in the game
 - [ ] All animations play (idle, walk, attack, ability, hit)
 - [ ] Sprite size on screen is 44×66 px
