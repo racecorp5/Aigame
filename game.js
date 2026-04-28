@@ -10,6 +10,13 @@ const STATE = { PLAYER: 'PLAYER', ANIM: 'ANIM', ENEMY: 'ENEMY', WIN: 'WIN', LOSE
 
 function hits(s) { return Math.random() * 100 < s; }
 function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+// Multiplicative tint blend (channel min), used to layer skin over subclass.
+function _blendTints(a, b) {
+  const ar = (a >> 16) & 0xff, ag = (a >> 8) & 0xff, ab = a & 0xff;
+  const br = (b >> 16) & 0xff, bg = (b >> 8) & 0xff, bb = b & 0xff;
+  const r = Math.floor(ar * br / 255), g = Math.floor(ag * bg / 255), bl = Math.floor(ab * bb / 255);
+  return (r << 16) | (g << 8) | bl;
+}
 
 // ── World map ─────────────────────────────────────────────
 const WORLDS = [
@@ -194,7 +201,9 @@ const WORLD_CHANNELS = {
 
 const DEFS = [
   {
-    id: 'threadling', name: 'THREADLING', cls: 'COMPUTE', color: 0x00ff88,
+    id: 'threadling', name: 'THREADLING', cls: 'COMPUTE', color: 0x00ff88, decal: '01',
+    faction: 'COMPUTE / BURST',
+    bio: 'Surgical compute operative. Sharp angular silhouette, blade-edge attacks. Built for high-burst takedowns at the cost of fragile armor.',
     maxHp: 100, maxEn: 50, signal: 85, autonomy: 10,
     moves: [
       { id: 'attack',    label: 'ATTACK',    sub: '~15 dmg',           color: 0xff3355, cost: 0  },
@@ -202,7 +211,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'patchwork', name: 'PATCHWORK', cls: 'MEMORY', color: 0xaa44ff,
+    id: 'patchwork', name: 'PATCHWORK', cls: 'MEMORY', color: 0xaa44ff, decal: '02',
+    faction: 'MEMORY / SUPPORT',
+    bio: 'Field medic stitched from salvaged firmware. Rounded, mismatched parts. Heals teammates and replays past actions to undo mistakes.',
     maxHp: 80, maxEn: 60, signal: 75, autonomy: 25,
     moves: [
       { id: 'patch',  label: 'PATCH',  sub: 'Heal ally ~25 HP',   color: 0xaa44ff, cost: 15 },
@@ -210,7 +221,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'vault', name: 'VAULT', cls: 'STORAGE', color: 0xffcc00,
+    id: 'vault', name: 'VAULT', cls: 'STORAGE', color: 0xffcc00, decal: '03',
+    faction: 'STORAGE / TANK',
+    bio: 'Heavy-armor data fortress. Blocky, slab-shouldered, walks slow but absorbs hits the others cannot. Stores damage and returns it as counter-strikes.',
     maxHp: 140, maxEn: 40, signal: 70, autonomy: 8,
     moves: [
       { id: 'bash',    label: 'BASH',    sub: '+15 signal bonus',  color: 0xffcc00, cost: 0 },
@@ -218,7 +231,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'netrunner', name: 'NETRUNNER', cls: 'NETWORK', color: 0x00ccff,
+    id: 'netrunner', name: 'NETRUNNER', cls: 'NETWORK', color: 0x00ccff, decal: '04',
+    faction: 'NETWORK / FIRST-STRIKE',
+    bio: 'Slim, antenna-arrayed signal runner. Trails of cable, packet-blue glow. Highest accuracy in the squad. Acts before anyone else can blink.',
     maxHp: 75, maxEn: 70, signal: 92, autonomy: 35,
     moves: [
       { id: 'packet',    label: 'PACKET',    sub: '~12 dmg high accuracy', color: 0x00ccff, cost: 0  },
@@ -226,7 +241,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'sentinel', name: 'SENTINEL', cls: 'SECURITY', color: 0xff4466,
+    id: 'sentinel', name: 'SENTINEL', cls: 'SECURITY', color: 0xff4466, decal: '05',
+    faction: 'SECURITY / CONTROL',
+    bio: 'Symmetrical, shield-bearing security daemon. Reads enemy weakness, debuffs aura, and reflects attacks back at the source. Slow but unyielding.',
     maxHp: 95, maxEn: 55, signal: 80, autonomy: 15,
     moves: [
       { id: 'scan',     label: 'SCAN',     sub: 'Enemy −15 aura',       color: 0xff4466, cost: 10 },
@@ -234,7 +251,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'glitcher', name: 'GLITCHER', cls: 'GLITCH', color: 0xff44ff,
+    id: 'glitcher', name: 'GLITCHER', cls: 'GLITCH', color: 0xff44ff, decal: '06',
+    faction: 'GLITCH / WILDCARD',
+    bio: 'Asymmetric, corrupt-edged. Acts on hostile firmware fragments she’s glued to her own form. Outcomes are statistical — sometimes catastrophic.',
     maxHp: 70, maxEn: 80, signal: 65, autonomy: 40,
     moves: [
       { id: 'corrupt', label: 'CORRUPT', sub: '65% enemy / 35% ally',  color: 0xff44ff, cost: 0  },
@@ -242,7 +261,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'bridgelink', name: 'BRIDGELINK', cls: 'INTERFACE', color: 0xffaa00,
+    id: 'bridgelink', name: 'BRIDGELINK', cls: 'INTERFACE', color: 0xffaa00, decal: '07',
+    faction: 'INTERFACE / COORDINATOR',
+    bio: 'Arc-shaped relay agent. Links the squad’s energy and HP into shared pools. Without Bridgelink, the squad is seven units. With her, it is one.',
     maxHp: 85, maxEn: 65, signal: 78, autonomy: 20,
     moves: [
       { id: 'boost', label: 'BOOST', sub: '+10 EN to all allies',    color: 0xffaa00, cost: 10 },
@@ -250,6 +271,104 @@ const DEFS = [
     ],
   },
 ];
+
+// ── Tileset config ─────────────────────────────────────────
+// 32×32 tile grid. Each tile defines a fill, stroke, and optional glyph.
+// Battle backgrounds and the future exploration mode read from this table.
+// Adding a real PNG tileset later only requires adding `texture: 'key_x'` to
+// the tile entry and the renderer will swap from rect-fill to image draw.
+const TILE_SIZE = 32;
+const TILES = {
+  empty:    { fill: 0x000000, stroke: null,     glyph: null },
+  floor:    { fill: 0x12162a, stroke: 0x1f2745, glyph: null },
+  wall:     { fill: 0x070912, stroke: 0x1f2745, glyph: null },
+  panel:    { fill: 0x141a2e, stroke: 0x3df7ff, glyph: null },
+  terminal: { fill: 0x141a2e, stroke: 0x3df7ff, glyph: '◼' },
+  cable:    { fill: 0x070912, stroke: 0x62b8ff, glyph: '═' },
+  ice:      { fill: 0x1a2e3f, stroke: 0xa8e0ff, glyph: '❄' },
+  fire:     { fill: 0x2e1410, stroke: 0xff8a3c, glyph: '▲' },
+  paper:    { fill: 0x1f1a14, stroke: 0xffd23d, glyph: '═' },
+  data:     { fill: 0x0a141f, stroke: 0x4cff8a, glyph: '·' },
+  shock:    { fill: 0x1f1f0a, stroke: 0xffd23d, glyph: '⚡' },
+  void:     { fill: 0x05050a, stroke: 0x1f2745, glyph: null },
+  cloud:    { fill: 0x1a1430, stroke: 0xb050d0, glyph: '☁' },
+  scanline: { fill: 0x0a0d18, stroke: 0xff4d4d, glyph: '─' },
+};
+
+// ── Scene config (per world battle backdrop) ───────────────
+// Compact ASCII grid → tile-id pattern. The renderer draws each cell as
+// 32×32, so a scene of N rows × M cols paints N*M tiles. Strings keep the
+// authoring clean; '.' = empty (transparent), letters map via SCENE_LEGEND.
+const SCENE_LEGEND = {
+  '.': 'empty', '#': 'wall', ',': 'floor', 'P': 'panel', 'T': 'terminal',
+  'C': 'cable', 'I': 'ice', 'F': 'fire', 'p': 'paper', 'D': 'data',
+  'S': 'shock', 'V': 'void', 'L': 'cloud', '~': 'scanline',
+};
+const SCENES = {
+  // Each value is an array of strings; one string per row, one char per tile.
+  // 12 cols × 4 rows = a 384×128 strip drawn under the enemy.
+  tv:        ['~~~~~~~~~~~~', '~..PPPP....~', '~..#TTTT#..~', '~##########~'],
+  phone:     ['............', 'CCCCCCCCCCCC', '..,T,,,,T,..', '############'],
+  speaker:   ['............', '....PPPP....', '..,,TTTT,,..', '############'],
+  watch:     ['CCCCCCCCCCCC', '..PPPPPPPP..', '..TT,,,,TT..', '############'],
+  console:   ['~~~~~~~~~~~~', '..PPTTPPTT..', '..,,,,,,,,..', '############'],
+  fridge:    ['IIIIIIIIIIII', 'I..,T,,T,..I', 'I..,,,,,,..I', 'IIIIIIIIIIII'],
+  micro:     ['FFFFFFFFFFFF', 'F..,T,,T,..F', 'F..,SS,SS,.F', 'FFFFFFFFFFFF'],
+  printer:   ['ppppppppppppp', 'p..PTTPP..p', 'p..,,,,,..p', 'pppppppppppp'].slice(0, 4).map(s => s.padEnd(12, 'p').slice(0,12)),
+  hub:       ['CCCCCCCCCCCC', 'C..,T,,T,..C', 'C..,,DD,,..C', 'CCCCCCCCCCCC'],
+  seccam:    ['~~~~~~~~~~~~', '~..PPTTPP..~', '~..,,,,,,..~', '############'],
+  router:    ['CCCCCCCCCCCC', 'C..PPPPPPPPC', 'C..,,DDDD,.C', 'CCCCCCCCCCCC'],
+  computer:  ['DDDDDDDDDDDD', 'D..PTTPPTT.D', 'D..,,,,,,,.D', 'DDDDDDDDDDDD'],
+  car:       ['~~~~~~~~~~~~', '............', '..,,,,,,,,..', '############'],
+  atm:       ['~~~~~~~~~~~~', '~..PTTTTPP.~', '~..,,,,,,,.~', '############'],
+  grid:      ['SSSSSSSSSSSS', 'S..,T,,T,..S', 'S..,,SS,,,.S', 'SSSSSSSSSSSS'],
+  medical:   ['~~~~~~~~~~~~', '~..PPDDPP,.~', '~..,T,,,T,.~', '############'],
+  farm:      ['DDDDDDDDDDDD', 'D..PTPTPTPDD', 'D..,,,,,,,,D', 'DDDDDDDDDDDD'],
+  satellite: ['VVVVVVVVVVVV', 'V..PCCCCPP.V', 'V..,,,,,,,.V', 'VVVVVVVVVVVV'],
+  cloud:     ['LLLLLLLLLLLL', 'L..PTTTTPP.L', 'L..,,LL,,,.L', 'LLLLLLLLLLLL'],
+};
+
+// ── Skin / color variant definitions ───────────────────────
+// Each skin defines a tint (Phaser multiplies sprite RGB by tint) and a small
+// label string. Per-agent owned-skins live on save.cosmetics.ownedSkins[id].
+// Engine applies skin.tint to every sprite when agent's `skin` is set.
+const SKINS = [
+  { id: 'default',   name: 'DEFAULT',   tint: 0xffffff, cost: 0   },
+  { id: 'desert',    name: 'DESERT',    tint: 0xd0a060, cost: 50  },
+  { id: 'stealth',   name: 'STEALTH',   tint: 0x6a7080, cost: 80  },
+  { id: 'arctic',    name: 'ARCTIC',    tint: 0xa8e0ff, cost: 80  },
+  { id: 'corrupted', name: 'CORRUPTED', tint: 0xb050d0, cost: 120 },
+];
+const SKIN_BY_ID = Object.fromEntries(SKINS.map(s => [s.id, s]));
+
+// ── Equipment slot config (extends gear) ───────────────────
+// Two new slot types for the modular shield/booster system shown in the sample.
+// MODULES = active sub-systems (shield/parry/scan).
+// BOOSTERS = passive movement/defense buffs.
+const MODULES = [
+  { id: 'shield_module', name: 'SHIELD MODULE', desc: '+15 max SH', shBonus: 15, cost: 60 },
+  { id: 'parry_chip',    name: 'PARRY CHIP',    desc: '+8% reflect chance', reflect: 0.08, cost: 80 },
+  { id: 'scan_dish',     name: 'SCAN DISH',     desc: 'Reveal enemy aura on turn 1', reveal: true, cost: 50 },
+];
+const BOOSTERS = [
+  { id: 'jet_booster',     name: 'JET BOOSTER',     desc: '+10% dodge', dodge: 0.10, cost: 70 },
+  { id: 'overdrive_pack',  name: 'OVERDRIVE PACK',  desc: '+5 EN regen/round', enRegen: 5, cost: 80 },
+  { id: 'kinetic_dampers', name: 'KINETIC DAMPERS', desc: '−10% incoming dmg', dmgReduce: 0.10, cost: 90 },
+];
+const MODULE_BY_ID  = Object.fromEntries(MODULES.map(m => [m.id, m]));
+const BOOSTER_BY_ID = Object.fromEntries(BOOSTERS.map(b => [b.id, b]));
+
+// ── Decal / chevron config ─────────────────────────────────
+// Chevron rank tiers based on level (visual rank decoration on agent card).
+const RANK_CHEVRONS = [
+  { min: 1,  max: 3,  glyph: '▾',   label: 'RECRUIT' },
+  { min: 4,  max: 6,  glyph: '▾▾',  label: 'OPERATIVE' },
+  { min: 7,  max: 9,  glyph: '▾▾▾', label: 'VETERAN' },
+  { min: 10, max: 99, glyph: '★',    label: 'COMMANDER' },
+];
+function rankFor(level) {
+  return RANK_CHEVRONS.find(r => level >= r.min && level <= r.max) || RANK_CHEVRONS[0];
+}
 
 // ── Subclass definitions ───────────────────────────────────
 const SUBCLASSES = {
@@ -1280,6 +1399,14 @@ class OverworldMap extends Phaser.Scene {
 
   _nodes() {
     const r = 20;
+    // 16x16 minimap-icon glyph per device — emoji as placeholder for the sprite
+    // sheet asset that will replace it later.
+    const DEVICE_GLYPH = {
+      tv: '📺', phone: '📱', speaker: '🔊', watch: '⌚', console: '🎮',
+      fridge: '🧊', micro: '🔥', printer: '📰', hub: '🛜', seccam: '📷',
+      router: '📡', computer: '💻', car: '🚗', atm: '🏧', grid: '⚡',
+      medical: '💉', farm: '🗄️', satellite: '🛰️', cloud: '☁️',
+    };
     WORLDS.forEach(w => {
       const state = worldState(w.id, this.save);
       const col = state === 'locked' ? 0x1a1a2e : w.color;
@@ -1301,6 +1428,21 @@ class OverworldMap extends Phaser.Scene {
       const label = state === 'cleared' ? '✓' : w.abbr;
       this.add.text(w.x, w.y - 1, label, { fontFamily: 'monospace', fontSize: '11px', color: state === 'locked' ? '#1a1a33' : hex, fontStyle: 'bold' }).setOrigin(0.5);
       this.add.text(w.x, w.y + r + 5, w.device, { fontFamily: 'monospace', fontSize: '8px', color: state === 'locked' ? '#111122' : hex }).setOrigin(0.5, 0);
+
+      // 16×16 device glyph in the upper-right corner of the node ring (the
+      // "minimap icon" from the sample reference). Hidden for locked nodes so
+      // the player isn't spoiled on which device they haven't reached yet.
+      if (state !== 'locked') {
+        const glyph = DEVICE_GLYPH[w.id] || '◆';
+        this.add.text(w.x + r - 4, w.y - r + 4, glyph, { fontFamily: 'monospace', fontSize: '14px' }).setOrigin(0.5).setAlpha(state === 'cleared' ? 0.95 : 0.7);
+      }
+
+      // boss tier marker (small chevron) for tier-4 / tier-5 worlds, mirrors
+      // the chevron rank decals used on agent cards.
+      if (state !== 'locked' && w.tier >= 4) {
+        const chev = w.tier === 5 ? '★' : '▲';
+        this.add.text(w.x - r + 4, w.y - r + 4, chev, { fontFamily: 'monospace', fontSize: '10px', color: '#ff8844' }).setOrigin(0.5);
+      }
 
       if (state !== 'locked') {
         this.add.zone(w.x - r, w.y - r, r * 2, r * 2).setOrigin(0).setInteractive()
@@ -1839,12 +1981,22 @@ class Battle extends Phaser.Scene {
           moves: [...d.moves, ...subMoves],
           hp: Math.min(saved.hp, stats.maxHp),
           en: stats.maxEn,
+          sh: stats.maxSh,
           level,
           xp: saved.xp,
+          kills: saved.kills || 0,
+          skin: saved.skin || 'default',
           subclass: saved.subclass || null,
-          weapon: equipped.weapon || null,
-          armor:  equipped.armor  || null,
+          weapon:  equipped.weapon  || null,
+          armor:   equipped.armor   || null,
+          module:  equipped.module  || null,
+          booster: equipped.booster || null,
+          dodge:     stats.dodge     || 0,
+          dmgReduce: stats.dmgReduce || 0,
+          reflectChance: stats.reflect || 0,
+          enRegenBonus:  stats.enRegen || 0,
           stored: 0,
+          facing: 'side', pose: 'idle',
           defending: false, fortified: false, locked: false, frozen: false, shielded: false,
         };
         // Apply global upgrades
@@ -1894,6 +2046,7 @@ class Battle extends Phaser.Scene {
   create() {
     getMusicEng(this)?.play(this.mechanic);
     this._grid();
+    this._scene();
     this._spawnParticles();
     this._enemyUI();
     this._logUI();
@@ -1949,6 +2102,35 @@ class Battle extends Phaser.Scene {
     this.add.text(W / 2, 8, 'SYSTEM BREACH', {
       fontFamily: 'monospace', fontSize: '16px', color: '#00ff88', letterSpacing: 4,
     }).setOrigin(0.5, 0);
+  }
+
+  // ── Tile-based scene background (per-world battle backdrop) ────────
+  // Renders the SCENES[worldId] grid as 32×32 tiles centered behind the
+  // enemy. Falls back to plain background if the world has no entry.
+  _scene() {
+    const wid = this.worldId || 'tv';
+    const grid = SCENES[wid]; if (!grid) return;
+    const cols = grid[0].length, rows = grid.length;
+    const totalW = cols * TILE_SIZE, totalH = rows * TILE_SIZE;
+    const ox = Math.round((W - totalW) / 2);
+    const oy = 38; // slot above the enemy HP bar (y=160)
+    const g = this.add.graphics().setDepth(-2);
+    grid.forEach((row, ry) => {
+      for (let cx = 0; cx < row.length; cx++) {
+        const ch = row[cx];
+        const tileId = SCENE_LEGEND[ch] || 'empty';
+        const tile = TILES[tileId];
+        if (!tile || tile.fill === 0x000000 && !tile.stroke) continue;
+        const x = ox + cx * TILE_SIZE, y = oy + ry * TILE_SIZE;
+        g.fillStyle(tile.fill, 0.55); g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        if (tile.stroke != null) { g.lineStyle(1, tile.stroke, 0.45); g.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1); }
+        if (tile.glyph) {
+          this.add.text(x + TILE_SIZE / 2, y + TILE_SIZE / 2, tile.glyph, {
+            fontFamily: 'monospace', fontSize: '11px', color: '#' + (tile.stroke || 0x444466).toString(16).padStart(6, '0')
+          }).setOrigin(0.5).setAlpha(0.55).setDepth(-1);
+        }
+      }
+    });
   }
 
   // ── Per-mechanic ambient particles ──────────────────────
@@ -2096,25 +2278,65 @@ class Battle extends Phaser.Scene {
       const hex = '#' + ag.color.toString(16).padStart(6, '0');
       const nm = this.add.text(cx + cw / 2, cy + 94, ag.name, { fontFamily: 'monospace', fontSize: '11px', color: hex, fontStyle: 'bold' }).setOrigin(0.5, 0);
       const cl = this.add.text(cx + cw / 2, cy + 108, ag.cls, { fontFamily: 'monospace', fontSize: '10px', color: '#444466' }).setOrigin(0.5, 0);
+
+      // agent number decal (top-right corner of card)
+      const decal = ag.decal || String(i + 1).padStart(2, '0');
+      const dc = this.add.text(cx + cw - 5, cy + 4, decal, { fontFamily: 'monospace', fontSize: '9px', color: '#3a3a55', fontStyle: 'bold' }).setOrigin(1, 0);
+
+      // top-left: rank chevron (glyph reflects level tier)
+      const rk = this.add.text(cx + 5, cy + 4, '', { fontFamily: 'monospace', fontSize: '10px', color: '#5a5a8a', fontStyle: 'bold' }).setOrigin(0, 0);
+      // below rank: kill-counter decal (skull glyph + count) — hidden when 0
+      const kc = this.add.text(cx + 5, cy + 16, '', { fontFamily: 'monospace', fontSize: '8px', color: '#665577' }).setOrigin(0, 0);
+      // top-right vertical strip: 4 equipment-slot chips (weapon, armor, module, booster)
+      const chipColors = { weapon: 0xff8844, armor: 0x66ddff, module: 0xffd23d, booster: 0xff44cc };
+      const chips = ['weapon','armor','module','booster'].map((slot, ci) => {
+        const cg = this.add.graphics();
+        const cy0 = cy + 16 + ci * 8;
+        cg._slot = slot; cg._cx = cx + cw - 9; cg._cy = cy0; cg._color = chipColors[slot];
+        return cg;
+      });
+
       const bw = cw - 16;
       const hbg = this.add.graphics();
-      hbg.fillStyle(0x111122, 1); hbg.fillRect(cx + 8, cy + 122, bw, 12);
-      hbg.lineStyle(1, COLORS.dim, 0.3); hbg.strokeRect(cx + 8, cy + 122, bw, 12);
+      hbg.fillStyle(0x111122, 1); hbg.fillRect(cx + 8, cy + 120, bw, 11);
+      hbg.lineStyle(1, COLORS.dim, 0.3); hbg.strokeRect(cx + 8, cy + 120, bw, 11);
       const hf = this.add.graphics();
-      const hl = this.add.text(cx + 8 + bw / 2, cy + 128, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      const hl = this.add.text(cx + 8 + bw / 2, cy + 125, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
       const ebg = this.add.graphics();
-      ebg.fillStyle(0x111122, 1); ebg.fillRect(cx + 8, cy + 140, bw, 10);
-      ebg.lineStyle(1, COLORS.dim, 0.3); ebg.strokeRect(cx + 8, cy + 140, bw, 10);
+      ebg.fillStyle(0x111122, 1); ebg.fillRect(cx + 8, cy + 133, bw, 8);
+      ebg.lineStyle(1, COLORS.dim, 0.3); ebg.strokeRect(cx + 8, cy + 133, bw, 8);
       const ef = this.add.graphics();
-      const el = this.add.text(cx + 8 + bw / 2, cy + 145, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      const el = this.add.text(cx + 8 + bw / 2, cy + 137, '', { fontFamily: 'monospace', fontSize: '8px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      // SH (Shield) bar — only meaningful if maxSh > 0
+      const shbg = this.add.graphics();
+      const sf = this.add.graphics();
+      const sl = this.add.text(cx + 8 + bw / 2, cy + 147, '', { fontFamily: 'monospace', fontSize: '8px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      if (ag.maxSh > 0) {
+        shbg.fillStyle(0x111122, 1); shbg.fillRect(cx + 8, cy + 143, bw, 8);
+        shbg.lineStyle(1, 0x4488cc, 0.3); shbg.strokeRect(cx + 8, cy + 143, bw, 8);
+      }
       const sg = this.add.text(cx + 8, cy + 156, '', { fontFamily: 'monospace', fontSize: '10px', color: '#ffcc00' });
       const st = this.add.text(cx + 8, cy + 168, '', { fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc' });
 
-      // tap zone on sprite area to show stats
+      // tap zone on sprite area: short-tap = show stats; long-press (>= 350ms) = radial menu
       const tap = this.add.zone(cx, cy, cw, 90).setOrigin(0).setInteractive();
-      tap.on('pointerdown', () => this._showStats(i));
+      let _holdTimer = null;
+      let _longFired = false;
+      tap.on('pointerdown', () => {
+        _longFired = false;
+        if (_holdTimer) _holdTimer.remove();
+        _holdTimer = this.time.delayedCall(350, () => {
+          _longFired = true;
+          this._openRadial(i);
+        });
+      });
+      tap.on('pointerup',   () => {
+        if (_holdTimer) { _holdTimer.remove(); _holdTimer = null; }
+        if (!_longFired) this._showStats(i);
+      });
+      tap.on('pointerout',  () => { if (_holdTimer) { _holdTimer.remove(); _holdTimer = null; } });
 
-      return { bg, sp, nm, cl, hf, hl, ef, el, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
+      return { bg, sp, nm, cl, dc, rk, kc, chips, hf, hl, ef, el, shbg, sf, sl, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
     });
     this.agents.forEach((_, i) => this._reCard(i));
     this._div(554);
@@ -2207,15 +2429,34 @@ class Battle extends Phaser.Scene {
     obj.bg.lineStyle(active ? 2 : 1, ag.color, active ? 0.9 : 0.25);
     obj.bg.strokeRoundedRect(obj.cx, obj.cy, obj.cw, obj.ch, 6);
     obj.sp.setAlpha(dead ? 0.2 : 1);
+
+    // damage-state sprite tint (Normal / Damaged / Critical / Destroyed)
+    const ratio = ag.maxHp > 0 ? ag.hp / ag.maxHp : 0;
+    if (dead)            obj.sp.setTint(0x441122);
+    else if (ratio < 0.3) obj.sp.setTint(0xff5544); // Critical
+    else if (ratio < 0.6) obj.sp.setTint(0xffaa44); // Damaged
+    else                  obj.sp.clearTint();       // Normal
+
     const bw = obj.bw;
-    const hr = Math.max(0, ag.hp / ag.maxHp);
+    const hr = Math.max(0, ratio);
     obj.hf.clear();
-    if (!dead) { obj.hf.fillStyle(ag.color, 0.85); obj.hf.fillRect(obj.cx + 9, obj.cy + 123, (bw - 2) * hr, 10); }
+    if (!dead) { obj.hf.fillStyle(ag.color, 0.85); obj.hf.fillRect(obj.cx + 9, obj.cy + 121, (bw - 2) * hr, 9); }
     obj.hl.setText(`HP ${ag.hp}/${ag.maxHp}`);
     const er = Math.max(0, ag.en / ag.maxEn);
     obj.ef.clear();
-    if (!dead) { obj.ef.fillStyle(COLORS.blue, 0.85); obj.ef.fillRect(obj.cx + 9, obj.cy + 141, (bw - 2) * er, 8); }
+    if (!dead) { obj.ef.fillStyle(COLORS.blue, 0.85); obj.ef.fillRect(obj.cx + 9, obj.cy + 134, (bw - 2) * er, 6); }
     obj.el.setText(`EN ${ag.en}/${ag.maxEn}`);
+
+    // Shield (SH) bar — only render if agent has shield capacity
+    obj.sf.clear();
+    if (ag.maxSh > 0 && !dead) {
+      const sr = Math.max(0, (ag.sh || 0) / ag.maxSh);
+      obj.sf.fillStyle(0x66c8ff, 0.9); obj.sf.fillRect(obj.cx + 9, obj.cy + 144, (bw - 2) * sr, 6);
+      obj.sl.setText(`SH ${ag.sh}/${ag.maxSh}`).setVisible(true);
+    } else {
+      obj.sl.setVisible(false);
+    }
+
     const blackoutPenalty = this.mechanic === 'blackout' ? 15 : 0;
     const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     obj.sg.setText(`SIG ${sig}%`);
@@ -2227,10 +2468,25 @@ class Battle extends Phaser.Scene {
     if (ag.shielded)   badges.push('🔷');
     if (ag.locked)     badges.push('🔒');
     if (ag.stored > 0) badges.push(`📦${ag.stored}`);
+    if (ratio > 0 && ratio < 0.3) badges.push('⚠');
     if (dead)          badges.push('💀');
     obj.st.setText(badges.join(' '));
-    obj.st.setColor(dead ? '#ff3355' : '#aaaacc');
+    obj.st.setColor(dead ? '#ff3355' : ratio < 0.3 && !dead ? '#ff8844' : '#aaaacc');
     obj.nm.setAlpha(dead ? 0.3 : 1);
+    obj.dc.setAlpha(dead ? 0.2 : 0.7);
+
+    // rank chevron + kill counter decals
+    const rk = rankFor(ag.level || 1);
+    obj.rk.setText(rk.glyph).setAlpha(dead ? 0.2 : 0.85);
+    obj.kc.setText(ag.kills > 0 ? `☠${ag.kills}` : '').setAlpha(dead ? 0.2 : 0.7);
+
+    // equipment-slot chips: filled (with slot color) when equipped, dim outline when empty
+    obj.chips.forEach(cg => {
+      cg.clear();
+      const equipped = !!ag[cg._slot];
+      if (equipped) { cg.fillStyle(cg._color, dead ? 0.15 : 0.85); cg.fillRect(cg._cx, cg._cy, 5, 5); }
+      cg.lineStyle(1, cg._color, dead ? 0.1 : equipped ? 0.7 : 0.25); cg.strokeRect(cg._cx, cg._cy, 5, 5);
+    });
   }
 
   _reAll() { this.agents.forEach((_, i) => this._reCard(i)); }
@@ -2311,6 +2567,13 @@ class Battle extends Phaser.Scene {
     const blackoutPenalty = this.mechanic === 'blackout' ? 15 : 0;
     const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     ag.defending = false; ag.fortified = false;
+
+    // Pose / facing hooks (visual only — no behavioral effect).
+    // Player turn always faces the enemy (right). Action type drives pose.
+    this._setFacing(this.activeIdx, 'right');
+    if (id === 'defend' || id === 'item' || id.startsWith('use_')) this._setPose(this.activeIdx, 'using_terminal');
+    else if (id === 'patch' || id === 'sync' || id === 'revive' || id === 'cache_run' || id === 'boost') this._setPose(this.activeIdx, 'jumping');
+    else this._setPose(this.activeIdx, 'attack');
 
     // Attack lunge animation for active agent sprite
     if (id !== 'item' && id !== 'defend') {
@@ -2638,7 +2901,17 @@ class Battle extends Phaser.Scene {
       this._reEnemy();
     }
 
-    if (this.enemy.hp <= 0) { this.time.delayedCall(500, () => this._end(true)); return; }
+    if (this.enemy.hp <= 0) {
+      // credit the active agent with the kill (decal counter on card)
+      const killer = this.agents[this.activeIdx];
+      if (killer && killer.hp > 0) {
+        killer.kills = (killer.kills || 0) + 1;
+        const saved = this.save.agents.find(a => a.id === killer.id);
+        if (saved) { saved.kills = killer.kills; writeSave(this.save); }
+      }
+      this._reAll();
+      this.time.delayedCall(500, () => this._end(true)); return;
+    }
     if (this.agents.every(a => a.hp <= 0)) { this.time.delayedCall(500, () => this._end(false)); return; }
 
     this.time.delayedCall(350, () => this._next());
@@ -2654,7 +2927,16 @@ class Battle extends Phaser.Scene {
       if (this.agents.every(a => a.hp <= 0)) { this._end(false); return; }
       this.round++;
       const enRegen = this.mechanic === 'battery' ? 2 : 5;
-      this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen); });
+      this.agents.forEach(a => {
+        if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen + (a.enRegenBonus || 0));
+      });
+      // Shield slowly recharges between rounds (10% of max, rounded up)
+      this.agents.forEach(a => {
+        if (a.hp > 0 && a.maxSh > 0) {
+          const regen = Math.max(1, Math.ceil(a.maxSh * 0.1));
+          a.sh = Math.min(a.maxSh, (a.sh || 0) + regen);
+        }
+      });
       if (this.mechanic === 'heat') {
         this.heatStacks++;
         this.log(`> 🔥 HEAT ${this.heatStacks}: enemy +${this.heatStacks * 2} dmg`);
@@ -2691,9 +2973,16 @@ class Battle extends Phaser.Scene {
     const pick = () => alive[Math.floor(Math.random() * alive.length)].a;
     const dmgHit = (tgt, raw) => {
       let d = raw;
+      // booster: jet booster grants chance to fully dodge
+      if (tgt.dodge && Math.random() < tgt.dodge) {
+        this.log(`> ${tgt.name}: 🛞 DODGED`);
+        return 0;
+      }
       if (tgt.defending) d = Math.ceil(d * 0.5);
       else if (tgt.fortified) d = Math.ceil(d * 0.4);
       if (tgt.shielded) { tgt.shielded = false; d = Math.ceil(d * 0.2); }
+      // booster: kinetic dampers flat reduction
+      if (tgt.dmgReduce) d = Math.ceil(d * (1 - tgt.dmgReduce));
       return d;
     };
     const tag = (tgt) => tgt.defending ? ' [BLOCK]' : tgt.fortified ? ' [FORT]' : tgt.shielded ? ' [SHIELD]' : '';
@@ -2703,17 +2992,25 @@ class Battle extends Phaser.Scene {
     const roll = Math.random();
 
     const applyHit = (tgt, dmg) => {
-      tgt.hp = Math.max(0, tgt.hp - dmg);
+      let remaining = dmg;
+      if (tgt.sh > 0 && remaining > 0) {
+        const absorbed = Math.min(tgt.sh, remaining);
+        tgt.sh -= absorbed;
+        remaining -= absorbed;
+      }
+      tgt.hp = Math.max(0, tgt.hp - remaining);
       if (tgt.subclass === 'archive') tgt.stored = (tgt.stored || 0) + Math.ceil(dmg * 0.5);
       if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
         tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN`);
       }
-      // Armor hit-reaction particles
+      // Armor hit-reaction particles + pose hook (visual only)
       const agIdx = this.agents.indexOf(tgt);
-      if (agIdx !== -1 && tgt.armor) {
+      if (agIdx !== -1) {
         if (tgt.armor === 'fortress_shell' || tgt.armor === 'signal_mesh') {
           this._armorBurst(agIdx, tgt.armor);
         }
+        if (tgt.hp <= 0) this._setPose(agIdx, 'down');
+        else if (dmg > 0) this._setPose(agIdx, 'hit');
       }
     };
 
@@ -2729,8 +3026,13 @@ class Battle extends Phaser.Scene {
         this.log(`> ${tgt.name}: REROUTE! → enemy −${raw}`);
         this._flashE(); this.time.delayedCall(600, finish); return;
       }
-      const reflectDmg = tgt.reflecting ? Math.ceil(raw * 0.6) : 0;
-      if (tgt.reflecting) { tgt.reflecting = false; this.enemy.hp = Math.max(0, this.enemy.hp - reflectDmg); }
+      // Reflect via active subclass move OR passive parry-chip module (random)
+      const passiveReflect = (tgt.reflectChance && Math.random() < tgt.reflectChance);
+      const reflectDmg = (tgt.reflecting || passiveReflect) ? Math.ceil(raw * 0.6) : 0;
+      if (tgt.reflecting || passiveReflect) {
+        tgt.reflecting = false;
+        this.enemy.hp = Math.max(0, this.enemy.hp - reflectDmg);
+      }
       const dmg = dmgHit(tgt, raw);
       applyHit(tgt, dmg);
       this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}${reflectDmg ? ` [↩−${reflectDmg}]` : ''}`);
@@ -3175,32 +3477,70 @@ class Battle extends Phaser.Scene {
     panel.add(sp);
 
     panel.add(this.add.text(px + pw / 2, py + 90, ag.name, { fontFamily: 'monospace', fontSize: '20px', color: hex, fontStyle: 'bold' }).setOrigin(0.5, 0));
-    panel.add(this.add.text(px + pw / 2, py + 114, ag.cls, { fontFamily: 'monospace', fontSize: '13px', color: '#555577' }).setOrigin(0.5, 0));
+    panel.add(this.add.text(px + pw / 2, py + 114, ag.cls + (ag.faction ? `  ·  ${ag.faction.split(' / ')[1] || ''}` : ''), { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }).setOrigin(0.5, 0));
+    if (ag.decal) panel.add(this.add.text(px + pw - 12, py + 12, ag.decal, { fontFamily: 'monospace', fontSize: '11px', color: '#555577', fontStyle: 'bold' }).setOrigin(1, 0));
 
     const statRows = [
       { label: 'INTEGRITY', val: `${ag.hp} / ${ag.maxHp}`, ratio: ag.hp / ag.maxHp, color: ag.color },
       { label: 'ENERGY',    val: `${ag.en} / ${ag.maxEn}`, ratio: ag.en / ag.maxEn, color: COLORS.blue },
+      { label: 'SHIELD',    val: ag.maxSh > 0 ? `${ag.sh} / ${ag.maxSh}` : '— / —', ratio: ag.maxSh > 0 ? (ag.sh || 0) / ag.maxSh : 0, color: 0x66c8ff },
       { label: 'SIGNAL',    val: `${ag.signal}%`,           ratio: ag.signal / 100,   color: COLORS.yellow },
       { label: 'AUTONOMY',  val: `${ag.autonomy}`,          ratio: ag.autonomy / 100, color: COLORS.green },
     ];
     const bx = px + 16, bw = pw - 32;
     statRows.forEach((row, ri) => {
-      const ry = py + 140 + ri * 44;
-      panel.add(this.add.text(bx, ry, row.label, { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
-      panel.add(this.add.text(bx + bw, ry, row.val, { fontFamily: 'monospace', fontSize: '12px', color: hex }).setOrigin(1, 0));
+      const ry = py + 138 + ri * 36;
+      panel.add(this.add.text(bx, ry, row.label, { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }));
+      panel.add(this.add.text(bx + bw, ry, row.val, { fontFamily: 'monospace', fontSize: '11px', color: hex }).setOrigin(1, 0));
       const rbg = this.add.graphics();
-      rbg.fillStyle(0x111122, 1); rbg.fillRect(bx, ry + 16, bw, 12);
-      rbg.lineStyle(1, COLORS.dim, 0.3); rbg.strokeRect(bx, ry + 16, bw, 12);
+      rbg.fillStyle(0x111122, 1); rbg.fillRect(bx, ry + 14, bw, 10);
+      rbg.lineStyle(1, COLORS.dim, 0.3); rbg.strokeRect(bx, ry + 14, bw, 10);
       const rfill = this.add.graphics();
-      rfill.fillStyle(row.color, 0.8); rfill.fillRect(bx + 1, ry + 17, (bw - 2) * Math.min(1, row.ratio), 10);
+      rfill.fillStyle(row.color, 0.8); rfill.fillRect(bx + 1, ry + 15, (bw - 2) * Math.min(1, row.ratio), 8);
       panel.add(rbg); panel.add(rfill);
     });
 
+    // KILLS + SKIN cycler row (sits between stats and bio)
+    const krY = py + 138 + statRows.length * 36 + 2;
+    const owned = (this.save.cosmetics?.ownedSkins?.[ag.id]) || ['default'];
+    const cur   = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
+    panel.add(this.add.text(bx, krY, `KILLS: ${ag.kills || 0}`, { fontFamily: 'monospace', fontSize: '10px', color: '#888899' }));
+    const skinTxt = this.add.text(bx + bw - 36, krY, `SKIN: ${cur.name}`, { fontFamily: 'monospace', fontSize: '10px', color: '#888899' }).setOrigin(1, 0);
+    panel.add(skinTxt);
+    const lArrow = this.add.text(bx + bw - 28, krY, '◀', { fontFamily: 'monospace', fontSize: '12px', color: '#88aacc' }).setOrigin(0.5, 0);
+    const rArrow = this.add.text(bx + bw - 8,  krY, '▶', { fontFamily: 'monospace', fontSize: '12px', color: '#88aacc' }).setOrigin(0.5, 0);
+    panel.add(lArrow); panel.add(rArrow);
+    const cycleSkin = (dir) => {
+      if (owned.length <= 1) return;
+      const idx = owned.indexOf(ag.skin || 'default');
+      const next = owned[(idx + dir + owned.length) % owned.length];
+      ag.skin = next;
+      const saved = this.save.agents.find(a => a.id === ag.id);
+      if (saved) { saved.skin = next; writeSave(this.save); }
+      // re-tint sprite in modal + on card
+      this._closeStats(ov); this._reAll(); this._refreshSpriteTints();
+    };
+    const lz = this.add.zone(bx + bw - 36, krY - 2, 16, 18).setOrigin(0).setInteractive();
+    const rz = this.add.zone(bx + bw - 16, krY - 2, 16, 18).setOrigin(0).setInteractive();
+    lz.on('pointerdown', () => cycleSkin(-1));
+    rz.on('pointerdown', () => cycleSkin(+1));
+    panel.add(lz); panel.add(rz);
+
+    // bio / lore — wraps inside panel width
+    if (ag.bio) {
+      const by0 = krY + 18;
+      panel.add(this.add.text(bx, by0, 'BIO', { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }));
+      panel.add(this.add.text(bx, by0 + 14, ag.bio, {
+        fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc',
+        wordWrap: { width: bw }, lineSpacing: 2,
+      }));
+    }
+
     // abilities
-    panel.add(this.add.text(bx, py + 328, 'ABILITIES', { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
+    panel.add(this.add.text(bx, py + 358, 'ABILITIES', { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
     ag.moves.forEach((mv, mi) => {
       const mvhex = '#' + mv.color.toString(16).padStart(6, '0');
-      const my = py + 346 + mi * 36;
+      const my = py + 376 + mi * 36;
       const mbg = this.add.graphics();
       mbg.fillStyle(mv.color, 0.12); mbg.fillRoundedRect(bx, my, bw, 30, 4);
       mbg.lineStyle(1, mv.color, 0.4); mbg.strokeRoundedRect(bx, my, bw, 30, 4);
@@ -3271,22 +3611,144 @@ class Battle extends Phaser.Scene {
   }
 
   // Returns an Image (if texture loaded) or Graphics (pixel art fallback)
-  _makeSpriteNode(ag, x, y) {
-    const key = `ag_${ag.id}`;
-    if (this.textures.exists(key)) {
-      const img = this.add.image(x + 22, y + 33, key).setOrigin(0.5);
+  // ── Pose / facing state helpers ────────────────────────────────────
+  // Sets agent visual pose. When sprite-sheet art lands, this will swap the
+  // active animation row; for now it applies a tween / tint hint.
+  _setPose(idx, pose) {
+    const ag = this.agents[idx]; if (!ag) return;
+    const obj = this.cards?.[idx]; if (!obj || !obj.sp) { ag.pose = pose; return; }
+    ag.pose = pose;
+    if (pose === 'attack') {
+      // Snap forward + return — same shape as the sprite-sheet attack row.
+      this.tweens.add({ targets: obj.sp, x: obj._baseSpX + 4, duration: 90, yoyo: true, ease: 'Power2.easeOut' });
+    } else if (pose === 'jumping') {
+      this.tweens.add({ targets: obj.sp, y: obj._baseSpY - 8, duration: 180, yoyo: true, ease: 'Sine.easeInOut' });
+    } else if (pose === 'hit') {
+      const orig = obj.sp.tintTopLeft || 0xffffff;
+      if (typeof obj.sp.setTint === 'function') {
+        obj.sp.setTint(0xffb3c1);
+        this.time.delayedCall(120, () => { try { obj.sp.setTint(orig); } catch (e) {} this._reCard(idx); });
+      }
+    } else if (pose === 'using_terminal') {
+      this.tweens.add({ targets: obj.sp, scaleY: 0.95, duration: 200, yoyo: true, ease: 'Sine.easeInOut' });
+    } else if (pose === 'down') {
+      obj.sp.setAlpha(0.25);
+    }
+  }
+  _setFacing(idx, facing) {
+    const ag = this.agents[idx]; if (!ag) return;
+    ag.facing = facing;
+    const obj = this.cards?.[idx]; if (!obj || !obj.sp) return;
+    if (typeof obj.sp.setFlipX !== 'function') return;
+    if (facing === 'left') obj.sp.setFlipX(true);
+    else                   obj.sp.setFlipX(false);
+    if (facing === 'back') obj.sp.setAlpha(Math.min(obj.sp.alpha, 0.7));
+  }
+
+  // ── Radial action menu (opens via long-press on any agent card) ──
+  _openRadial(forIdx) {
+    if (this.radial) return;
+    if (this.state !== STATE.PLAYER) return;
+    // Radial always operates on the CURRENTLY ACTIVE agent (the one taking
+    // the turn), not whichever card was long-pressed. Long-pressing any card
+    // is just a more accessible gesture than reaching for the bottom buttons.
+    const ag = this.agents[this.activeIdx];
+    if (!ag || ag.hp <= 0) return;
+    const acts = [
+      ag.moves[0],
+      ag.moves[1],
+      { id: 'defend', label: 'DEFEND', sub: 'Block 50%', color: COLORS.blue, cost: 0 },
+      { id: 'item',   label: 'ITEM',   sub: 'Inventory', color: COLORS.dim,  cost: 0 },
+    ].filter(Boolean);
+    const cont = this.add.container(0, 0).setDepth(20);
+    this.radial = cont;
+    const cx = W / 2, cy = H / 2 - 40;
+    const ov = this.add.graphics();
+    ov.fillStyle(0x000000, 0.6); ov.fillRect(0, 0, W, H);
+    ov.setInteractive(new Phaser.Geom.Rectangle(0, 0, W, H), Phaser.Geom.Rectangle.Contains);
+    ov.on('pointerdown', () => this._closeRadial());
+    cont.add(ov);
+    // center cap
+    const cap = this.add.graphics();
+    cap.fillStyle(ag.color, 0.25); cap.fillCircle(cx, cy, 28);
+    cap.lineStyle(2, ag.color, 0.9); cap.strokeCircle(cx, cy, 28);
+    cont.add(cap);
+    cont.add(this.add.text(cx, cy - 6, ag.name, { fontFamily: 'monospace', fontSize: '10px', color: '#' + ag.color.toString(16).padStart(6,'0'), fontStyle: 'bold' }).setOrigin(0.5));
+    cont.add(this.add.text(cx, cy + 6, 'CHOOSE', { fontFamily: 'monospace', fontSize: '8px',  color: '#888899' }).setOrigin(0.5));
+    // 4 petals at 12 / 3 / 6 / 9 o'clock
+    const radius = 92;
+    const angles = [-Math.PI/2, 0, Math.PI/2, Math.PI];
+    acts.forEach((mv, i) => {
+      const ang = angles[i];
+      const px = cx + Math.cos(ang) * radius;
+      const py = cy + Math.sin(ang) * radius;
+      const pg = this.add.graphics();
+      pg.fillStyle(mv.color, 0.18); pg.fillCircle(px, py, 44);
+      pg.lineStyle(2, mv.color, 0.7); pg.strokeCircle(px, py, 44);
+      cont.add(pg);
+      const hex = '#' + mv.color.toString(16).padStart(6,'0');
+      cont.add(this.add.text(px, py - 12, mv.label, { fontFamily: 'monospace', fontSize: '12px', color: hex, fontStyle: 'bold' }).setOrigin(0.5));
+      cont.add(this.add.text(px, py + 4,  mv.sub,   { fontFamily: 'monospace', fontSize: '9px',  color: '#aaaacc' }).setOrigin(0.5, 0));
+      if (mv.cost > 0) cont.add(this.add.text(px, py + 22, `${mv.cost}⚡`, { fontFamily: 'monospace', fontSize: '9px', color: '#44aaff' }).setOrigin(0.5));
+      const z = this.add.zone(px - 44, py - 44, 88, 88).setOrigin(0).setInteractive();
+      z.on('pointerdown', () => {
+        this._closeRadial();
+        // small delay so the close animation doesn't eat the next pointerup
+        this.time.delayedCall(60, () => this.act(mv.id));
+      });
+      cont.add(z);
+    });
+    // tween the petals from 0 → full size
+    cont.setScale(0.6); cont.setAlpha(0);
+    this.tweens.add({ targets: cont, scale: 1, alpha: 1, duration: 120, ease: 'Back.easeOut' });
+  }
+  _closeRadial() {
+    if (!this.radial) return;
+    const cont = this.radial; this.radial = null;
+    this.tweens.add({ targets: cont, scale: 0.6, alpha: 0, duration: 100, onComplete: () => cont.destroy() });
+  }
+
+  _refreshSpriteTints() {
+    if (!this.cards) return;
+    this.cards.forEach((obj, i) => {
+      const ag = this.agents[i];
+      const skin = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
+      let baseTint = null;
       if (ag.subclass) {
         const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
-        if (sc) img.setTint(sc.color);
+        if (sc) baseTint = sc.color;
       }
+      const finalTint = (baseTint != null && skin.id !== 'default')
+        ? _blendTints(baseTint, skin.tint)
+        : (baseTint != null ? baseTint : (skin.id !== 'default' ? skin.tint : null));
+      if (obj.sp && typeof obj.sp.setTint === 'function') {
+        if (finalTint != null) obj.sp.setTint(finalTint);
+        else obj.sp.clearTint();
+      }
+    });
+  }
+
+  _makeSpriteNode(ag, x, y) {
+    const key = `ag_${ag.id}`;
+    const skin = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
+    let baseTint = null;
+    if (ag.subclass) {
+      const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
+      if (sc) baseTint = sc.color;
+    }
+    // Skin tint multiplies base. If both subclass + non-default skin set, blend by RGB-min.
+    const finalTint = (baseTint != null && skin.id !== 'default')
+      ? _blendTints(baseTint, skin.tint)
+      : (baseTint != null ? baseTint : (skin.id !== 'default' ? skin.tint : null));
+
+    if (this.textures.exists(key)) {
+      const img = this.add.image(x + 22, y + 33, key).setOrigin(0.5);
+      if (finalTint != null) img.setTint(finalTint);
       return img;
     }
     const g = this.add.graphics();
     _drawSprite(g, ag.id, x, y);
-    if (ag.subclass) {
-      const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
-      if (sc) { g.fillStyle(sc.color, 0.22); g.fillRect(x, y, 44, 66); }
-    }
+    if (finalTint != null) { g.fillStyle(finalTint, 0.22); g.fillRect(x, y, 44, 66); }
     return g;
   }
 }
