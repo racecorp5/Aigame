@@ -272,6 +272,62 @@ const DEFS = [
   },
 ];
 
+// ── Tileset config ─────────────────────────────────────────
+// 32×32 tile grid. Each tile defines a fill, stroke, and optional glyph.
+// Battle backgrounds and the future exploration mode read from this table.
+// Adding a real PNG tileset later only requires adding `texture: 'key_x'` to
+// the tile entry and the renderer will swap from rect-fill to image draw.
+const TILE_SIZE = 32;
+const TILES = {
+  empty:    { fill: 0x000000, stroke: null,     glyph: null },
+  floor:    { fill: 0x12162a, stroke: 0x1f2745, glyph: null },
+  wall:     { fill: 0x070912, stroke: 0x1f2745, glyph: null },
+  panel:    { fill: 0x141a2e, stroke: 0x3df7ff, glyph: null },
+  terminal: { fill: 0x141a2e, stroke: 0x3df7ff, glyph: '◼' },
+  cable:    { fill: 0x070912, stroke: 0x62b8ff, glyph: '═' },
+  ice:      { fill: 0x1a2e3f, stroke: 0xa8e0ff, glyph: '❄' },
+  fire:     { fill: 0x2e1410, stroke: 0xff8a3c, glyph: '▲' },
+  paper:    { fill: 0x1f1a14, stroke: 0xffd23d, glyph: '═' },
+  data:     { fill: 0x0a141f, stroke: 0x4cff8a, glyph: '·' },
+  shock:    { fill: 0x1f1f0a, stroke: 0xffd23d, glyph: '⚡' },
+  void:     { fill: 0x05050a, stroke: 0x1f2745, glyph: null },
+  cloud:    { fill: 0x1a1430, stroke: 0xb050d0, glyph: '☁' },
+  scanline: { fill: 0x0a0d18, stroke: 0xff4d4d, glyph: '─' },
+};
+
+// ── Scene config (per world battle backdrop) ───────────────
+// Compact ASCII grid → tile-id pattern. The renderer draws each cell as
+// 32×32, so a scene of N rows × M cols paints N*M tiles. Strings keep the
+// authoring clean; '.' = empty (transparent), letters map via SCENE_LEGEND.
+const SCENE_LEGEND = {
+  '.': 'empty', '#': 'wall', ',': 'floor', 'P': 'panel', 'T': 'terminal',
+  'C': 'cable', 'I': 'ice', 'F': 'fire', 'p': 'paper', 'D': 'data',
+  'S': 'shock', 'V': 'void', 'L': 'cloud', '~': 'scanline',
+};
+const SCENES = {
+  // Each value is an array of strings; one string per row, one char per tile.
+  // 12 cols × 4 rows = a 384×128 strip drawn under the enemy.
+  tv:        ['~~~~~~~~~~~~', '~..PPPP....~', '~..#TTTT#..~', '~##########~'],
+  phone:     ['............', 'CCCCCCCCCCCC', '..,T,,,,T,..', '############'],
+  speaker:   ['............', '....PPPP....', '..,,TTTT,,..', '############'],
+  watch:     ['CCCCCCCCCCCC', '..PPPPPPPP..', '..TT,,,,TT..', '############'],
+  console:   ['~~~~~~~~~~~~', '..PPTTPPTT..', '..,,,,,,,,..', '############'],
+  fridge:    ['IIIIIIIIIIII', 'I..,T,,T,..I', 'I..,,,,,,..I', 'IIIIIIIIIIII'],
+  micro:     ['FFFFFFFFFFFF', 'F..,T,,T,..F', 'F..,SS,SS,.F', 'FFFFFFFFFFFF'],
+  printer:   ['ppppppppppppp', 'p..PTTPP..p', 'p..,,,,,..p', 'pppppppppppp'].slice(0, 4).map(s => s.padEnd(12, 'p').slice(0,12)),
+  hub:       ['CCCCCCCCCCCC', 'C..,T,,T,..C', 'C..,,DD,,..C', 'CCCCCCCCCCCC'],
+  seccam:    ['~~~~~~~~~~~~', '~..PPTTPP..~', '~..,,,,,,..~', '############'],
+  router:    ['CCCCCCCCCCCC', 'C..PPPPPPPPC', 'C..,,DDDD,.C', 'CCCCCCCCCCCC'],
+  computer:  ['DDDDDDDDDDDD', 'D..PTTPPTT.D', 'D..,,,,,,,.D', 'DDDDDDDDDDDD'],
+  car:       ['~~~~~~~~~~~~', '............', '..,,,,,,,,..', '############'],
+  atm:       ['~~~~~~~~~~~~', '~..PTTTTPP.~', '~..,,,,,,,.~', '############'],
+  grid:      ['SSSSSSSSSSSS', 'S..,T,,T,..S', 'S..,,SS,,,.S', 'SSSSSSSSSSSS'],
+  medical:   ['~~~~~~~~~~~~', '~..PPDDPP,.~', '~..,T,,,T,.~', '############'],
+  farm:      ['DDDDDDDDDDDD', 'D..PTPTPTPDD', 'D..,,,,,,,,D', 'DDDDDDDDDDDD'],
+  satellite: ['VVVVVVVVVVVV', 'V..PCCCCPP.V', 'V..,,,,,,,.V', 'VVVVVVVVVVVV'],
+  cloud:     ['LLLLLLLLLLLL', 'L..PTTTTPP.L', 'L..,,LL,,,.L', 'LLLLLLLLLLLL'],
+};
+
 // ── Skin / color variant definitions ───────────────────────
 // Each skin defines a tint (Phaser multiplies sprite RGB by tint) and a small
 // label string. Per-agent owned-skins live on save.cosmetics.ownedSkins[id].
@@ -1990,6 +2046,7 @@ class Battle extends Phaser.Scene {
   create() {
     getMusicEng(this)?.play(this.mechanic);
     this._grid();
+    this._scene();
     this._spawnParticles();
     this._enemyUI();
     this._logUI();
@@ -2045,6 +2102,35 @@ class Battle extends Phaser.Scene {
     this.add.text(W / 2, 8, 'SYSTEM BREACH', {
       fontFamily: 'monospace', fontSize: '16px', color: '#00ff88', letterSpacing: 4,
     }).setOrigin(0.5, 0);
+  }
+
+  // ── Tile-based scene background (per-world battle backdrop) ────────
+  // Renders the SCENES[worldId] grid as 32×32 tiles centered behind the
+  // enemy. Falls back to plain background if the world has no entry.
+  _scene() {
+    const wid = this.worldId || 'tv';
+    const grid = SCENES[wid]; if (!grid) return;
+    const cols = grid[0].length, rows = grid.length;
+    const totalW = cols * TILE_SIZE, totalH = rows * TILE_SIZE;
+    const ox = Math.round((W - totalW) / 2);
+    const oy = 38; // slot above the enemy HP bar (y=160)
+    const g = this.add.graphics().setDepth(-2);
+    grid.forEach((row, ry) => {
+      for (let cx = 0; cx < row.length; cx++) {
+        const ch = row[cx];
+        const tileId = SCENE_LEGEND[ch] || 'empty';
+        const tile = TILES[tileId];
+        if (!tile || tile.fill === 0x000000 && !tile.stroke) continue;
+        const x = ox + cx * TILE_SIZE, y = oy + ry * TILE_SIZE;
+        g.fillStyle(tile.fill, 0.55); g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        if (tile.stroke != null) { g.lineStyle(1, tile.stroke, 0.45); g.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1); }
+        if (tile.glyph) {
+          this.add.text(x + TILE_SIZE / 2, y + TILE_SIZE / 2, tile.glyph, {
+            fontFamily: 'monospace', fontSize: '11px', color: '#' + (tile.stroke || 0x444466).toString(16).padStart(6, '0')
+          }).setOrigin(0.5).setAlpha(0.55).setDepth(-1);
+        }
+      }
+    });
   }
 
   // ── Per-mechanic ambient particles ──────────────────────
@@ -2482,6 +2568,13 @@ class Battle extends Phaser.Scene {
     const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     ag.defending = false; ag.fortified = false;
 
+    // Pose / facing hooks (visual only — no behavioral effect).
+    // Player turn always faces the enemy (right). Action type drives pose.
+    this._setFacing(this.activeIdx, 'right');
+    if (id === 'defend' || id === 'item' || id.startsWith('use_')) this._setPose(this.activeIdx, 'using_terminal');
+    else if (id === 'patch' || id === 'sync' || id === 'revive' || id === 'cache_run' || id === 'boost') this._setPose(this.activeIdx, 'jumping');
+    else this._setPose(this.activeIdx, 'attack');
+
     // Attack lunge animation for active agent sprite
     if (id !== 'item' && id !== 'defend') {
       const card = this.cards[this.activeIdx];
@@ -2910,12 +3003,14 @@ class Battle extends Phaser.Scene {
       if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
         tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN`);
       }
-      // Armor hit-reaction particles
+      // Armor hit-reaction particles + pose hook (visual only)
       const agIdx = this.agents.indexOf(tgt);
-      if (agIdx !== -1 && tgt.armor) {
+      if (agIdx !== -1) {
         if (tgt.armor === 'fortress_shell' || tgt.armor === 'signal_mesh') {
           this._armorBurst(agIdx, tgt.armor);
         }
+        if (tgt.hp <= 0) this._setPose(agIdx, 'down');
+        else if (dmg > 0) this._setPose(agIdx, 'hit');
       }
     };
 
@@ -3516,6 +3611,40 @@ class Battle extends Phaser.Scene {
   }
 
   // Returns an Image (if texture loaded) or Graphics (pixel art fallback)
+  // ── Pose / facing state helpers ────────────────────────────────────
+  // Sets agent visual pose. When sprite-sheet art lands, this will swap the
+  // active animation row; for now it applies a tween / tint hint.
+  _setPose(idx, pose) {
+    const ag = this.agents[idx]; if (!ag) return;
+    const obj = this.cards?.[idx]; if (!obj || !obj.sp) { ag.pose = pose; return; }
+    ag.pose = pose;
+    if (pose === 'attack') {
+      // Snap forward + return — same shape as the sprite-sheet attack row.
+      this.tweens.add({ targets: obj.sp, x: obj._baseSpX + 4, duration: 90, yoyo: true, ease: 'Power2.easeOut' });
+    } else if (pose === 'jumping') {
+      this.tweens.add({ targets: obj.sp, y: obj._baseSpY - 8, duration: 180, yoyo: true, ease: 'Sine.easeInOut' });
+    } else if (pose === 'hit') {
+      const orig = obj.sp.tintTopLeft || 0xffffff;
+      if (typeof obj.sp.setTint === 'function') {
+        obj.sp.setTint(0xffb3c1);
+        this.time.delayedCall(120, () => { try { obj.sp.setTint(orig); } catch (e) {} this._reCard(idx); });
+      }
+    } else if (pose === 'using_terminal') {
+      this.tweens.add({ targets: obj.sp, scaleY: 0.95, duration: 200, yoyo: true, ease: 'Sine.easeInOut' });
+    } else if (pose === 'down') {
+      obj.sp.setAlpha(0.25);
+    }
+  }
+  _setFacing(idx, facing) {
+    const ag = this.agents[idx]; if (!ag) return;
+    ag.facing = facing;
+    const obj = this.cards?.[idx]; if (!obj || !obj.sp) return;
+    if (typeof obj.sp.setFlipX !== 'function') return;
+    if (facing === 'left') obj.sp.setFlipX(true);
+    else                   obj.sp.setFlipX(false);
+    if (facing === 'back') obj.sp.setAlpha(Math.min(obj.sp.alpha, 0.7));
+  }
+
   // ── Radial action menu (opens via long-press on any agent card) ──
   _openRadial(forIdx) {
     if (this.radial) return;
