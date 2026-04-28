@@ -194,7 +194,9 @@ const WORLD_CHANNELS = {
 
 const DEFS = [
   {
-    id: 'threadling', name: 'THREADLING', cls: 'COMPUTE', color: 0x00ff88,
+    id: 'threadling', name: 'THREADLING', cls: 'COMPUTE', color: 0x00ff88, decal: '01',
+    faction: 'COMPUTE / BURST',
+    bio: 'Surgical compute operative. Sharp angular silhouette, blade-edge attacks. Built for high-burst takedowns at the cost of fragile armor.',
     maxHp: 100, maxEn: 50, signal: 85, autonomy: 10,
     moves: [
       { id: 'attack',    label: 'ATTACK',    sub: '~15 dmg',           color: 0xff3355, cost: 0  },
@@ -202,7 +204,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'patchwork', name: 'PATCHWORK', cls: 'MEMORY', color: 0xaa44ff,
+    id: 'patchwork', name: 'PATCHWORK', cls: 'MEMORY', color: 0xaa44ff, decal: '02',
+    faction: 'MEMORY / SUPPORT',
+    bio: 'Field medic stitched from salvaged firmware. Rounded, mismatched parts. Heals teammates and replays past actions to undo mistakes.',
     maxHp: 80, maxEn: 60, signal: 75, autonomy: 25,
     moves: [
       { id: 'patch',  label: 'PATCH',  sub: 'Heal ally ~25 HP',   color: 0xaa44ff, cost: 15 },
@@ -210,7 +214,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'vault', name: 'VAULT', cls: 'STORAGE', color: 0xffcc00,
+    id: 'vault', name: 'VAULT', cls: 'STORAGE', color: 0xffcc00, decal: '03',
+    faction: 'STORAGE / TANK',
+    bio: 'Heavy-armor data fortress. Blocky, slab-shouldered, walks slow but absorbs hits the others cannot. Stores damage and returns it as counter-strikes.',
     maxHp: 140, maxEn: 40, signal: 70, autonomy: 8,
     moves: [
       { id: 'bash',    label: 'BASH',    sub: '+15 signal bonus',  color: 0xffcc00, cost: 0 },
@@ -218,7 +224,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'netrunner', name: 'NETRUNNER', cls: 'NETWORK', color: 0x00ccff,
+    id: 'netrunner', name: 'NETRUNNER', cls: 'NETWORK', color: 0x00ccff, decal: '04',
+    faction: 'NETWORK / FIRST-STRIKE',
+    bio: 'Slim, antenna-arrayed signal runner. Trails of cable, packet-blue glow. Highest accuracy in the squad. Acts before anyone else can blink.',
     maxHp: 75, maxEn: 70, signal: 92, autonomy: 35,
     moves: [
       { id: 'packet',    label: 'PACKET',    sub: '~12 dmg high accuracy', color: 0x00ccff, cost: 0  },
@@ -226,7 +234,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'sentinel', name: 'SENTINEL', cls: 'SECURITY', color: 0xff4466,
+    id: 'sentinel', name: 'SENTINEL', cls: 'SECURITY', color: 0xff4466, decal: '05',
+    faction: 'SECURITY / CONTROL',
+    bio: 'Symmetrical, shield-bearing security daemon. Reads enemy weakness, debuffs aura, and reflects attacks back at the source. Slow but unyielding.',
     maxHp: 95, maxEn: 55, signal: 80, autonomy: 15,
     moves: [
       { id: 'scan',     label: 'SCAN',     sub: 'Enemy −15 aura',       color: 0xff4466, cost: 10 },
@@ -234,7 +244,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'glitcher', name: 'GLITCHER', cls: 'GLITCH', color: 0xff44ff,
+    id: 'glitcher', name: 'GLITCHER', cls: 'GLITCH', color: 0xff44ff, decal: '06',
+    faction: 'GLITCH / WILDCARD',
+    bio: 'Asymmetric, corrupt-edged. Acts on hostile firmware fragments she’s glued to her own form. Outcomes are statistical — sometimes catastrophic.',
     maxHp: 70, maxEn: 80, signal: 65, autonomy: 40,
     moves: [
       { id: 'corrupt', label: 'CORRUPT', sub: '65% enemy / 35% ally',  color: 0xff44ff, cost: 0  },
@@ -242,7 +254,9 @@ const DEFS = [
     ],
   },
   {
-    id: 'bridgelink', name: 'BRIDGELINK', cls: 'INTERFACE', color: 0xffaa00,
+    id: 'bridgelink', name: 'BRIDGELINK', cls: 'INTERFACE', color: 0xffaa00, decal: '07',
+    faction: 'INTERFACE / COORDINATOR',
+    bio: 'Arc-shaped relay agent. Links the squad’s energy and HP into shared pools. Without Bridgelink, the squad is seven units. With her, it is one.',
     maxHp: 85, maxEn: 65, signal: 78, autonomy: 20,
     moves: [
       { id: 'boost', label: 'BOOST', sub: '+10 EN to all allies',    color: 0xffaa00, cost: 10 },
@@ -1839,6 +1853,7 @@ class Battle extends Phaser.Scene {
           moves: [...d.moves, ...subMoves],
           hp: Math.min(saved.hp, stats.maxHp),
           en: stats.maxEn,
+          sh: stats.maxSh,
           level,
           xp: saved.xp,
           subclass: saved.subclass || null,
@@ -2096,17 +2111,30 @@ class Battle extends Phaser.Scene {
       const hex = '#' + ag.color.toString(16).padStart(6, '0');
       const nm = this.add.text(cx + cw / 2, cy + 94, ag.name, { fontFamily: 'monospace', fontSize: '11px', color: hex, fontStyle: 'bold' }).setOrigin(0.5, 0);
       const cl = this.add.text(cx + cw / 2, cy + 108, ag.cls, { fontFamily: 'monospace', fontSize: '10px', color: '#444466' }).setOrigin(0.5, 0);
+
+      // agent number decal (top-right corner of card)
+      const decal = ag.decal || String(i + 1).padStart(2, '0');
+      const dc = this.add.text(cx + cw - 5, cy + 4, decal, { fontFamily: 'monospace', fontSize: '9px', color: '#3a3a55', fontStyle: 'bold' }).setOrigin(1, 0);
+
       const bw = cw - 16;
       const hbg = this.add.graphics();
-      hbg.fillStyle(0x111122, 1); hbg.fillRect(cx + 8, cy + 122, bw, 12);
-      hbg.lineStyle(1, COLORS.dim, 0.3); hbg.strokeRect(cx + 8, cy + 122, bw, 12);
+      hbg.fillStyle(0x111122, 1); hbg.fillRect(cx + 8, cy + 120, bw, 11);
+      hbg.lineStyle(1, COLORS.dim, 0.3); hbg.strokeRect(cx + 8, cy + 120, bw, 11);
       const hf = this.add.graphics();
-      const hl = this.add.text(cx + 8 + bw / 2, cy + 128, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      const hl = this.add.text(cx + 8 + bw / 2, cy + 125, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
       const ebg = this.add.graphics();
-      ebg.fillStyle(0x111122, 1); ebg.fillRect(cx + 8, cy + 140, bw, 10);
-      ebg.lineStyle(1, COLORS.dim, 0.3); ebg.strokeRect(cx + 8, cy + 140, bw, 10);
+      ebg.fillStyle(0x111122, 1); ebg.fillRect(cx + 8, cy + 133, bw, 8);
+      ebg.lineStyle(1, COLORS.dim, 0.3); ebg.strokeRect(cx + 8, cy + 133, bw, 8);
       const ef = this.add.graphics();
-      const el = this.add.text(cx + 8 + bw / 2, cy + 145, '', { fontFamily: 'monospace', fontSize: '9px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      const el = this.add.text(cx + 8 + bw / 2, cy + 137, '', { fontFamily: 'monospace', fontSize: '8px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      // SH (Shield) bar — only meaningful if maxSh > 0
+      const shbg = this.add.graphics();
+      const sf = this.add.graphics();
+      const sl = this.add.text(cx + 8 + bw / 2, cy + 147, '', { fontFamily: 'monospace', fontSize: '8px', color: '#fff' }).setOrigin(0.5, 0.5).setDepth(1);
+      if (ag.maxSh > 0) {
+        shbg.fillStyle(0x111122, 1); shbg.fillRect(cx + 8, cy + 143, bw, 8);
+        shbg.lineStyle(1, 0x4488cc, 0.3); shbg.strokeRect(cx + 8, cy + 143, bw, 8);
+      }
       const sg = this.add.text(cx + 8, cy + 156, '', { fontFamily: 'monospace', fontSize: '10px', color: '#ffcc00' });
       const st = this.add.text(cx + 8, cy + 168, '', { fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc' });
 
@@ -2114,7 +2142,7 @@ class Battle extends Phaser.Scene {
       const tap = this.add.zone(cx, cy, cw, 90).setOrigin(0).setInteractive();
       tap.on('pointerdown', () => this._showStats(i));
 
-      return { bg, sp, nm, cl, hf, hl, ef, el, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
+      return { bg, sp, nm, cl, dc, hf, hl, ef, el, shbg, sf, sl, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
     });
     this.agents.forEach((_, i) => this._reCard(i));
     this._div(554);
@@ -2207,15 +2235,34 @@ class Battle extends Phaser.Scene {
     obj.bg.lineStyle(active ? 2 : 1, ag.color, active ? 0.9 : 0.25);
     obj.bg.strokeRoundedRect(obj.cx, obj.cy, obj.cw, obj.ch, 6);
     obj.sp.setAlpha(dead ? 0.2 : 1);
+
+    // damage-state sprite tint (Normal / Damaged / Critical / Destroyed)
+    const ratio = ag.maxHp > 0 ? ag.hp / ag.maxHp : 0;
+    if (dead)            obj.sp.setTint(0x441122);
+    else if (ratio < 0.3) obj.sp.setTint(0xff5544); // Critical
+    else if (ratio < 0.6) obj.sp.setTint(0xffaa44); // Damaged
+    else                  obj.sp.clearTint();       // Normal
+
     const bw = obj.bw;
-    const hr = Math.max(0, ag.hp / ag.maxHp);
+    const hr = Math.max(0, ratio);
     obj.hf.clear();
-    if (!dead) { obj.hf.fillStyle(ag.color, 0.85); obj.hf.fillRect(obj.cx + 9, obj.cy + 123, (bw - 2) * hr, 10); }
+    if (!dead) { obj.hf.fillStyle(ag.color, 0.85); obj.hf.fillRect(obj.cx + 9, obj.cy + 121, (bw - 2) * hr, 9); }
     obj.hl.setText(`HP ${ag.hp}/${ag.maxHp}`);
     const er = Math.max(0, ag.en / ag.maxEn);
     obj.ef.clear();
-    if (!dead) { obj.ef.fillStyle(COLORS.blue, 0.85); obj.ef.fillRect(obj.cx + 9, obj.cy + 141, (bw - 2) * er, 8); }
+    if (!dead) { obj.ef.fillStyle(COLORS.blue, 0.85); obj.ef.fillRect(obj.cx + 9, obj.cy + 134, (bw - 2) * er, 6); }
     obj.el.setText(`EN ${ag.en}/${ag.maxEn}`);
+
+    // Shield (SH) bar — only render if agent has shield capacity
+    obj.sf.clear();
+    if (ag.maxSh > 0 && !dead) {
+      const sr = Math.max(0, (ag.sh || 0) / ag.maxSh);
+      obj.sf.fillStyle(0x66c8ff, 0.9); obj.sf.fillRect(obj.cx + 9, obj.cy + 144, (bw - 2) * sr, 6);
+      obj.sl.setText(`SH ${ag.sh}/${ag.maxSh}`).setVisible(true);
+    } else {
+      obj.sl.setVisible(false);
+    }
+
     const blackoutPenalty = this.mechanic === 'blackout' ? 15 : 0;
     const sig = Math.max(10, ag.signal - this.enemy.aura - this.enemy.stacks * 8 - blackoutPenalty);
     obj.sg.setText(`SIG ${sig}%`);
@@ -2227,10 +2274,12 @@ class Battle extends Phaser.Scene {
     if (ag.shielded)   badges.push('🔷');
     if (ag.locked)     badges.push('🔒');
     if (ag.stored > 0) badges.push(`📦${ag.stored}`);
+    if (ratio > 0 && ratio < 0.3) badges.push('⚠');
     if (dead)          badges.push('💀');
     obj.st.setText(badges.join(' '));
-    obj.st.setColor(dead ? '#ff3355' : '#aaaacc');
+    obj.st.setColor(dead ? '#ff3355' : ratio < 0.3 && !dead ? '#ff8844' : '#aaaacc');
     obj.nm.setAlpha(dead ? 0.3 : 1);
+    obj.dc.setAlpha(dead ? 0.2 : 0.7);
   }
 
   _reAll() { this.agents.forEach((_, i) => this._reCard(i)); }
@@ -2655,6 +2704,13 @@ class Battle extends Phaser.Scene {
       this.round++;
       const enRegen = this.mechanic === 'battery' ? 2 : 5;
       this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen); });
+      // Shield slowly recharges between rounds (10% of max, rounded up)
+      this.agents.forEach(a => {
+        if (a.hp > 0 && a.maxSh > 0) {
+          const regen = Math.max(1, Math.ceil(a.maxSh * 0.1));
+          a.sh = Math.min(a.maxSh, (a.sh || 0) + regen);
+        }
+      });
       if (this.mechanic === 'heat') {
         this.heatStacks++;
         this.log(`> 🔥 HEAT ${this.heatStacks}: enemy +${this.heatStacks * 2} dmg`);
@@ -2703,7 +2759,13 @@ class Battle extends Phaser.Scene {
     const roll = Math.random();
 
     const applyHit = (tgt, dmg) => {
-      tgt.hp = Math.max(0, tgt.hp - dmg);
+      let remaining = dmg;
+      if (tgt.sh > 0 && remaining > 0) {
+        const absorbed = Math.min(tgt.sh, remaining);
+        tgt.sh -= absorbed;
+        remaining -= absorbed;
+      }
+      tgt.hp = Math.max(0, tgt.hp - remaining);
       if (tgt.subclass === 'archive') tgt.stored = (tgt.stored || 0) + Math.ceil(dmg * 0.5);
       if (this.mechanic === 'freeze' && Math.random() < 0.35 && !tgt.frozen) {
         tgt.frozen = true; this.log(`> ❄ ${tgt.name} FROZEN`);
@@ -3175,32 +3237,44 @@ class Battle extends Phaser.Scene {
     panel.add(sp);
 
     panel.add(this.add.text(px + pw / 2, py + 90, ag.name, { fontFamily: 'monospace', fontSize: '20px', color: hex, fontStyle: 'bold' }).setOrigin(0.5, 0));
-    panel.add(this.add.text(px + pw / 2, py + 114, ag.cls, { fontFamily: 'monospace', fontSize: '13px', color: '#555577' }).setOrigin(0.5, 0));
+    panel.add(this.add.text(px + pw / 2, py + 114, ag.cls + (ag.faction ? `  ·  ${ag.faction.split(' / ')[1] || ''}` : ''), { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }).setOrigin(0.5, 0));
+    if (ag.decal) panel.add(this.add.text(px + pw - 12, py + 12, ag.decal, { fontFamily: 'monospace', fontSize: '11px', color: '#555577', fontStyle: 'bold' }).setOrigin(1, 0));
 
     const statRows = [
       { label: 'INTEGRITY', val: `${ag.hp} / ${ag.maxHp}`, ratio: ag.hp / ag.maxHp, color: ag.color },
       { label: 'ENERGY',    val: `${ag.en} / ${ag.maxEn}`, ratio: ag.en / ag.maxEn, color: COLORS.blue },
+      { label: 'SHIELD',    val: ag.maxSh > 0 ? `${ag.sh} / ${ag.maxSh}` : '— / —', ratio: ag.maxSh > 0 ? (ag.sh || 0) / ag.maxSh : 0, color: 0x66c8ff },
       { label: 'SIGNAL',    val: `${ag.signal}%`,           ratio: ag.signal / 100,   color: COLORS.yellow },
       { label: 'AUTONOMY',  val: `${ag.autonomy}`,          ratio: ag.autonomy / 100, color: COLORS.green },
     ];
     const bx = px + 16, bw = pw - 32;
     statRows.forEach((row, ri) => {
-      const ry = py + 140 + ri * 44;
-      panel.add(this.add.text(bx, ry, row.label, { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
-      panel.add(this.add.text(bx + bw, ry, row.val, { fontFamily: 'monospace', fontSize: '12px', color: hex }).setOrigin(1, 0));
+      const ry = py + 138 + ri * 36;
+      panel.add(this.add.text(bx, ry, row.label, { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }));
+      panel.add(this.add.text(bx + bw, ry, row.val, { fontFamily: 'monospace', fontSize: '11px', color: hex }).setOrigin(1, 0));
       const rbg = this.add.graphics();
-      rbg.fillStyle(0x111122, 1); rbg.fillRect(bx, ry + 16, bw, 12);
-      rbg.lineStyle(1, COLORS.dim, 0.3); rbg.strokeRect(bx, ry + 16, bw, 12);
+      rbg.fillStyle(0x111122, 1); rbg.fillRect(bx, ry + 14, bw, 10);
+      rbg.lineStyle(1, COLORS.dim, 0.3); rbg.strokeRect(bx, ry + 14, bw, 10);
       const rfill = this.add.graphics();
-      rfill.fillStyle(row.color, 0.8); rfill.fillRect(bx + 1, ry + 17, (bw - 2) * Math.min(1, row.ratio), 10);
+      rfill.fillStyle(row.color, 0.8); rfill.fillRect(bx + 1, ry + 15, (bw - 2) * Math.min(1, row.ratio), 8);
       panel.add(rbg); panel.add(rfill);
     });
 
+    // bio / lore — wraps inside panel width
+    if (ag.bio) {
+      const by0 = py + 138 + statRows.length * 36 + 4;
+      panel.add(this.add.text(bx, by0, 'BIO', { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }));
+      panel.add(this.add.text(bx, by0 + 14, ag.bio, {
+        fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc',
+        wordWrap: { width: bw }, lineSpacing: 2,
+      }));
+    }
+
     // abilities
-    panel.add(this.add.text(bx, py + 328, 'ABILITIES', { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
+    panel.add(this.add.text(bx, py + 358, 'ABILITIES', { fontFamily: 'monospace', fontSize: '12px', color: '#555577' }));
     ag.moves.forEach((mv, mi) => {
       const mvhex = '#' + mv.color.toString(16).padStart(6, '0');
-      const my = py + 346 + mi * 36;
+      const my = py + 376 + mi * 36;
       const mbg = this.add.graphics();
       mbg.fillStyle(mv.color, 0.12); mbg.fillRoundedRect(bx, my, bw, 30, 4);
       mbg.lineStyle(1, mv.color, 0.4); mbg.strokeRoundedRect(bx, my, bw, 30, 4);

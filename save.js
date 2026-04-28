@@ -1,16 +1,16 @@
 // ── Persistent save state (localStorage) ──────────────────
 
 const XP_THRESHOLDS = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200];
-const STAT_PER_LEVEL = { hp: 10, en: 5, signal: 3, autonomy: 5 };
+const STAT_PER_LEVEL = { hp: 10, en: 5, signal: 3, autonomy: 5, shield: 3 };
 
 const AGENT_BASES = {
-  threadling: { maxHp: 100, maxEn: 50, signal: 85, autonomy: 10 },
-  patchwork:  { maxHp: 80,  maxEn: 60, signal: 75, autonomy: 25 },
-  vault:      { maxHp: 140, maxEn: 40, signal: 70, autonomy: 8  },
-  netrunner:  { maxHp: 75,  maxEn: 70, signal: 92, autonomy: 35 },
-  sentinel:   { maxHp: 95,  maxEn: 55, signal: 80, autonomy: 15 },
-  glitcher:   { maxHp: 70,  maxEn: 80, signal: 65, autonomy: 40 },
-  bridgelink: { maxHp: 85,  maxEn: 65, signal: 78, autonomy: 20 },
+  threadling: { maxHp: 100, maxEn: 50, signal: 85, autonomy: 10, maxSh: 20 },
+  patchwork:  { maxHp: 80,  maxEn: 60, signal: 75, autonomy: 25, maxSh: 25 },
+  vault:      { maxHp: 140, maxEn: 40, signal: 70, autonomy: 8,  maxSh: 60 },
+  netrunner:  { maxHp: 75,  maxEn: 70, signal: 92, autonomy: 35, maxSh: 30 },
+  sentinel:   { maxHp: 95,  maxEn: 55, signal: 80, autonomy: 15, maxSh: 50 },
+  glitcher:   { maxHp: 70,  maxEn: 80, signal: 65, autonomy: 40, maxSh: 15 },
+  bridgelink: { maxHp: 85,  maxEn: 65, signal: 78, autonomy: 20, maxSh: 30 },
 };
 
 const AGENT_COSTS = { threadling: 0, patchwork: 80, vault: 160, netrunner: 200, sentinel: 240, glitcher: 280, bridgelink: 300 };
@@ -156,6 +156,7 @@ function statsForLevel(agentId, level) {
     maxEn:    base.maxEn    + extra * STAT_PER_LEVEL.en,
     signal:   base.signal   + extra * STAT_PER_LEVEL.signal,
     autonomy: base.autonomy + extra * STAT_PER_LEVEL.autonomy,
+    maxSh:    base.maxSh    + extra * STAT_PER_LEVEL.shield,
   };
 }
 
@@ -170,6 +171,7 @@ function effectiveStats(agentId, level, save) {
     maxEn:    base.maxEn    + (armor?.enBonus  || 0),
     signal:   base.signal   + (weapon?.sigBonus || 0) + (armor?.sigBonus || 0),
     autonomy: base.autonomy,
+    maxSh:    base.maxSh    + (armor?.shBonus  || 0),
     dmgBonus: weapon?.dmgBonus || 0,
     recovery: armor?.recovery  || 0,
   };
