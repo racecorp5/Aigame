@@ -45,25 +45,32 @@ const ITEMS_CATALOG = [
 const DEFAULT_SAVE = {
   cycles: 50,
   agents: [
-    { id: 'threadling', owned: true,  active: true,  hp: 100, xp: 0, level: 1 },
-    { id: 'patchwork',  owned: false, active: false, hp: 80,  xp: 0, level: 1 },
-    { id: 'vault',      owned: false, active: false, hp: 140, xp: 0, level: 1 },
-    { id: 'netrunner',  owned: false, active: false, hp: 75,  xp: 0, level: 1 },
-    { id: 'sentinel',   owned: false, active: false, hp: 95,  xp: 0, level: 1 },
-    { id: 'glitcher',   owned: false, active: false, hp: 70,  xp: 0, level: 1 },
-    { id: 'bridgelink', owned: false, active: false, hp: 85,  xp: 0, level: 1 },
+    { id: 'threadling', owned: true,  active: true,  hp: 100, xp: 0, level: 1, kills: 0, skin: 'default' },
+    { id: 'patchwork',  owned: false, active: false, hp: 80,  xp: 0, level: 1, kills: 0, skin: 'default' },
+    { id: 'vault',      owned: false, active: false, hp: 140, xp: 0, level: 1, kills: 0, skin: 'default' },
+    { id: 'netrunner',  owned: false, active: false, hp: 75,  xp: 0, level: 1, kills: 0, skin: 'default' },
+    { id: 'sentinel',   owned: false, active: false, hp: 95,  xp: 0, level: 1, kills: 0, skin: 'default' },
+    { id: 'glitcher',   owned: false, active: false, hp: 70,  xp: 0, level: 1, kills: 0, skin: 'default' },
+    { id: 'bridgelink', owned: false, active: false, hp: 85,  xp: 0, level: 1, kills: 0, skin: 'default' },
   ],
   gear: {
     equipped: {
-      threadling: { weapon: null, armor: null },
-      patchwork:  { weapon: null, armor: null },
-      vault:      { weapon: null, armor: null },
-      netrunner:  { weapon: null, armor: null },
-      sentinel:   { weapon: null, armor: null },
-      glitcher:   { weapon: null, armor: null },
-      bridgelink: { weapon: null, armor: null },
+      threadling: { weapon: null, armor: null, module: null, booster: null },
+      patchwork:  { weapon: null, armor: null, module: null, booster: null },
+      vault:      { weapon: null, armor: null, module: null, booster: null },
+      netrunner:  { weapon: null, armor: null, module: null, booster: null },
+      sentinel:   { weapon: null, armor: null, module: null, booster: null },
+      glitcher:   { weapon: null, armor: null, module: null, booster: null },
+      bridgelink: { weapon: null, armor: null, module: null, booster: null },
     },
   },
+  cosmetics: {
+    ownedSkins: {
+      threadling: ['default'], patchwork: ['default'], vault: ['default'],
+      netrunner:  ['default'], sentinel:  ['default'], glitcher: ['default'], bridgelink: ['default'],
+    },
+  },
+  settings: { useRadialMenu: false, showFps: false, soundOn: true, musicOn: true },
   items: { repair_kit: 0, energy_cell: 0, sig_boost: 0, emp_charge: 0 },
   worlds: {
     tv: { cleared: [false, false, false, false, false] },
@@ -93,13 +100,34 @@ function loadSave() {
     });
     // migrate: add new gear slots if missing
     DEFAULT_SAVE.agents.forEach(da => {
-      if (!s.gear.equipped[da.id]) s.gear.equipped[da.id] = { weapon: null, armor: null };
+      if (!s.gear.equipped[da.id]) s.gear.equipped[da.id] = { weapon: null, armor: null, module: null, booster: null };
+      else {
+        if (!('module'  in s.gear.equipped[da.id])) s.gear.equipped[da.id].module  = null;
+        if (!('booster' in s.gear.equipped[da.id])) s.gear.equipped[da.id].booster = null;
+      }
     });
     // migrate: ensure active field exists and at least one owned agent is active
     s.agents.forEach(a => { if (typeof a.active !== 'boolean') a.active = a.owned; });
+    // migrate: add new per-agent fields
+    s.agents.forEach(a => {
+      if (typeof a.kills !== 'number') a.kills = 0;
+      if (typeof a.skin  !== 'string') a.skin  = 'default';
+    });
     if (!s.agents.some(a => a.owned && a.active)) {
       const first = s.agents.find(a => a.owned);
       if (first) first.active = true;
+    }
+    // migrate: cosmetics + settings
+    if (!s.cosmetics) s.cosmetics = _clone(DEFAULT_SAVE.cosmetics);
+    if (!s.cosmetics.ownedSkins) s.cosmetics.ownedSkins = _clone(DEFAULT_SAVE.cosmetics.ownedSkins);
+    DEFAULT_SAVE.agents.forEach(da => {
+      if (!s.cosmetics.ownedSkins[da.id]) s.cosmetics.ownedSkins[da.id] = ['default'];
+    });
+    if (!s.settings) s.settings = _clone(DEFAULT_SAVE.settings);
+    else {
+      Object.keys(DEFAULT_SAVE.settings).forEach(k => {
+        if (typeof s.settings[k] === 'undefined') s.settings[k] = DEFAULT_SAVE.settings[k];
+      });
     }
     // migrate: add items if missing
     if (!s.items) s.items = _clone(DEFAULT_SAVE.items);
@@ -160,20 +188,31 @@ function statsForLevel(agentId, level) {
   };
 }
 
-// Effective stats including gear bonuses
+// Effective stats including gear bonuses (weapon + armor + module + booster)
 function effectiveStats(agentId, level, save) {
   const base     = statsForLevel(agentId, level);
   const equipped = save.gear?.equipped?.[agentId] || {};
   const weapon   = equipped.weapon ? WEAPONS.find(w => w.id === equipped.weapon) : null;
   const armor    = equipped.armor  ? ARMORS.find(a  => a.id === equipped.armor)  : null;
+  // MODULES / BOOSTERS may not be defined in environments that load save.js without game.js;
+  // fall back to safe lookups via globals.
+  const mods   = (typeof MODULE_BY_ID  !== 'undefined') ? MODULE_BY_ID  : {};
+  const boosts = (typeof BOOSTER_BY_ID !== 'undefined') ? BOOSTER_BY_ID : {};
+  const module  = equipped.module  ? mods[equipped.module]   : null;
+  const booster = equipped.booster ? boosts[equipped.booster] : null;
   return {
     maxHp:    base.maxHp    + (armor?.hpBonus  || 0),
     maxEn:    base.maxEn    + (armor?.enBonus  || 0),
     signal:   base.signal   + (weapon?.sigBonus || 0) + (armor?.sigBonus || 0),
     autonomy: base.autonomy,
-    maxSh:    base.maxSh    + (armor?.shBonus  || 0),
+    maxSh:    base.maxSh    + (armor?.shBonus  || 0) + (module?.shBonus || 0),
     dmgBonus: weapon?.dmgBonus || 0,
     recovery: armor?.recovery  || 0,
+    reflect:  module?.reflect    || 0,
+    reveal:   !!module?.reveal,
+    dodge:    booster?.dodge     || 0,
+    enRegen:  booster?.enRegen   || 0,
+    dmgReduce: booster?.dmgReduce || 0,
   };
 }
 

@@ -10,6 +10,13 @@ const STATE = { PLAYER: 'PLAYER', ANIM: 'ANIM', ENEMY: 'ENEMY', WIN: 'WIN', LOSE
 
 function hits(s) { return Math.random() * 100 < s; }
 function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+// Multiplicative tint blend (channel min), used to layer skin over subclass.
+function _blendTints(a, b) {
+  const ar = (a >> 16) & 0xff, ag = (a >> 8) & 0xff, ab = a & 0xff;
+  const br = (b >> 16) & 0xff, bg = (b >> 8) & 0xff, bb = b & 0xff;
+  const r = Math.floor(ar * br / 255), g = Math.floor(ag * bg / 255), bl = Math.floor(ab * bb / 255);
+  return (r << 16) | (g << 8) | bl;
+}
 
 // ── World map ─────────────────────────────────────────────
 const WORLDS = [
@@ -264,6 +271,48 @@ const DEFS = [
     ],
   },
 ];
+
+// ── Skin / color variant definitions ───────────────────────
+// Each skin defines a tint (Phaser multiplies sprite RGB by tint) and a small
+// label string. Per-agent owned-skins live on save.cosmetics.ownedSkins[id].
+// Engine applies skin.tint to every sprite when agent's `skin` is set.
+const SKINS = [
+  { id: 'default',   name: 'DEFAULT',   tint: 0xffffff, cost: 0   },
+  { id: 'desert',    name: 'DESERT',    tint: 0xd0a060, cost: 50  },
+  { id: 'stealth',   name: 'STEALTH',   tint: 0x6a7080, cost: 80  },
+  { id: 'arctic',    name: 'ARCTIC',    tint: 0xa8e0ff, cost: 80  },
+  { id: 'corrupted', name: 'CORRUPTED', tint: 0xb050d0, cost: 120 },
+];
+const SKIN_BY_ID = Object.fromEntries(SKINS.map(s => [s.id, s]));
+
+// ── Equipment slot config (extends gear) ───────────────────
+// Two new slot types for the modular shield/booster system shown in the sample.
+// MODULES = active sub-systems (shield/parry/scan).
+// BOOSTERS = passive movement/defense buffs.
+const MODULES = [
+  { id: 'shield_module', name: 'SHIELD MODULE', desc: '+15 max SH', shBonus: 15, cost: 60 },
+  { id: 'parry_chip',    name: 'PARRY CHIP',    desc: '+8% reflect chance', reflect: 0.08, cost: 80 },
+  { id: 'scan_dish',     name: 'SCAN DISH',     desc: 'Reveal enemy aura on turn 1', reveal: true, cost: 50 },
+];
+const BOOSTERS = [
+  { id: 'jet_booster',     name: 'JET BOOSTER',     desc: '+10% dodge', dodge: 0.10, cost: 70 },
+  { id: 'overdrive_pack',  name: 'OVERDRIVE PACK',  desc: '+5 EN regen/round', enRegen: 5, cost: 80 },
+  { id: 'kinetic_dampers', name: 'KINETIC DAMPERS', desc: '−10% incoming dmg', dmgReduce: 0.10, cost: 90 },
+];
+const MODULE_BY_ID  = Object.fromEntries(MODULES.map(m => [m.id, m]));
+const BOOSTER_BY_ID = Object.fromEntries(BOOSTERS.map(b => [b.id, b]));
+
+// ── Decal / chevron config ─────────────────────────────────
+// Chevron rank tiers based on level (visual rank decoration on agent card).
+const RANK_CHEVRONS = [
+  { min: 1,  max: 3,  glyph: '▾',   label: 'RECRUIT' },
+  { min: 4,  max: 6,  glyph: '▾▾',  label: 'OPERATIVE' },
+  { min: 7,  max: 9,  glyph: '▾▾▾', label: 'VETERAN' },
+  { min: 10, max: 99, glyph: '★',    label: 'COMMANDER' },
+];
+function rankFor(level) {
+  return RANK_CHEVRONS.find(r => level >= r.min && level <= r.max) || RANK_CHEVRONS[0];
+}
 
 // ── Subclass definitions ───────────────────────────────────
 const SUBCLASSES = {
@@ -1856,10 +1905,19 @@ class Battle extends Phaser.Scene {
           sh: stats.maxSh,
           level,
           xp: saved.xp,
+          kills: saved.kills || 0,
+          skin: saved.skin || 'default',
           subclass: saved.subclass || null,
-          weapon: equipped.weapon || null,
-          armor:  equipped.armor  || null,
+          weapon:  equipped.weapon  || null,
+          armor:   equipped.armor   || null,
+          module:  equipped.module  || null,
+          booster: equipped.booster || null,
+          dodge:     stats.dodge     || 0,
+          dmgReduce: stats.dmgReduce || 0,
+          reflectChance: stats.reflect || 0,
+          enRegenBonus:  stats.enRegen || 0,
           stored: 0,
+          facing: 'side', pose: 'idle',
           defending: false, fortified: false, locked: false, frozen: false, shielded: false,
         };
         // Apply global upgrades
@@ -2116,6 +2174,19 @@ class Battle extends Phaser.Scene {
       const decal = ag.decal || String(i + 1).padStart(2, '0');
       const dc = this.add.text(cx + cw - 5, cy + 4, decal, { fontFamily: 'monospace', fontSize: '9px', color: '#3a3a55', fontStyle: 'bold' }).setOrigin(1, 0);
 
+      // top-left: rank chevron (glyph reflects level tier)
+      const rk = this.add.text(cx + 5, cy + 4, '', { fontFamily: 'monospace', fontSize: '10px', color: '#5a5a8a', fontStyle: 'bold' }).setOrigin(0, 0);
+      // below rank: kill-counter decal (skull glyph + count) — hidden when 0
+      const kc = this.add.text(cx + 5, cy + 16, '', { fontFamily: 'monospace', fontSize: '8px', color: '#665577' }).setOrigin(0, 0);
+      // top-right vertical strip: 4 equipment-slot chips (weapon, armor, module, booster)
+      const chipColors = { weapon: 0xff8844, armor: 0x66ddff, module: 0xffd23d, booster: 0xff44cc };
+      const chips = ['weapon','armor','module','booster'].map((slot, ci) => {
+        const cg = this.add.graphics();
+        const cy0 = cy + 16 + ci * 8;
+        cg._slot = slot; cg._cx = cx + cw - 9; cg._cy = cy0; cg._color = chipColors[slot];
+        return cg;
+      });
+
       const bw = cw - 16;
       const hbg = this.add.graphics();
       hbg.fillStyle(0x111122, 1); hbg.fillRect(cx + 8, cy + 120, bw, 11);
@@ -2142,7 +2213,7 @@ class Battle extends Phaser.Scene {
       const tap = this.add.zone(cx, cy, cw, 90).setOrigin(0).setInteractive();
       tap.on('pointerdown', () => this._showStats(i));
 
-      return { bg, sp, nm, cl, dc, hf, hl, ef, el, shbg, sf, sl, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
+      return { bg, sp, nm, cl, dc, rk, kc, chips, hf, hl, ef, el, shbg, sf, sl, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
     });
     this.agents.forEach((_, i) => this._reCard(i));
     this._div(554);
@@ -2280,6 +2351,19 @@ class Battle extends Phaser.Scene {
     obj.st.setColor(dead ? '#ff3355' : ratio < 0.3 && !dead ? '#ff8844' : '#aaaacc');
     obj.nm.setAlpha(dead ? 0.3 : 1);
     obj.dc.setAlpha(dead ? 0.2 : 0.7);
+
+    // rank chevron + kill counter decals
+    const rk = rankFor(ag.level || 1);
+    obj.rk.setText(rk.glyph).setAlpha(dead ? 0.2 : 0.85);
+    obj.kc.setText(ag.kills > 0 ? `☠${ag.kills}` : '').setAlpha(dead ? 0.2 : 0.7);
+
+    // equipment-slot chips: filled (with slot color) when equipped, dim outline when empty
+    obj.chips.forEach(cg => {
+      cg.clear();
+      const equipped = !!ag[cg._slot];
+      if (equipped) { cg.fillStyle(cg._color, dead ? 0.15 : 0.85); cg.fillRect(cg._cx, cg._cy, 5, 5); }
+      cg.lineStyle(1, cg._color, dead ? 0.1 : equipped ? 0.7 : 0.25); cg.strokeRect(cg._cx, cg._cy, 5, 5);
+    });
   }
 
   _reAll() { this.agents.forEach((_, i) => this._reCard(i)); }
@@ -2687,7 +2771,17 @@ class Battle extends Phaser.Scene {
       this._reEnemy();
     }
 
-    if (this.enemy.hp <= 0) { this.time.delayedCall(500, () => this._end(true)); return; }
+    if (this.enemy.hp <= 0) {
+      // credit the active agent with the kill (decal counter on card)
+      const killer = this.agents[this.activeIdx];
+      if (killer && killer.hp > 0) {
+        killer.kills = (killer.kills || 0) + 1;
+        const saved = this.save.agents.find(a => a.id === killer.id);
+        if (saved) { saved.kills = killer.kills; writeSave(this.save); }
+      }
+      this._reAll();
+      this.time.delayedCall(500, () => this._end(true)); return;
+    }
     if (this.agents.every(a => a.hp <= 0)) { this.time.delayedCall(500, () => this._end(false)); return; }
 
     this.time.delayedCall(350, () => this._next());
@@ -2703,7 +2797,9 @@ class Battle extends Phaser.Scene {
       if (this.agents.every(a => a.hp <= 0)) { this._end(false); return; }
       this.round++;
       const enRegen = this.mechanic === 'battery' ? 2 : 5;
-      this.agents.forEach(a => { if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen); });
+      this.agents.forEach(a => {
+        if (a.hp > 0) a.en = Math.min(a.maxEn, a.en + enRegen + (a.enRegenBonus || 0));
+      });
       // Shield slowly recharges between rounds (10% of max, rounded up)
       this.agents.forEach(a => {
         if (a.hp > 0 && a.maxSh > 0) {
@@ -2747,9 +2843,16 @@ class Battle extends Phaser.Scene {
     const pick = () => alive[Math.floor(Math.random() * alive.length)].a;
     const dmgHit = (tgt, raw) => {
       let d = raw;
+      // booster: jet booster grants chance to fully dodge
+      if (tgt.dodge && Math.random() < tgt.dodge) {
+        this.log(`> ${tgt.name}: 🛞 DODGED`);
+        return 0;
+      }
       if (tgt.defending) d = Math.ceil(d * 0.5);
       else if (tgt.fortified) d = Math.ceil(d * 0.4);
       if (tgt.shielded) { tgt.shielded = false; d = Math.ceil(d * 0.2); }
+      // booster: kinetic dampers flat reduction
+      if (tgt.dmgReduce) d = Math.ceil(d * (1 - tgt.dmgReduce));
       return d;
     };
     const tag = (tgt) => tgt.defending ? ' [BLOCK]' : tgt.fortified ? ' [FORT]' : tgt.shielded ? ' [SHIELD]' : '';
@@ -2791,8 +2894,13 @@ class Battle extends Phaser.Scene {
         this.log(`> ${tgt.name}: REROUTE! → enemy −${raw}`);
         this._flashE(); this.time.delayedCall(600, finish); return;
       }
-      const reflectDmg = tgt.reflecting ? Math.ceil(raw * 0.6) : 0;
-      if (tgt.reflecting) { tgt.reflecting = false; this.enemy.hp = Math.max(0, this.enemy.hp - reflectDmg); }
+      // Reflect via active subclass move OR passive parry-chip module (random)
+      const passiveReflect = (tgt.reflectChance && Math.random() < tgt.reflectChance);
+      const reflectDmg = (tgt.reflecting || passiveReflect) ? Math.ceil(raw * 0.6) : 0;
+      if (tgt.reflecting || passiveReflect) {
+        tgt.reflecting = false;
+        this.enemy.hp = Math.max(0, this.enemy.hp - reflectDmg);
+      }
       const dmg = dmgHit(tgt, raw);
       applyHit(tgt, dmg);
       this.log(`> ${this.enemy.name} → ${tgt.name}${tag(tgt)} −${dmg}${reflectDmg ? ` [↩−${reflectDmg}]` : ''}`);
@@ -3260,9 +3368,35 @@ class Battle extends Phaser.Scene {
       panel.add(rbg); panel.add(rfill);
     });
 
+    // KILLS + SKIN cycler row (sits between stats and bio)
+    const krY = py + 138 + statRows.length * 36 + 2;
+    const owned = (this.save.cosmetics?.ownedSkins?.[ag.id]) || ['default'];
+    const cur   = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
+    panel.add(this.add.text(bx, krY, `KILLS: ${ag.kills || 0}`, { fontFamily: 'monospace', fontSize: '10px', color: '#888899' }));
+    const skinTxt = this.add.text(bx + bw - 36, krY, `SKIN: ${cur.name}`, { fontFamily: 'monospace', fontSize: '10px', color: '#888899' }).setOrigin(1, 0);
+    panel.add(skinTxt);
+    const lArrow = this.add.text(bx + bw - 28, krY, '◀', { fontFamily: 'monospace', fontSize: '12px', color: '#88aacc' }).setOrigin(0.5, 0);
+    const rArrow = this.add.text(bx + bw - 8,  krY, '▶', { fontFamily: 'monospace', fontSize: '12px', color: '#88aacc' }).setOrigin(0.5, 0);
+    panel.add(lArrow); panel.add(rArrow);
+    const cycleSkin = (dir) => {
+      if (owned.length <= 1) return;
+      const idx = owned.indexOf(ag.skin || 'default');
+      const next = owned[(idx + dir + owned.length) % owned.length];
+      ag.skin = next;
+      const saved = this.save.agents.find(a => a.id === ag.id);
+      if (saved) { saved.skin = next; writeSave(this.save); }
+      // re-tint sprite in modal + on card
+      this._closeStats(ov); this._reAll(); this._refreshSpriteTints();
+    };
+    const lz = this.add.zone(bx + bw - 36, krY - 2, 16, 18).setOrigin(0).setInteractive();
+    const rz = this.add.zone(bx + bw - 16, krY - 2, 16, 18).setOrigin(0).setInteractive();
+    lz.on('pointerdown', () => cycleSkin(-1));
+    rz.on('pointerdown', () => cycleSkin(+1));
+    panel.add(lz); panel.add(rz);
+
     // bio / lore — wraps inside panel width
     if (ag.bio) {
-      const by0 = py + 138 + statRows.length * 36 + 4;
+      const by0 = krY + 18;
       panel.add(this.add.text(bx, by0, 'BIO', { fontFamily: 'monospace', fontSize: '11px', color: '#555577' }));
       panel.add(this.add.text(bx, by0 + 14, ag.bio, {
         fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc',
@@ -3345,22 +3479,47 @@ class Battle extends Phaser.Scene {
   }
 
   // Returns an Image (if texture loaded) or Graphics (pixel art fallback)
-  _makeSpriteNode(ag, x, y) {
-    const key = `ag_${ag.id}`;
-    if (this.textures.exists(key)) {
-      const img = this.add.image(x + 22, y + 33, key).setOrigin(0.5);
+  _refreshSpriteTints() {
+    if (!this.cards) return;
+    this.cards.forEach((obj, i) => {
+      const ag = this.agents[i];
+      const skin = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
+      let baseTint = null;
       if (ag.subclass) {
         const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
-        if (sc) img.setTint(sc.color);
+        if (sc) baseTint = sc.color;
       }
+      const finalTint = (baseTint != null && skin.id !== 'default')
+        ? _blendTints(baseTint, skin.tint)
+        : (baseTint != null ? baseTint : (skin.id !== 'default' ? skin.tint : null));
+      if (obj.sp && typeof obj.sp.setTint === 'function') {
+        if (finalTint != null) obj.sp.setTint(finalTint);
+        else obj.sp.clearTint();
+      }
+    });
+  }
+
+  _makeSpriteNode(ag, x, y) {
+    const key = `ag_${ag.id}`;
+    const skin = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
+    let baseTint = null;
+    if (ag.subclass) {
+      const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
+      if (sc) baseTint = sc.color;
+    }
+    // Skin tint multiplies base. If both subclass + non-default skin set, blend by RGB-min.
+    const finalTint = (baseTint != null && skin.id !== 'default')
+      ? _blendTints(baseTint, skin.tint)
+      : (baseTint != null ? baseTint : (skin.id !== 'default' ? skin.tint : null));
+
+    if (this.textures.exists(key)) {
+      const img = this.add.image(x + 22, y + 33, key).setOrigin(0.5);
+      if (finalTint != null) img.setTint(finalTint);
       return img;
     }
     const g = this.add.graphics();
     _drawSprite(g, ag.id, x, y);
-    if (ag.subclass) {
-      const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
-      if (sc) { g.fillStyle(sc.color, 0.22); g.fillRect(x, y, 44, 66); }
-    }
+    if (finalTint != null) { g.fillStyle(finalTint, 0.22); g.fillRect(x, y, 44, 66); }
     return g;
   }
 }
