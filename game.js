@@ -1343,6 +1343,14 @@ class OverworldMap extends Phaser.Scene {
 
   _nodes() {
     const r = 20;
+    // 16x16 minimap-icon glyph per device — emoji as placeholder for the sprite
+    // sheet asset that will replace it later.
+    const DEVICE_GLYPH = {
+      tv: '📺', phone: '📱', speaker: '🔊', watch: '⌚', console: '🎮',
+      fridge: '🧊', micro: '🔥', printer: '📰', hub: '🛜', seccam: '📷',
+      router: '📡', computer: '💻', car: '🚗', atm: '🏧', grid: '⚡',
+      medical: '💉', farm: '🗄️', satellite: '🛰️', cloud: '☁️',
+    };
     WORLDS.forEach(w => {
       const state = worldState(w.id, this.save);
       const col = state === 'locked' ? 0x1a1a2e : w.color;
@@ -1364,6 +1372,21 @@ class OverworldMap extends Phaser.Scene {
       const label = state === 'cleared' ? '✓' : w.abbr;
       this.add.text(w.x, w.y - 1, label, { fontFamily: 'monospace', fontSize: '11px', color: state === 'locked' ? '#1a1a33' : hex, fontStyle: 'bold' }).setOrigin(0.5);
       this.add.text(w.x, w.y + r + 5, w.device, { fontFamily: 'monospace', fontSize: '8px', color: state === 'locked' ? '#111122' : hex }).setOrigin(0.5, 0);
+
+      // 16×16 device glyph in the upper-right corner of the node ring (the
+      // "minimap icon" from the sample reference). Hidden for locked nodes so
+      // the player isn't spoiled on which device they haven't reached yet.
+      if (state !== 'locked') {
+        const glyph = DEVICE_GLYPH[w.id] || '◆';
+        this.add.text(w.x + r - 4, w.y - r + 4, glyph, { fontFamily: 'monospace', fontSize: '14px' }).setOrigin(0.5).setAlpha(state === 'cleared' ? 0.95 : 0.7);
+      }
+
+      // boss tier marker (small chevron) for tier-4 / tier-5 worlds, mirrors
+      // the chevron rank decals used on agent cards.
+      if (state !== 'locked' && w.tier >= 4) {
+        const chev = w.tier === 5 ? '★' : '▲';
+        this.add.text(w.x - r + 4, w.y - r + 4, chev, { fontFamily: 'monospace', fontSize: '10px', color: '#ff8844' }).setOrigin(0.5);
+      }
 
       if (state !== 'locked') {
         this.add.zone(w.x - r, w.y - r, r * 2, r * 2).setOrigin(0).setInteractive()
@@ -2209,9 +2232,23 @@ class Battle extends Phaser.Scene {
       const sg = this.add.text(cx + 8, cy + 156, '', { fontFamily: 'monospace', fontSize: '10px', color: '#ffcc00' });
       const st = this.add.text(cx + 8, cy + 168, '', { fontFamily: 'monospace', fontSize: '10px', color: '#aaaacc' });
 
-      // tap zone on sprite area to show stats
+      // tap zone on sprite area: short-tap = show stats; long-press (>= 350ms) = radial menu
       const tap = this.add.zone(cx, cy, cw, 90).setOrigin(0).setInteractive();
-      tap.on('pointerdown', () => this._showStats(i));
+      let _holdTimer = null;
+      let _longFired = false;
+      tap.on('pointerdown', () => {
+        _longFired = false;
+        if (_holdTimer) _holdTimer.remove();
+        _holdTimer = this.time.delayedCall(350, () => {
+          _longFired = true;
+          this._openRadial(i);
+        });
+      });
+      tap.on('pointerup',   () => {
+        if (_holdTimer) { _holdTimer.remove(); _holdTimer = null; }
+        if (!_longFired) this._showStats(i);
+      });
+      tap.on('pointerout',  () => { if (_holdTimer) { _holdTimer.remove(); _holdTimer = null; } });
 
       return { bg, sp, nm, cl, dc, rk, kc, chips, hf, hl, ef, el, shbg, sf, sl, sg, st, cx, cy, cw, ch, bw, _idleTween, _baseSpY, _baseSpX };
     });
@@ -3479,6 +3516,69 @@ class Battle extends Phaser.Scene {
   }
 
   // Returns an Image (if texture loaded) or Graphics (pixel art fallback)
+  // ── Radial action menu (opens via long-press on any agent card) ──
+  _openRadial(forIdx) {
+    if (this.radial) return;
+    if (this.state !== STATE.PLAYER) return;
+    // Radial always operates on the CURRENTLY ACTIVE agent (the one taking
+    // the turn), not whichever card was long-pressed. Long-pressing any card
+    // is just a more accessible gesture than reaching for the bottom buttons.
+    const ag = this.agents[this.activeIdx];
+    if (!ag || ag.hp <= 0) return;
+    const acts = [
+      ag.moves[0],
+      ag.moves[1],
+      { id: 'defend', label: 'DEFEND', sub: 'Block 50%', color: COLORS.blue, cost: 0 },
+      { id: 'item',   label: 'ITEM',   sub: 'Inventory', color: COLORS.dim,  cost: 0 },
+    ].filter(Boolean);
+    const cont = this.add.container(0, 0).setDepth(20);
+    this.radial = cont;
+    const cx = W / 2, cy = H / 2 - 40;
+    const ov = this.add.graphics();
+    ov.fillStyle(0x000000, 0.6); ov.fillRect(0, 0, W, H);
+    ov.setInteractive(new Phaser.Geom.Rectangle(0, 0, W, H), Phaser.Geom.Rectangle.Contains);
+    ov.on('pointerdown', () => this._closeRadial());
+    cont.add(ov);
+    // center cap
+    const cap = this.add.graphics();
+    cap.fillStyle(ag.color, 0.25); cap.fillCircle(cx, cy, 28);
+    cap.lineStyle(2, ag.color, 0.9); cap.strokeCircle(cx, cy, 28);
+    cont.add(cap);
+    cont.add(this.add.text(cx, cy - 6, ag.name, { fontFamily: 'monospace', fontSize: '10px', color: '#' + ag.color.toString(16).padStart(6,'0'), fontStyle: 'bold' }).setOrigin(0.5));
+    cont.add(this.add.text(cx, cy + 6, 'CHOOSE', { fontFamily: 'monospace', fontSize: '8px',  color: '#888899' }).setOrigin(0.5));
+    // 4 petals at 12 / 3 / 6 / 9 o'clock
+    const radius = 92;
+    const angles = [-Math.PI/2, 0, Math.PI/2, Math.PI];
+    acts.forEach((mv, i) => {
+      const ang = angles[i];
+      const px = cx + Math.cos(ang) * radius;
+      const py = cy + Math.sin(ang) * radius;
+      const pg = this.add.graphics();
+      pg.fillStyle(mv.color, 0.18); pg.fillCircle(px, py, 44);
+      pg.lineStyle(2, mv.color, 0.7); pg.strokeCircle(px, py, 44);
+      cont.add(pg);
+      const hex = '#' + mv.color.toString(16).padStart(6,'0');
+      cont.add(this.add.text(px, py - 12, mv.label, { fontFamily: 'monospace', fontSize: '12px', color: hex, fontStyle: 'bold' }).setOrigin(0.5));
+      cont.add(this.add.text(px, py + 4,  mv.sub,   { fontFamily: 'monospace', fontSize: '9px',  color: '#aaaacc' }).setOrigin(0.5, 0));
+      if (mv.cost > 0) cont.add(this.add.text(px, py + 22, `${mv.cost}⚡`, { fontFamily: 'monospace', fontSize: '9px', color: '#44aaff' }).setOrigin(0.5));
+      const z = this.add.zone(px - 44, py - 44, 88, 88).setOrigin(0).setInteractive();
+      z.on('pointerdown', () => {
+        this._closeRadial();
+        // small delay so the close animation doesn't eat the next pointerup
+        this.time.delayedCall(60, () => this.act(mv.id));
+      });
+      cont.add(z);
+    });
+    // tween the petals from 0 → full size
+    cont.setScale(0.6); cont.setAlpha(0);
+    this.tweens.add({ targets: cont, scale: 1, alpha: 1, duration: 120, ease: 'Back.easeOut' });
+  }
+  _closeRadial() {
+    if (!this.radial) return;
+    const cont = this.radial; this.radial = null;
+    this.tweens.add({ targets: cont, scale: 0.6, alpha: 0, duration: 100, onComplete: () => cont.destroy() });
+  }
+
   _refreshSpriteTints() {
     if (!this.cards) return;
     this.cards.forEach((obj, i) => {
