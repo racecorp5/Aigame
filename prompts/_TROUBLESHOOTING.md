@@ -202,6 +202,31 @@ multi-output requests, but the result varies wildly by tool.
 
 ---
 
+## Symptom: Columns labeled "DOWN LEFT RIGHT UP" — directions as columns
+
+The generator produced 8 columns labeled DOWN / LEFT / RIGHT / UP / DOWN /
+LEFT / RIGHT / UP, and rows represent individual animation frames
+(IDLE row, WALK 1 row, WALK 2 row, etc.).
+
+### Why
+
+The generator defaulted to a common "all-directions-side-by-side" layout
+used by many sprite tools. Our engine expects the opposite orientation:
+rows = animation-direction combos, columns = frames of that animation.
+
+### Fix
+
+1. The updated `01a_threadling_spritesheet.md` now includes an explicit
+   "Wrong / Correct" example at the top of the SHEET LAYOUT section.
+   Re-drag the updated prompt file.
+2. The key line to emphasize if it keeps failing:
+   *"THE 8 COLUMNS ARE ANIMATION FRAMES — NOT DIRECTIONS. Each row is one
+   animation for one facing direction. Do NOT label columns DOWN/LEFT/RIGHT/UP."*
+3. If the generator still can't follow this: paste the "Wrong/Correct"
+   ascii diagram from the prompt as your first message, then add the rest.
+
+---
+
 ## When in doubt
 
 If your generator keeps producing a ~1500×1000 dashboard image no

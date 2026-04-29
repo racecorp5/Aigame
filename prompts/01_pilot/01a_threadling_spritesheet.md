@@ -27,10 +27,56 @@ sized animation frames and nothing else.
 
 **392 × 1688 pixels.** Transparent background (true alpha, not white).
 
-## SHEET LAYOUT
+## SHEET LAYOUT — READ THIS CAREFULLY
 
 24 rows × 8 columns of cells. Each cell is **44 × 66 pixels.**
 4 px gutter between cells. 4 px outer margin.
+
+**THE 8 COLUMNS ARE ANIMATION FRAMES — NOT DIRECTIONS.**
+**EACH ROW IS ONE ANIMATION FOR ONE FACING DIRECTION.**
+
+Wrong (do not do this):
+```
+Cols: [DOWN | LEFT | RIGHT | UP | DOWN | LEFT | RIGHT | UP]
+Row 0: idle frame, one per direction ...
+Row 1: walk frame 1, one per direction ...
+```
+
+Correct (do this):
+```
+Row  0, cols 0-3: idle_down frames 0-1-2-3  (cols 4-7 transparent)
+Row  1, cols 0-5: walk_down frames 0-1-2-3-4-5  (cols 6-7 transparent)
+Row  6, cols 0-3: idle_LEFT frames 0-1-2-3  ← new block for LEFT direction
+```
+
+The full row table:
+
+```
+Row  0:  idle_down       (frames 0–3 used,  cells 4–7 transparent)
+Row  1:  walk_down       (frames 0–5 used,  cells 6–7 transparent)
+Row  2:  attack_down     (frames 0–5 used,  cells 6–7 transparent)
+Row  3:  ability_down    (frames 0–7 used — full row)
+Row  4:  hit_down        (frames 0–1 used,  cells 2–7 transparent)
+Row  5:  death_down      (frames 0–5 used,  cells 6–7 transparent)
+Row  6:  idle_left       (same pattern)
+Row  7:  walk_left
+Row  8:  attack_left
+Row  9:  ability_left
+Row 10:  hit_left
+Row 11:  death_left
+Row 12:  idle_right
+Row 13:  walk_right
+Row 14:  attack_right
+Row 15:  ability_right
+Row 16:  hit_right
+Row 17:  death_right
+Row 18:  idle_up
+Row 19:  walk_up
+Row 20:  attack_up
+Row 21:  ability_up
+Row 22:  hit_up
+Row 23:  death_up
+```
 
 Cell content is pixel-art animation frames. Empty cells (e.g. idle's last
 4 columns) are **fully transparent** — leave them blank, do not extend
@@ -134,6 +180,13 @@ Down shows the visor head-on.
 - ❌ Render the character in a "scene" — they are isolated on transparent
   background, frame after frame.
 - ❌ Vary frame size — every cell on the sheet is exactly 44×66 px.
+- ❌ Put multiple directions in the same row. Each row = one animation for
+  one direction. Columns = frames. Never use columns as direction slots.
+- ❌ Label columns "DOWN LEFT RIGHT UP". That means you got the layout
+  backwards — restart with the row table above.
+- ❌ Use an opaque or white background. The PNG must have true alpha
+  transparency. Verify the output in a viewer that shows a checkerboard
+  for transparent pixels.
 
 ## OUTPUT REQUIREMENT (repeat)
 
