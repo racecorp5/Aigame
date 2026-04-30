@@ -1,0 +1,21 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "reflected.png",
+  "frameWidth": 44,
+  "frameHeight": 66,
+  "padding": 0,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 4,
+  "rows": 1,
+  "originX": 22,
+  "originY": 33,
+  "animations": {
+    "loop": {
+      "row": 0,
+      "frames": 4,
+      "fps": 8,
+      "loop": true
+    }
+  }
+}

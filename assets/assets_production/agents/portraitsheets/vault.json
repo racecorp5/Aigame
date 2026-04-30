@@ -1,0 +1,21 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "vault.png",
+  "frameWidth": 200,
+  "frameHeight": 200,
+  "padding": 0,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 4,
+  "rows": 1,
+  "originX": 100,
+  "originY": 200,
+  "animations": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    }
+  }
+}

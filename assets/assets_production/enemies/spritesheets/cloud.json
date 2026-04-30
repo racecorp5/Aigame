@@ -1,0 +1,123 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "cloud.png",
+  "frameWidth": 176,
+  "frameHeight": 264,
+  "padding": 2,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 8,
+  "rows": 18,
+  "originX": 88,
+  "originY": 252,
+  "animations": {
+    "form1_idle": {
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "form1_attack": {
+      "row": 1,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "form1_cast": {
+      "row": 2,
+      "frames": 6,
+      "fps": 10,
+      "loop": false
+    },
+    "form1_hit": {
+      "row": 3,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "form1_death": {
+      "row": 4,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "form1_phase": {
+      "row": 5,
+      "frames": 8,
+      "fps": 8,
+      "loop": false
+    },
+    "form2_idle": {
+      "row": 6,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "form2_attack": {
+      "row": 7,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "form2_cast": {
+      "row": 8,
+      "frames": 6,
+      "fps": 10,
+      "loop": false
+    },
+    "form2_hit": {
+      "row": 9,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "form2_death": {
+      "row": 10,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "form2_phase": {
+      "row": 11,
+      "frames": 8,
+      "fps": 8,
+      "loop": false
+    },
+    "form3_idle": {
+      "row": 12,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "form3_attack": {
+      "row": 13,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "form3_cast": {
+      "row": 14,
+      "frames": 6,
+      "fps": 10,
+      "loop": false
+    },
+    "form3_hit": {
+      "row": 15,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "form3_death": {
+      "row": 16,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "form3_phase": {
+      "row": 17,
+      "frames": 8,
+      "fps": 8,
+      "loop": false
+    }
+  }
+}

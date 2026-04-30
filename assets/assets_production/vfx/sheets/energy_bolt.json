@@ -1,0 +1,21 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "energy_bolt.png",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "padding": 0,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 6,
+  "rows": 1,
+  "originX": 32,
+  "originY": 32,
+  "animations": {
+    "play": {
+      "row": 0,
+      "frames": 6,
+      "fps": 14,
+      "loop": false
+    }
+  }
+}

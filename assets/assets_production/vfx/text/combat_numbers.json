@@ -1,0 +1,21 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "combat_numbers.png",
+  "frameWidth": 16,
+  "frameHeight": 24,
+  "padding": 0,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 18,
+  "rows": 1,
+  "originX": 8,
+  "originY": 12,
+  "animations": {
+    "atlas": {
+      "row": 0,
+      "frames": 18,
+      "fps": 1,
+      "loop": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "bg_console.png",
+  "frameWidth": 960,
+  "frameHeight": 640,
+  "padding": 0,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 4,
+  "rows": 1,
+  "originX": 0,
+  "originY": 0,
+  "animations": {
+    "ambient": {
+      "row": 0,
+      "frames": 4,
+      "fps": 4,
+      "loop": true
+    }
+  }
+}
