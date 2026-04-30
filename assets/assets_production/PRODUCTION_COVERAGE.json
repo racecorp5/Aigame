@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-04-30T00:00:00-04:00",
+  "assetRoot": "/Users/justinpruskowski/Documents/Codex/2026-04-29/files-mentioned-by-the-user-style/assets_production",
+  "deliverableCounts": {
+    "png": 432,
+    "runtimeJsonManifests": 112,
+    "qaJsonReports": 2,
+    "totalDeliverableFiles": 544
+  },
+  "expectedCounts": {
+    "png": 432,
+    "runtimeJsonManifests": 112,
+    "totalDeliverableFiles": 544
+  },
+  "byFolder": {
+    "agents": {
+      "png": 42,
+      "json": 42
+    },
+    "npc": {
+      "png": 2,
+      "json": 2
+    },
+    "enemies": {
+      "png": 19,
+      "json": 19
+    },
+    "backgrounds": {
+      "png": 19,
+      "json": 19
+    },
+    "vfx": {
+      "png": 30,
+      "json": 30
+    },
+    "icons": {
+      "png": 205,
+      "json": 0
+    },
+    "comics": {
+      "png": 26,
+      "json": 0
+    },
+    "ui": {
+      "png": 89,
+      "json": 0
+    }
+  },
+  "audit": {
+    "manifestImagesExist": true,
+    "sheetDimensionsValid": true,
+    "animationRowsAndFrameCountsValid": true,
+    "allManifestCellsNonEmpty": true,
+    "minimumCellInsetPixelsForManifestRuntimeSheets": 2,
+    "transparentCornersForAgentsEnemiesIconsVfx": true,
+    "chromaGreenBackgroundPixelsFound": 0,
+    "errorCount": 0,
+    "allPngBroadCutoffAuditPassed": true,
+    "intentionalEdgeToEdgeAssets": [
+      "ui/hud/battle_bottom_bar.png",
+      "ui/hud/battle_top_bar.png",
+      "ui/hud/en_bar_bg.png",
+      "ui/hud/en_bar_fill.png",
+      "ui/hud/hp_bar_bg.png",
+      "ui/hud/hp_bar_fill.png",
+      "ui/hud/xp_bar_bg.png",
+      "ui/hud/xp_bar_fill.png",
+      "ui/map/connection_locked.png"
+    ],
+    "jpgRecommended": false,
+    "pngAlphaSupportedAndRequired": true
+  },
+  "notes": [
+    "All required production slots from the supplied inventory are present in assets_production.",
+    "Runtime assets that require alpha have transparent corners; backgrounds and screen backdrops are intentionally opaque.",
+    "Subclass sheets are production-shaped palette variants with tint-derived rows; optional polish can redraw subclass ability rows more expressively.",
+    "Some agent base sheets include filled/interpolated frames from the batch process; they pass structural/runtime criteria and are ready for in-engine timing review."
+  ],
+  "lastAuditErrors": []
+}

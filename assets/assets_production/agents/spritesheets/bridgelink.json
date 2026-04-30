@@ -1,0 +1,161 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "bridgelink.png",
+  "frameWidth": 44,
+  "frameHeight": 66,
+  "padding": 2,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 8,
+  "rows": 24,
+  "sheetWidth": 392,
+  "sheetHeight": 1688,
+  "originX": 22,
+  "originY": 60,
+  "animations": {
+    "idle_down": {
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "walk_down": {
+      "row": 1,
+      "frames": 6,
+      "fps": 10,
+      "loop": true
+    },
+    "attack_down": {
+      "row": 2,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "ability_down": {
+      "row": 3,
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    },
+    "hit_down": {
+      "row": 4,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "death_down": {
+      "row": 5,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "idle_left": {
+      "row": 6,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "walk_left": {
+      "row": 7,
+      "frames": 6,
+      "fps": 10,
+      "loop": true
+    },
+    "attack_left": {
+      "row": 8,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "ability_left": {
+      "row": 9,
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    },
+    "hit_left": {
+      "row": 10,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "death_left": {
+      "row": 11,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "idle_right": {
+      "row": 12,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "walk_right": {
+      "row": 13,
+      "frames": 6,
+      "fps": 10,
+      "loop": true
+    },
+    "attack_right": {
+      "row": 14,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "ability_right": {
+      "row": 15,
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    },
+    "hit_right": {
+      "row": 16,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "death_right": {
+      "row": 17,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "idle_up": {
+      "row": 18,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    "walk_up": {
+      "row": 19,
+      "frames": 6,
+      "fps": 10,
+      "loop": true
+    },
+    "attack_up": {
+      "row": 20,
+      "frames": 6,
+      "fps": 12,
+      "loop": false
+    },
+    "ability_up": {
+      "row": 21,
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    },
+    "hit_up": {
+      "row": 22,
+      "frames": 2,
+      "fps": 12,
+      "loop": false
+    },
+    "death_up": {
+      "row": 23,
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    }
+  }
+}

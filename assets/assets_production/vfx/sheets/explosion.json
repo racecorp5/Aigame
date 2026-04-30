@@ -1,0 +1,21 @@
+{
+  "$schema": "spritesheet/v1",
+  "image": "explosion.png",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "padding": 0,
+  "spacing": 4,
+  "margin": 4,
+  "columns": 10,
+  "rows": 1,
+  "originX": 32,
+  "originY": 32,
+  "animations": {
+    "play": {
+      "row": 0,
+      "frames": 10,
+      "fps": 18,
+      "loop": false
+    }
+  }
+}

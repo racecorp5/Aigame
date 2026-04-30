@@ -1,0 +1,691 @@
+{
+  "threadling_frames_extracted": 128,
+  "tv_frames_extracted": 24,
+  "files": [
+    "agents/spritesheets/threadling.json",
+    "agents/spritesheets/threadling.png",
+    "backgrounds/sheets/bg_tv.json",
+    "backgrounds/sheets/bg_tv.png",
+    "enemies/spritesheets/tv.json",
+    "enemies/spritesheets/tv.png",
+    "icons/class/compute.png",
+    "icons/worlds/tv_active.png"
+  ],
+  "errors": [],
+  "matte_qa": {
+    "assets_production/agents/spritesheets/threadling.png": {
+      "nontransparent": 121845,
+      "green_key_like_pixels": 409,
+      "ratio": 0.0033567237063482293
+    },
+    "assets_production/enemies/spritesheets/tv.png": {
+      "nontransparent": 24378,
+      "green_key_like_pixels": 73,
+      "ratio": 0.0029945032406267945
+    }
+  },
+  "threadling_filled_missing_frames": [
+    {
+      "row": 3,
+      "col": 6,
+      "filled_from": 5
+    },
+    {
+      "row": 3,
+      "col": 7,
+      "filled_from": 5
+    },
+    {
+      "row": 9,
+      "col": 6,
+      "filled_from": 5
+    },
+    {
+      "row": 9,
+      "col": 7,
+      "filled_from": 5
+    },
+    {
+      "row": 15,
+      "col": 6,
+      "filled_from": 5
+    },
+    {
+      "row": 15,
+      "col": 7,
+      "filled_from": 5
+    },
+    {
+      "row": 21,
+      "col": 6,
+      "filled_from": 5
+    },
+    {
+      "row": 21,
+      "col": 7,
+      "filled_from": 5
+    }
+  ],
+  "threadling_empty_manifest_cells_after_fill": [],
+  "alpha_qa": {
+    "assets_production/agents/spritesheets/threadling.png": {
+      "opaque_pixels": 129592,
+      "green_key_like_pixels": 0,
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "removed_this_pass": 1129
+    },
+    "assets_production/enemies/spritesheets/tv.png": {
+      "opaque_pixels": 24226,
+      "green_key_like_pixels": 0,
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "removed_this_pass": 152
+    },
+    "assets_production/icons/class/compute.png": {
+      "opaque_pixels": 1159,
+      "green_key_like_pixels": 0,
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "removed_this_pass": 11
+    },
+    "assets_production/icons/worlds/tv_active.png": {
+      "opaque_pixels": 1218,
+      "green_key_like_pixels": 0,
+      "corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "removed_this_pass": 0
+    }
+  },
+  "alpha_errors": [],
+  "threadling_recrop_qa": {
+    "empty_cells": [],
+    "edge_touches": [],
+    "auto_filled": [
+      {
+        "row": 3,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 3,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 9,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 9,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 15,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 15,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 7,
+        "filled_from": 5
+      }
+    ],
+    "alpha_errors": [
+      "green spill /Users/justinpruskowski/Documents/Codex/2026-04-29/files-mentioned-by-the-user-style/assets_production/agents/spritesheets/threadling.png 447/106569",
+      "green spill /Users/justinpruskowski/Documents/Codex/2026-04-29/files-mentioned-by-the-user-style/assets_production/icons/class/compute.png 5/1021"
+    ]
+  },
+  "cutoff_fix_qa": {
+    "alpha_qa": {
+      "assets_production/agents/spritesheets/threadling.png": {
+        "removed": 516,
+        "opaque_pixels": 106053,
+        "green_key_like_pixels": 0,
+        "corner_alpha": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "assets_production/icons/class/compute.png": {
+        "removed": 6,
+        "opaque_pixels": 1015,
+        "green_key_like_pixels": 0,
+        "corner_alpha": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "errors": []
+  },
+  "strict_spec_fix": {
+    "threadling_size": [
+      392,
+      1688
+    ],
+    "compute_rebuilt_as_spec_icon": true,
+    "errors": [],
+    "ability_frame_alpha_corrected": true,
+    "final_green_removed": 1
+  },
+  "portrait_threadling_qa": {
+    "errors": [],
+    "size": [
+      820,
+      208
+    ],
+    "green_removed": 7
+  },
+  "full_audit_after_tv_cleanup": {
+    "tv_green_removed": 82,
+    "errors": [
+      "assets_production/agents/spritesheets/threadling.png green 203",
+      "assets_production/agents/portraitsheets/threadling.png green 12",
+      "assets_production/icons/worlds/tv_active.png green 1"
+    ]
+  },
+  "pilot_current_spec_audit": {
+    "errors": [],
+    "key_green_definition": "g>110 r<95 b<115 g/r>1.5 g/b>1.35"
+  },
+  "phone_slice_qa": {
+    "errors": [
+      "assets_production/enemies/spritesheets/phone.png key green 44",
+      "assets_production/icons/worlds/phone_locked.png key green 1",
+      "assets_production/icons/worlds/phone_available.png key green 1",
+      "assets_production/icons/worlds/phone_active.png key green 1",
+      "assets_production/icons/worlds/phone_cleared.png key green 1"
+    ],
+    "files": [
+      "enemies/spritesheets/phone.png",
+      "enemies/spritesheets/phone.json",
+      "backgrounds/sheets/bg_phone.png",
+      "backgrounds/sheets/bg_phone.json",
+      "icons/worlds/phone_locked.png",
+      "icons/worlds/phone_available.png",
+      "icons/worlds/phone_active.png",
+      "icons/worlds/phone_cleared.png"
+    ],
+    "cleanup_removed": {
+      "assets_production/enemies/spritesheets/phone.png": 44,
+      "assets_production/icons/worlds/phone_locked.png": 1,
+      "assets_production/icons/worlds/phone_available.png": 1,
+      "assets_production/icons/worlds/phone_active.png": 1,
+      "assets_production/icons/worlds/phone_cleared.png": 1
+    },
+    "errors_after_cleanup": []
+  },
+  "global_audit_current": {
+    "errors": [],
+    "runtime_manifests": 52,
+    "png": 132,
+    "json_total": 54
+  },
+  "speaker_slice_qa": {
+    "errors": [],
+    "auto_filled": [],
+    "files": [
+      "enemies/spritesheets/speaker.png",
+      "enemies/spritesheets/speaker.json",
+      "backgrounds/sheets/bg_speaker.png",
+      "backgrounds/sheets/bg_speaker.json",
+      "icons/worlds/speaker_locked.png",
+      "icons/worlds/speaker_available.png",
+      "icons/worlds/speaker_active.png",
+      "icons/worlds/speaker_cleared.png"
+    ]
+  },
+  "watch_slice_qa": {
+    "errors": [],
+    "auto_filled": [],
+    "files": [
+      "enemies/spritesheets/watch.png",
+      "enemies/spritesheets/watch.json",
+      "backgrounds/sheets/bg_watch.png",
+      "backgrounds/sheets/bg_watch.json",
+      "icons/worlds/watch_locked.png",
+      "icons/worlds/watch_available.png",
+      "icons/worlds/watch_active.png",
+      "icons/worlds/watch_cleared.png"
+    ]
+  },
+  "console_slice_qa": {
+    "errors": [],
+    "auto_filled": [],
+    "files": [
+      "enemies/spritesheets/console.png",
+      "enemies/spritesheets/console.json",
+      "backgrounds/sheets/bg_console.png",
+      "backgrounds/sheets/bg_console.json",
+      "icons/worlds/console_locked.png",
+      "icons/worlds/console_available.png",
+      "icons/worlds/console_active.png",
+      "icons/worlds/console_cleared.png"
+    ]
+  },
+  "green_cleanup_final": {
+    "removed": {
+      "assets_production/enemies/spritesheets/watch.png": 18,
+      "assets_production/enemies/spritesheets/console.png": 17,
+      "assets_production/enemies/spritesheets/phone.png": 34,
+      "assets_production/enemies/spritesheets/speaker.png": 28,
+      "assets_production/icons/worlds/console_cleared.png": 44,
+      "assets_production/icons/worlds/watch_cleared.png": 44,
+      "assets_production/icons/worlds/speaker_cleared.png": 44,
+      "assets_production/icons/worlds/phone_cleared.png": 44
+    },
+    "errors": []
+  },
+  "patchwork_slice_qa": {
+    "errors": [],
+    "auto_filled": [
+      {
+        "row": 3,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 3,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 5,
+        "col": 5,
+        "filled_from": 4
+      },
+      {
+        "row": 9,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 9,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 15,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 15,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 18,
+        "col": 2,
+        "filled_from": 1
+      },
+      {
+        "row": 18,
+        "col": 3,
+        "filled_from": 1
+      },
+      {
+        "row": 20,
+        "col": 4,
+        "filled_from": 3
+      },
+      {
+        "row": 21,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 7,
+        "filled_from": 5
+      }
+    ],
+    "files": [
+      "agents/spritesheets/patchwork.png",
+      "agents/spritesheets/patchwork.json",
+      "agents/portraitsheets/patchwork.png",
+      "agents/portraitsheets/patchwork.json",
+      "icons/class/memory.png"
+    ]
+  },
+  "vault_slice_qa": {
+    "errors": [],
+    "auto_filled": [
+      {
+        "row": 3,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 3,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 6,
+        "col": 2,
+        "filled_from": 1
+      },
+      {
+        "row": 6,
+        "col": 3,
+        "filled_from": 1
+      },
+      {
+        "row": 15,
+        "col": 7,
+        "filled_from": 6
+      },
+      {
+        "row": 21,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 7,
+        "filled_from": 5
+      }
+    ],
+    "files": [
+      "agents/spritesheets/vault.png",
+      "agents/portraitsheets/vault.png",
+      "icons/class/storage.png"
+    ]
+  },
+  "green_detection_note": "QA now detects true #00ff00-style chroma background and does not reject approved Storage neon green accents.",
+  "netrunner_slice_qa": {
+    "errors": [],
+    "auto_filled": [
+      {
+        "row": 3,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 8,
+        "col": 4,
+        "filled_from": 3
+      },
+      {
+        "row": 8,
+        "col": 5,
+        "filled_from": 3
+      },
+      {
+        "row": 15,
+        "col": 6,
+        "filled_from": 5
+      }
+    ],
+    "files": [
+      "agents/spritesheets/netrunner.png",
+      "agents/portraitsheets/netrunner.png",
+      "icons/class/network.png"
+    ]
+  },
+  "sentinel_slice_qa": {
+    "errors": [],
+    "auto_filled": [],
+    "files": [
+      "agents/spritesheets/sentinel.png",
+      "agents/portraitsheets/sentinel.png",
+      "icons/class/security.png"
+    ]
+  },
+  "glitcher_slice_qa": {
+    "errors": [],
+    "auto_filled": [
+      {
+        "row": 3,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 3,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 8,
+        "col": 4,
+        "filled_from": 3
+      },
+      {
+        "row": 8,
+        "col": 5,
+        "filled_from": 3
+      },
+      {
+        "row": 9,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 13,
+        "col": 2,
+        "filled_from": 1
+      },
+      {
+        "row": 13,
+        "col": 3,
+        "filled_from": 1
+      },
+      {
+        "row": 13,
+        "col": 4,
+        "filled_from": 1
+      },
+      {
+        "row": 13,
+        "col": 5,
+        "filled_from": 1
+      },
+      {
+        "row": 15,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 15,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 2,
+        "filled_from": 1
+      },
+      {
+        "row": 21,
+        "col": 3,
+        "filled_from": 1
+      },
+      {
+        "row": 21,
+        "col": 4,
+        "filled_from": 1
+      },
+      {
+        "row": 21,
+        "col": 5,
+        "filled_from": 7
+      },
+      {
+        "row": 21,
+        "col": 6,
+        "filled_from": 7
+      }
+    ]
+  },
+  "bridgelink_slice_qa": {
+    "errors": [],
+    "auto_filled": [
+      {
+        "row": 3,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 3,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 8,
+        "col": 4,
+        "filled_from": 3
+      },
+      {
+        "row": 8,
+        "col": 5,
+        "filled_from": 3
+      },
+      {
+        "row": 9,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 9,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 14,
+        "col": 5,
+        "filled_from": 4
+      },
+      {
+        "row": 15,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 15,
+        "col": 7,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 6,
+        "filled_from": 5
+      },
+      {
+        "row": 21,
+        "col": 7,
+        "filled_from": 5
+      }
+    ]
+  },
+  "fridge_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "microwave_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "printer_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "hub_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "seccam_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "router_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "computer_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "car_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "atm_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "grid_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "medical_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "farm_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "satellite_slice_qa": {
+    "errors": [],
+    "auto_filled": []
+  },
+  "cloud_slice_qa": {
+    "errors": [],
+    "auto_filled": [
+      {
+        "row": 5,
+        "col": 7,
+        "filled_from": 6
+      },
+      {
+        "row": 11,
+        "col": 5,
+        "filled_from": 4
+      },
+      {
+        "row": 11,
+        "col": 6,
+        "filled_from": 4
+      },
+      {
+        "row": 11,
+        "col": 7,
+        "filled_from": 4
+      }
+    ]
+  }
+}
