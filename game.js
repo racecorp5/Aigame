@@ -1,5 +1,31 @@
 const W = 390, H = 844, AUTO_MS = 2000;
 
+// ── Asset paths & IDs ────────────────────────────────────────
+const AP = 'assets/assets_production';
+const AGENT_IDS = ['threadling','patchwork','vault','netrunner','sentinel','glitcher','bridgelink'];
+const SUBCLASS_SHEET_IDS = [
+  'threadling_overclocker','threadling_parallel',
+  'patchwork_cache','patchwork_restore',
+  'vault_archive','vault_fortress',
+  'netrunner_router','netrunner_broadcast',
+  'sentinel_firewall','sentinel_scanner',
+  'glitcher_corrupt','glitcher_exploit',
+  'bridgelink_api','bridgelink_bridge',
+];
+const WORLD_IDS_ALL = ['tv','phone','speaker','watch','console','fridge','microwave','printer','hub','seccam','router','computer','car','atm','grid','medical','farm','satellite','cloud'];
+const VFX_SHEET_IDS = ['hit_spark','miss_puff','heal_pulse','death_dissolve','level_up','explosion','energy_bolt','crit_burst'];
+
+// Register animations from a spritesheet/v1 JSON into Phaser's anim manager
+function registerSheetAnims(scene, sheetKey, json, prefix) {
+  const cols = json.columns || 8;
+  Object.entries(json.animations || {}).forEach(([name, def]) => {
+    const key = `${prefix}_${name}`;
+    if (scene.anims.exists(key)) return;
+    const start = def.row * cols, end = start + def.frames - 1;
+    scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(sheetKey, { start, end }), frameRate: def.fps || 6, repeat: def.loop ? -1 : 0 });
+  });
+}
+
 const COLORS = {
   bg: 0x050510, grid: 0x0d0d2a, green: 0x00ff88, red: 0xff3355,
   orange: 0xff8800, blue: 0x44aaff, yellow: 0xffcc00, purple: 0xaa44ff,
@@ -26,7 +52,7 @@ const WORLDS = [
   { id:'watch',    num:4,  abbr:'WA', device:'WATCH',      name:'PULSE GRID',      tier:1, act:1, x:75,  y:630, color:0x44aaff },
   { id:'console',  num:5,  abbr:'CO', device:'CONSOLE',    name:'SAVE STATE',      tier:2, act:1, x:315, y:550, color:0xff8800 },
   { id:'fridge',   num:6,  abbr:'FR', device:'FRIDGE',     name:'FROZEN SECTOR',   tier:2, act:2, x:75,  y:550, color:0xff8800 },
-  { id:'micro',    num:7,  abbr:'MW', device:'MICROWAVE',  name:'HEAT SPIRAL',     tier:2, act:2, x:195, y:550, color:0xff8800 },
+  { id:'microwave',    num:7,  abbr:'MW', device:'MICROWAVE',  name:'HEAT SPIRAL',     tier:2, act:2, x:195, y:550, color:0xff8800 },
   { id:'printer',  num:8,  abbr:'PR', device:'PRINTER',    name:'PAPER CHAINS',    tier:2, act:2, x:315, y:470, color:0xaa44ff },
   { id:'hub',      num:9,  abbr:'HB', device:'SMART HUB',  name:'COMMAND HUB',     tier:2, act:2, x:195, y:470, color:0xaa44ff },
   { id:'seccam',   num:10, abbr:'SC', device:'SEC CAM',    name:'SURVEILLANCE',    tier:2, act:2, x:75,  y:470, color:0xaa44ff },
@@ -53,8 +79,8 @@ const WORLD_EDGES = [
 ];
 
 const WORLD_UNLOCKS = {
-  tv:['phone','speaker','watch'], phone:['console'], speaker:['micro'],
-  watch:['fridge'], console:['printer'], fridge:['seccam'], micro:['hub'],
+  tv:['phone','speaker','watch'], phone:['console'], speaker:['microwave'],
+  watch:['fridge'], console:['printer'], fridge:['seccam'], microwave:['hub'],
   printer:['router'], hub:['router'], seccam:['computer'],
   router:['car'], computer:['atm'], car:['grid'], atm:['medical'],
   grid:['satellite'], medical:['farm'], farm:['cloud'], satellite:['cloud'],
@@ -103,7 +129,7 @@ const WORLD_CHANNELS = {
     { id:4, label:'CH 04', name:'BLIZZARD',   type:'miniboss', mechanic:'freeze', enemy:{name:'BLIZZARD',      hp:310,maxHp:310,aura:20,stacks:0} },
     { id:5, label:'CH 05', name:'ABSOLUTE 0', type:'boss',     mechanic:'freeze', enemy:{name:'ABSOLUTE ZERO', hp:450,maxHp:450,aura:22,stacks:0} },
   ],
-  micro: [
+  microwave: [
     { id:1, label:'CH 01', name:'WARMUP',     type:'normal',   mechanic:'heat', enemy:{name:'HEAT BYTE',  hp:105,maxHp:105,aura:10,stacks:0} },
     { id:2, label:'CH 02', name:'OVERHEAT',   type:'normal',   mechanic:'heat', enemy:{name:'FLAME WAVE', hp:155,maxHp:155,aura:13,stacks:0} },
     { id:3, label:'CH 03', name:'MELTDOWN',   type:'normal',   mechanic:'heat', enemy:{name:'MELT CORE',  hp:205,maxHp:205,aura:16,stacks:0} },
@@ -313,7 +339,7 @@ const SCENES = {
   watch:     ['CCCCCCCCCCCC', '..PPPPPPPP..', '..TT,,,,TT..', '############'],
   console:   ['~~~~~~~~~~~~', '..PPTTPPTT..', '..,,,,,,,,..', '############'],
   fridge:    ['IIIIIIIIIIII', 'I..,T,,T,..I', 'I..,,,,,,..I', 'IIIIIIIIIIII'],
-  micro:     ['FFFFFFFFFFFF', 'F..,T,,T,..F', 'F..,SS,SS,.F', 'FFFFFFFFFFFF'],
+  microwave:     ['FFFFFFFFFFFF', 'F..,T,,T,..F', 'F..,SS,SS,.F', 'FFFFFFFFFFFF'],
   printer:   ['ppppppppppppp', 'p..PTTPP..p', 'p..,,,,,..p', 'pppppppppppp'].slice(0, 4).map(s => s.padEnd(12, 'p').slice(0,12)),
   hub:       ['CCCCCCCCCCCC', 'C..,T,,T,..C', 'C..,,DD,,..C', 'CCCCCCCCCCCC'],
   seccam:    ['~~~~~~~~~~~~', '~..PPTTPP..~', '~..,,,,,,..~', '############'],
@@ -387,7 +413,7 @@ const SUBCLASSES = {
   vault: [
     { id:'archive', name:'ARCHIVE', desc:'Store damage taken, release as attack', color:0xffaa44,
       move:{ id:'release', label:'RELEASE', sub:'Stored dmg ×1.5 to enemy', color:0xffaa44, cost:0 } },
-    { id:'fortress_sub', name:'FORTRESS', desc:'All allies take 40% less damage 1 round', color:0xdddd44,
+    { id:'fortress', name:'FORTRESS', desc:'All allies take 40% less damage 1 round', color:0xdddd44,
       move:{ id:'bulwark', label:'BULWARK',  sub:'All allies: −40% dmg 1 round', color:0xdddd44, cost:0 } },
   ],
   netrunner: [
@@ -397,15 +423,15 @@ const SUBCLASSES = {
       move:{ id:'multicast', label:'MULTICAST', sub:'Hit + enemy −8 signal',        color:0x0055ff, cost:20 } },
   ],
   sentinel: [
-    { id:'reflector', name:'REFLECTOR', desc:'Reflect 60% of next hit back to enemy', color:0xff2244,
+    { id:'firewall', name:'REFLECTOR', desc:'Reflect 60% of next hit back to enemy', color:0xff2244,
       move:{ id:'reflect',   label:'REFLECT',   sub:'Reflect 60% dmg this turn',  color:0xff2244, cost:0 } },
     { id:'scanner',   name:'SCANNER',   desc:'Deep scan: enemy −25 signal, vuln +15%', color:0xffcc44,
       move:{ id:'deep_scan', label:'DEEP SCAN', sub:'Enemy −25 sig, take +15% dmg', color:0xffcc44, cost:20 } },
   ],
   glitcher: [
-    { id:'corruptor', name:'CORRUPTOR', desc:'Stack virus: enemy −8 signal per turn', color:0xff00aa,
+    { id:'corrupt', name:'CORRUPTOR', desc:'Stack virus: enemy −8 signal per turn', color:0xff00aa,
       move:{ id:'virus',    label:'VIRUS',    sub:'Stack: enemy −8 signal/round', color:0xff00aa, cost:15 } },
-    { id:'exploiter', name:'EXPLOITER', desc:'Guaranteed crit for huge damage',       color:0xaa00ff,
+    { id:'exploit', name:'EXPLOITER', desc:'Guaranteed crit for huge damage',       color:0xaa00ff,
       move:{ id:'zero_day', label:'ZERO DAY', sub:'Guaranteed ~45 dmg crit',       color:0xaa00ff, cost:30 } },
   ],
   bridgelink: [
@@ -778,6 +804,67 @@ function worldState(worldId, save) {
   const ws = save.worlds && save.worlds[worldId];
   if (!ws || !ws.cleared) return 'available';
   return ws.cleared.every(c => c) ? 'cleared' : 'available';
+}
+
+// ============================================================
+class Preloader extends Phaser.Scene {
+  constructor() { super({ key: 'Preloader' }); }
+
+  preload() {
+    const bw = 280, bh = 12, bx = (W - bw) / 2, by = H / 2 - 6;
+    this.add.text(W/2, by - 30, 'SYSTEM BREACH', { fontFamily:'monospace', fontSize:'18px', color:'#00ff88', letterSpacing:4 }).setOrigin(0.5);
+    this.add.text(W/2, by - 12, 'LOADING ASSETS...', { fontFamily:'monospace', fontSize:'10px', color:'#333355' }).setOrigin(0.5);
+    const track = this.add.graphics();
+    track.fillStyle(0x111122,1); track.fillRect(bx,by,bw,bh);
+    track.lineStyle(1,0x333355,1); track.strokeRect(bx,by,bw,bh);
+    const fill = this.add.graphics();
+    this.load.on('progress', v => { fill.clear(); fill.fillStyle(0x00ff88,1); fill.fillRect(bx+1,by+1,(bw-2)*v,bh-2); });
+
+    // Agent + subclass spritesheets
+    [...AGENT_IDS, ...SUBCLASS_SHEET_IDS].forEach(id => {
+      this.load.spritesheet(`ag_${id}`, `${AP}/agents/spritesheets/${id}.png`, { frameWidth:44, frameHeight:66, spacing:4, margin:4 });
+      this.load.json(`agj_${id}`, `${AP}/agents/spritesheets/${id}.json`);
+    });
+    // Enemy spritesheets (one per world)
+    WORLD_IDS_ALL.forEach(id => {
+      this.load.spritesheet(`enemy_${id}`, `${AP}/enemies/spritesheets/${id}.png`, { frameWidth:44, frameHeight:66, spacing:4, margin:4 });
+      this.load.json(`ej_${id}`, `${AP}/enemies/spritesheets/${id}.json`);
+    });
+    // Background sheets
+    WORLD_IDS_ALL.forEach(id => {
+      this.load.spritesheet(`bg_${id}`, `${AP}/backgrounds/sheets/bg_${id}.png`, { frameWidth:960, frameHeight:640, spacing:4, margin:4 });
+      this.load.json(`bgj_${id}`, `${AP}/backgrounds/sheets/bg_${id}.json`);
+    });
+    // World map icons (4 states × 19 worlds)
+    WORLD_IDS_ALL.forEach(id => {
+      ['active','available','cleared','locked'].forEach(st => {
+        this.load.image(`wicon_${id}_${st}`, `${AP}/icons/worlds/${id}_${st}.png`);
+      });
+    });
+    // VFX sheets
+    VFX_SHEET_IDS.forEach(id => {
+      this.load.spritesheet(`vfx_${id}`, `${AP}/vfx/sheets/${id}.png`, { frameWidth:64, frameHeight:64, spacing:4, margin:4 });
+      this.load.json(`vfxj_${id}`, `${AP}/vfx/sheets/${id}.json`);
+    });
+  }
+
+  create() {
+    [...AGENT_IDS, ...SUBCLASS_SHEET_IDS].forEach(id => {
+      const json = this.cache.json.get(`agj_${id}`);
+      if (json) registerSheetAnims(this, `ag_${id}`, json, `ag_${id}`);
+    });
+    WORLD_IDS_ALL.forEach(id => {
+      const ej = this.cache.json.get(`ej_${id}`);
+      if (ej) registerSheetAnims(this, `enemy_${id}`, ej, `enemy_${id}`);
+      const bgj = this.cache.json.get(`bgj_${id}`);
+      if (bgj) registerSheetAnims(this, `bg_${id}`, bgj, `bg_${id}`);
+    });
+    VFX_SHEET_IDS.forEach(id => {
+      const vfxj = this.cache.json.get(`vfxj_${id}`);
+      if (vfxj) registerSheetAnims(this, `vfx_${id}`, vfxj, `vfx_${id}`);
+    });
+    this.scene.start('TitleScreen');
+  }
 }
 
 // ============================================================
@@ -1403,7 +1490,7 @@ class OverworldMap extends Phaser.Scene {
     // sheet asset that will replace it later.
     const DEVICE_GLYPH = {
       tv: '📺', phone: '📱', speaker: '🔊', watch: '⌚', console: '🎮',
-      fridge: '🧊', micro: '🔥', printer: '📰', hub: '🛜', seccam: '📷',
+      fridge: '🧊', microwave: '🔥', printer: '📰', hub: '🛜', seccam: '📷',
       router: '📡', computer: '💻', car: '🚗', atm: '🏧', grid: '⚡',
       medical: '💉', farm: '🗄️', satellite: '🛰️', cloud: '☁️',
     };
@@ -1425,16 +1512,15 @@ class OverworldMap extends Phaser.Scene {
         g.lineStyle(1, 0x1a1a2e, 0.4); g.strokeCircle(w.x, w.y, r);
       }
 
-      const label = state === 'cleared' ? '✓' : w.abbr;
-      this.add.text(w.x, w.y - 1, label, { fontFamily: 'monospace', fontSize: '11px', color: state === 'locked' ? '#1a1a33' : hex, fontStyle: 'bold' }).setOrigin(0.5);
       this.add.text(w.x, w.y + r + 5, w.device, { fontFamily: 'monospace', fontSize: '8px', color: state === 'locked' ? '#111122' : hex }).setOrigin(0.5, 0);
 
-      // 16×16 device glyph in the upper-right corner of the node ring (the
-      // "minimap icon" from the sample reference). Hidden for locked nodes so
-      // the player isn't spoiled on which device they haven't reached yet.
-      if (state !== 'locked') {
-        const glyph = DEVICE_GLYPH[w.id] || '◆';
-        this.add.text(w.x + r - 4, w.y - r + 4, glyph, { fontFamily: 'monospace', fontSize: '14px' }).setOrigin(0.5).setAlpha(state === 'cleared' ? 0.95 : 0.7);
+      // World icon image centered in node ring
+      const iconKey = `wicon_${w.id}_${state}`;
+      if (this.textures.exists(iconKey)) {
+        this.add.image(w.x, w.y, iconKey).setDisplaySize(28, 28).setAlpha(state === 'locked' ? 0.15 : (state === 'cleared' ? 1 : 0.85));
+      } else {
+        const label = state === 'cleared' ? '✓' : w.abbr;
+        this.add.text(w.x, w.y - 1, label, { fontFamily: 'monospace', fontSize: '11px', color: state === 'locked' ? '#1a1a33' : hex, fontStyle: 'bold' }).setOrigin(0.5);
       }
 
       // boss tier marker (small chevron) for tier-4 / tier-5 worlds, mirrors
@@ -2037,14 +2123,11 @@ class Battle extends Phaser.Scene {
     this.phantomActive = false;
   }
 
-  preload() {
-    ['threadling','patchwork','vault','netrunner','sentinel','glitcher','bridgelink'].forEach(id => {
-      this.load.image(`ag_${id}`, `assets/system_breach_full_asset_pack/agents/sprites/sprite_${id}.png`);
-    });
-  }
+  preload() {} // Assets loaded by Preloader scene
 
   create() {
     getMusicEng(this)?.play(this.mechanic);
+    this._bg();
     this._grid();
     this._scene();
     this._spawnParticles();
@@ -2197,9 +2280,19 @@ class Battle extends Phaser.Scene {
     this.add.text(W / 2, 8, `${ch.label}  ·  ${ch.name}`, { fontFamily: 'monospace', fontSize: '13px', color: typeColor[ch.type] }).setOrigin(0.5, 0);
     this.add.text(W / 2, 26, ch.enemy.name, { fontFamily: 'monospace', fontSize: '22px', color: '#ff3355', fontStyle: 'bold' }).setOrigin(0.5, 0);
 
-    this.blob = this.add.graphics();
-    this._blob();
-    this.tweens.add({ targets: this.blob, scaleX: 1.06, scaleY: 0.95, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    const enemyKey = `enemy_${this.worldId}`;
+    if (this.textures.exists(enemyKey)) {
+      this.enemySpr = this.add.sprite(W/2, 112, enemyKey).setOrigin(0.5, 0.5).setScale(2);
+      const idleAnim = `${enemyKey}_idle`;
+      if (this.anims.exists(idleAnim)) this.enemySpr.play(idleAnim);
+      this.tweens.add({ targets: this.enemySpr, y: 108, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      this.blob = this.add.graphics(); // hidden fallback for _blob() calls
+    } else {
+      this.enemySpr = null;
+      this.blob = this.add.graphics();
+      this._blob();
+      this.tweens.add({ targets: this.blob, scaleX: 1.06, scaleY: 0.95, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
     this._blobBaseY = this.blob.y;
 
     const bw = W - 60;
@@ -2575,23 +2668,30 @@ class Battle extends Phaser.Scene {
     else if (id === 'patch' || id === 'sync' || id === 'revive' || id === 'cache_run' || id === 'boost') this._setPose(this.activeIdx, 'jumping');
     else this._setPose(this.activeIdx, 'attack');
 
-    // Attack lunge animation for active agent sprite
+    // Attack animation for active agent sprite
     if (id !== 'item' && id !== 'defend') {
       const card = this.cards[this.activeIdx];
-      if (card?.sp) {
-        this.tweens.killTweensOf(card.sp);
-        const baseY = card._baseSpY || 0;
-        this.tweens.add({
-          targets: card.sp, y: baseY - 14,
-          duration: 110, yoyo: true, ease: 'Power2.easeOut',
-          onComplete: () => {
-            card.sp.y = baseY;
-            card._idleTween = this.tweens.add({
-              targets: card.sp, y: baseY + 3,
-              duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-            });
-          },
-        });
+      const ag0 = this.agents[this.activeIdx];
+      if (card?.sp && ag0) {
+        const sheetId = (ag0.subclass && this.textures.exists(`ag_${ag0.id}_${ag0.subclass}`)) ? `ag_${ag0.id}_${ag0.subclass}` : `ag_${ag0.id}`;
+        const attackAnim = `${sheetId}_attack_down`, idleAnim = `${sheetId}_idle_down`;
+        if (card.sp.play && this.anims.exists(attackAnim)) {
+          card._idleTween?.destroy();
+          card.sp.play(attackAnim, true);
+          card.sp.once('animationcomplete', () => { if (card.sp?.play && this.anims.exists(idleAnim)) card.sp.play(idleAnim); });
+        } else if (card.sp.y !== undefined) {
+          // Tween lunge fallback for pixel-art sprite
+          this.tweens.killTweensOf(card.sp);
+          const baseY = card._baseSpY || 0;
+          this.tweens.add({
+            targets: card.sp, y: baseY - 14,
+            duration: 110, yoyo: true, ease: 'Power2.easeOut',
+            onComplete: () => {
+              card.sp.y = baseY;
+              card._idleTween = this.tweens.add({ targets: card.sp, y: baseY + 3, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            },
+          });
+        }
       }
     }
 
@@ -3015,7 +3115,16 @@ class Battle extends Phaser.Scene {
     };
 
     const doAttack = () => {
-      this.tweens.add({ targets: this.blob, y: (this._blobBaseY || 0) + 20, duration: 120, yoyo: true, ease: 'Power2.easeOut' });
+      const key = `enemy_${this.worldId}`;
+      if (this.enemySpr) {
+        const attackAnim = `${key}_attack`, idleAnim = `${key}_idle`;
+        if (this.anims.exists(attackAnim)) {
+          this.enemySpr.play(attackAnim, true);
+          this.enemySpr.once('animationcomplete', () => { if (this.enemySpr && this.anims.exists(idleAnim)) this.enemySpr.play(idleAnim); });
+        }
+      } else {
+        this.tweens.add({ targets: this.blob, y: (this._blobBaseY || 0) + 20, duration: 120, yoyo: true, ease: 'Power2.easeOut' });
+      }
       const tgt = pick();
       let raw = rnd(5, 10) + heat + ovfl;
       if (this.enemy.vulnBonus) raw = Math.ceil(raw * (1 + this.enemy.vulnBonus / 100));
@@ -3130,7 +3239,18 @@ class Battle extends Phaser.Scene {
   }
 
   _flashE() {
-    this.tweens.add({ targets: this.blob, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 });
+    const key = `enemy_${this.worldId}`;
+    if (this.enemySpr) {
+      const hitAnim = `${key}_hit`, idleAnim = `${key}_idle`;
+      if (this.anims.exists(hitAnim)) {
+        this.enemySpr.play(hitAnim, true);
+        this.enemySpr.once('animationcomplete', () => { if (this.enemySpr && this.anims.exists(idleAnim)) this.enemySpr.play(idleAnim); });
+      } else {
+        this.tweens.add({ targets: this.enemySpr, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 });
+      }
+    } else {
+      this.tweens.add({ targets: this.blob, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 });
+    }
     const ag = this.agents[this.activeIdx];
     if (ag) this._weaponBurst(ag);
     getSoundMgr(this)?.play('hit');
@@ -3245,6 +3365,10 @@ class Battle extends Phaser.Scene {
     this._btns(false);
     this.timerFill.clear();
     getMusicEng(this)?.stop();
+    if (win && this.enemySpr) {
+      const deathAnim = `enemy_${this.worldId}_death`;
+      if (this.anims.exists(deathAnim)) this.enemySpr.play(deathAnim, true);
+    }
 
     const save    = this.save;
     const ch      = this.channel;
@@ -3399,7 +3523,7 @@ class Battle extends Phaser.Scene {
     // Act clears
     const actWorldIds = {
       signal_lost:     ['tv','phone','speaker','watch','console'],
-      deep_network:    ['fridge','micro','printer','hub','seccam'],
+      deep_network:    ['fridge','microwave','printer','hub','seccam'],
       system_critical: ['router','computer','car','atm','grid'],
     };
     Object.entries(actWorldIds).forEach(([achId, wids]) => {
@@ -3729,33 +3853,49 @@ class Battle extends Phaser.Scene {
   }
 
   _makeSpriteNode(ag, x, y) {
-    const key = `ag_${ag.id}`;
+    // Resolve tint from subclass + skin
     const skin = SKIN_BY_ID[ag.skin || 'default'] || SKIN_BY_ID.default;
     let baseTint = null;
     if (ag.subclass) {
       const sc = Object.values(SUBCLASSES).flat().find(s => s.id === ag.subclass);
       if (sc) baseTint = sc.color;
     }
-    // Skin tint multiplies base. If both subclass + non-default skin set, blend by RGB-min.
     const finalTint = (baseTint != null && skin.id !== 'default')
       ? _blendTints(baseTint, skin.tint)
       : (baseTint != null ? baseTint : (skin.id !== 'default' ? skin.tint : null));
 
+    // Prefer subclass spritesheet, fall back to base agent sheet
+    const subId = ag.subclass;
+    const sheetId = (subId && this.textures.exists(`ag_${ag.id}_${subId}`)) ? `${ag.id}_${subId}` : ag.id;
+    const key = `ag_${sheetId}`;
+
     if (this.textures.exists(key)) {
-      const img = this.add.image(x + 22, y + 33, key).setOrigin(0.5);
-      if (finalTint != null) img.setTint(finalTint);
-      return img;
+      const spr = this.add.sprite(x + 22, y + 33, key).setOrigin(0.5, 0.5);
+      if (finalTint != null) spr.setTint(finalTint);
+      const idleAnim = `${key}_idle_down`;
+      if (this.anims.exists(idleAnim)) spr.play(idleAnim);
+      return spr;
     }
     const g = this.add.graphics();
     _drawSprite(g, ag.id, x, y);
     if (finalTint != null) { g.fillStyle(finalTint, 0.22); g.fillRect(x, y, 44, 66); }
     return g;
   }
+
+  // Animated world background behind enemy area
+  _bg() {
+    const key = `bg_${this.worldId}`;
+    if (!this.textures.exists(key)) return;
+    const scaledH = Math.round(W * 640 / 960);
+    const bg = this.add.sprite(0, 0, key).setOrigin(0, 0).setDisplaySize(W, scaledH).setAlpha(0.4).setDepth(-2);
+    const animKey = `${key}_ambient`;
+    if (this.anims.exists(animKey)) bg.play(animKey);
+  }
 }
 
 new Phaser.Game({
   type: Phaser.AUTO, width: W, height: H,
-  backgroundColor: '#050510', scene: [TitleScreen, OverworldMap, Cutscene, Achievements, Upgrades, SquadSelect, SubclassChoice, ChannelSelect, Shop, Battle],
+  backgroundColor: '#050510', scene: [Preloader, TitleScreen, OverworldMap, Cutscene, Achievements, Upgrades, SquadSelect, SubclassChoice, ChannelSelect, Shop, Battle],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { activePointers: 2 },
 });
