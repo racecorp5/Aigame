@@ -3870,10 +3870,10 @@ class Battle extends Phaser.Scene {
     const key = `ag_${sheetId}`;
 
     if (this.textures.exists(key)) {
-      const spr = this.add.sprite(x + 22, y + 33, key).setOrigin(0.5, 0.5);
+      const spr = this.add.sprite(x + 22, y + 33, key).setOrigin(0.5, 0.5).setScale(1.3);
       if (finalTint != null) spr.setTint(finalTint);
       const idleAnim = `${key}_idle_down`;
-      if (this.anims.exists(idleAnim)) spr.play(idleAnim);
+      if (this.anims.exists(idleAnim)) spr.play({ key: idleAnim, frameRate: 3 });
       return spr;
     }
     const g = this.add.graphics();
@@ -3882,14 +3882,13 @@ class Battle extends Phaser.Scene {
     return g;
   }
 
-  // Animated world background behind enemy area
+  // Static world background with subtle alpha breathe (frame 0 only — ambient anim shifts vertically)
   _bg() {
     const key = `bg_${this.worldId}`;
     if (!this.textures.exists(key)) return;
     const scaledH = Math.round(W * 640 / 960);
-    const bg = this.add.sprite(0, 0, key).setOrigin(0, 0).setDisplaySize(W, scaledH).setAlpha(0.4).setDepth(-2);
-    const animKey = `${key}_ambient`;
-    if (this.anims.exists(animKey)) bg.play(animKey);
+    const bg = this.add.image(0, 0, key, 0).setOrigin(0, 0).setDisplaySize(W, scaledH).setAlpha(0.35).setDepth(-2);
+    this.tweens.add({ targets: bg, alpha: 0.45, duration: 3500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 }
 
